@@ -1,8 +1,8 @@
-EPIC-ID:    EPIC-D-12
-EPIC NAME:  Corporate Actions
-LAYER:      DOMAIN
-MODULE:     D-12 Corporate Actions
-VERSION:    1.0.0
+EPIC-ID: EPIC-D-12
+EPIC NAME: Corporate Actions
+LAYER: DOMAIN
+MODULE: D-12 Corporate Actions
+VERSION: 1.0.1
 
 ---
 
@@ -62,54 +62,54 @@ Deliver the D-12 Corporate Actions module, responsible for processing bonus shar
 
 #### Section 6 — Event Model Definition
 
-| Field | Description |
-|---|---|
-| Event Name | `EntitlementCalculated` |
-| Schema Version | `v1.0.0` |
-| Trigger Condition | Entitlements for a corporate action are finalized. |
-| Payload | `{ "ca_id": "...", "account_id": "...", "gross_amount": 10000, "tax_withheld": 500, "net_amount": 9500 }` |
-| Consumers | Ledger (K-16), Client Notification, Tax Reporting |
-| Idempotency Key | `hash(ca_id + account_id)` |
-| Replay Behavior | Updates entitlement views. |
-| Retention Policy | Permanent. |
+| Field             | Description                                                                                               |
+| ----------------- | --------------------------------------------------------------------------------------------------------- |
+| Event Name        | `EntitlementCalculated`                                                                                   |
+| Schema Version    | `v1.0.0`                                                                                                  |
+| Trigger Condition | Entitlements for a corporate action are finalized.                                                        |
+| Payload           | `{ "ca_id": "...", "account_id": "...", "gross_amount": 10000, "tax_withheld": 500, "net_amount": 9500 }` |
+| Consumers         | Ledger (K-16), Client Notification, Tax Reporting                                                         |
+| Idempotency Key   | `hash(ca_id + account_id)`                                                                                |
+| Replay Behavior   | Updates entitlement views.                                                                                |
+| Retention Policy  | Permanent.                                                                                                |
 
 ---
 
-#### Section 6.5 — Command Model Definition
+#### Section 7 — Command Model Definition
 
-| Field | Description |
-|---|---|
-| Command Name | `AnnounceCorporateActionCommand` |
-| Schema Version | `v1.0.0` |
-| Validation Rules | Instrument exists, CA type valid, dates valid, requester authorized |
-| Handler | `CorporateActionCommandHandler` in D-12 Corporate Actions |
-| Success Event | `CorporateActionAnnounced` |
-| Failure Event | `CorporateActionAnnouncementFailed` |
-| Idempotency | Command ID must be unique; duplicate commands return original result |
+| Field            | Description                                                          |
+| ---------------- | -------------------------------------------------------------------- |
+| Command Name     | `AnnounceCorporateActionCommand`                                     |
+| Schema Version   | `v1.0.0`                                                             |
+| Validation Rules | Instrument exists, CA type valid, dates valid, requester authorized  |
+| Handler          | `CorporateActionCommandHandler` in D-12 Corporate Actions            |
+| Success Event    | `CorporateActionAnnounced`                                           |
+| Failure Event    | `CorporateActionAnnouncementFailed`                                  |
+| Idempotency      | Command ID must be unique; duplicate commands return original result |
 
-| Field | Description |
-|---|---|
-| Command Name | `CalculateEntitlementCommand` |
-| Schema Version | `v1.0.0` |
+| Field            | Description                                                     |
+| ---------------- | --------------------------------------------------------------- |
+| Command Name     | `CalculateEntitlementCommand`                                   |
+| Schema Version   | `v1.0.0`                                                        |
 | Validation Rules | CA exists, record date reached, shareholder positions available |
-| Handler | `EntitlementCommandHandler` in D-12 Corporate Actions |
-| Success Event | `EntitlementCalculated` |
-| Failure Event | `EntitlementCalculationFailed` |
-| Idempotency | Same CA + record date returns cached entitlements |
+| Handler          | `EntitlementCommandHandler` in D-12 Corporate Actions           |
+| Success Event    | `EntitlementCalculated`                                         |
+| Failure Event    | `EntitlementCalculationFailed`                                  |
+| Idempotency      | Same CA + record date returns cached entitlements               |
 
-| Field | Description |
-|---|---|
-| Command Name | `ProcessPaymentCommand` |
-| Schema Version | `v1.0.0` |
-| Validation Rules | Entitlements calculated, payment date reached, funds available |
-| Handler | `PaymentCommandHandler` in D-12 Corporate Actions |
-| Success Event | `PaymentProcessed` |
-| Failure Event | `PaymentProcessingFailed` |
-| Idempotency | Command ID must be unique; duplicate commands return original result |
+| Field            | Description                                                          |
+| ---------------- | -------------------------------------------------------------------- |
+| Command Name     | `ProcessPaymentCommand`                                              |
+| Schema Version   | `v1.0.0`                                                             |
+| Validation Rules | Entitlements calculated, payment date reached, funds available       |
+| Handler          | `PaymentCommandHandler` in D-12 Corporate Actions                    |
+| Success Event    | `PaymentProcessed`                                                   |
+| Failure Event    | `PaymentProcessingFailed`                                            |
+| Idempotency      | Command ID must be unique; duplicate commands return original result |
 
 ---
 
-#### Section 7 — AI Integration Requirements
+#### Section 8 — AI Integration Requirements
 
 - **AI Hook Type:** Copilot Assist
 - **Workflow Steps Exposed:** Entitlement reconciliation.
@@ -121,28 +121,28 @@ Deliver the D-12 Corporate Actions module, responsible for processing bonus shar
 
 ---
 
-#### Section 8 — NFRs
+#### Section 9 — NFRs
 
-| NFR Category | Required Targets |
-|---|---|
-| Latency / Throughput | Calculate entitlements for 100,000 accounts in < 5 minutes |
-| Scalability | Batch processing scaled horizontally |
-| Availability | 99.99% |
-| Consistency Model | Strong consistency for ledger postings |
-| Security | Row-level tenant isolation |
-| Data Residency | Enforced via K-08 |
-| Data Retention | Retain CA history 10 years |
-| Auditability | All calculations logged |
-| Observability | Metrics: `ca.processing.duration`, `ca.reconciliation.break_count` |
-| Extensibility | New CA types via T2 Packs |
-| Upgrade / Compatibility | N/A |
-| On-Prem Constraints | Fully functional locally |
-| Ledger Integrity | Posts to K-16 |
-| Dual-Calendar Correctness | Correct record date handling |
+| NFR Category              | Required Targets                                                   |
+| ------------------------- | ------------------------------------------------------------------ |
+| Latency / Throughput      | Calculate entitlements for 100,000 accounts in < 5 minutes         |
+| Scalability               | Batch processing scaled horizontally                               |
+| Availability              | 99.99%                                                             |
+| Consistency Model         | Strong consistency for ledger postings                             |
+| Security                  | Row-level tenant isolation                                         |
+| Data Residency            | Enforced via K-08                                                  |
+| Data Retention            | Retain CA history 10 years                                         |
+| Auditability              | All calculations logged                                            |
+| Observability             | Metrics: `ca.processing.duration`, `ca.reconciliation.break_count` |
+| Extensibility             | New CA types via T2 Packs                                          |
+| Upgrade / Compatibility   | N/A                                                                |
+| On-Prem Constraints       | Fully functional locally                                           |
+| Ledger Integrity          | Posts to K-16                                                      |
+| Dual-Calendar Correctness | Correct record date handling                                       |
 
 ---
 
-#### Section 9 — Acceptance Criteria
+#### Section 10 — Acceptance Criteria
 
 1. **Given** a bonus share announcement (1:5 ratio), **When** processed for an account holding 100 shares, **Then** D-12 calculates an entitlement of 20 bonus shares and emits `EntitlementCalculated`.
 2. **Given** a cash dividend with Nepal T2 Tax Pack (5% TDS), **When** calculated for Rs 10,000 gross, **Then** the net entitlement is Rs 9,500.
@@ -150,34 +150,35 @@ Deliver the D-12 Corporate Actions module, responsible for processing bonus shar
 
 ---
 
-#### Section 10 — Failure Modes & Resilience
+#### Section 11 — Failure Modes & Resilience
 
 - **Depository Confirmation Delay:** Entitlements calculated and queued; posted to ledger upon confirmation.
 
 ---
 
-#### Section 11 — Observability & Audit
+#### Section 12 — Observability & Audit
 
-| Telemetry Type | Required Details |
-|---|---|
-| Metrics | `ca.entitlement.count`, `ca.tax.total` |
-| Logs | Calculation errors |
-| Traces | Span `CorporateActions.process` |
-| Audit Events | Action: `ApproveEntitlement`, `ManualAdjustment` |
-| Regulatory Evidence | CA processing audit trail. |
+| Telemetry Type      | Required Details                                 |
+| ------------------- | ------------------------------------------------ |
+| Metrics             | `ca.entitlement.count`, `ca.tax.total`           |
+| Logs                | Calculation errors                               |
+| Traces              | Span `CorporateActions.process`                  |
+| Audit Events        | Action: `ApproveEntitlement`, `ManualAdjustment` |
+| Regulatory Evidence | CA processing audit trail.                       |
 
 ---
 
-#### Section 12 — Compliance & Regulatory Traceability
+#### Section 13 — Compliance & Regulatory Traceability
 
 - Tax withholding compliance [LCA-TAX-001]
 - Audit trails [LCA-AUDIT-001]
 
 ---
 
-#### Section 13 — Extension Points & Contracts
+#### Section 14 — Extension Points & Contracts
 
 **SDK Methods (Platform SDK):**
+
 ```
 CorpActionClient.announceCorporateAction(payload: CAAnnouncementPayload): CAAnnouncement
 CorpActionClient.calculateEntitlements(caId: string): EntitlementResult
@@ -204,17 +205,17 @@ CorpActionClient.processPayment(caId: string): PaymentResult
 
 ---
 
-#### Section 14 — Future-Safe Architecture Evaluation
+#### Section 15 — Future-Safe Architecture Evaluation
 
-| Question | Expected Answer |
-|---|---|
-| Can this module support India/Bangladesh via plugin? | Yes. |
-| Can tax rules change without redeploy? | Yes, via T2 Rule Packs. |
-| Can this run in an air-gapped deployment? | Partially; requires external CA data feeds. |
+| Question                                             | Expected Answer                             |
+| ---------------------------------------------------- | ------------------------------------------- |
+| Can this module support India/Bangladesh via plugin? | Yes.                                        |
+| Can tax rules change without redeploy?               | Yes, via T2 Rule Packs.                     |
+| Can this run in an air-gapped deployment?            | Partially; requires external CA data feeds. |
 
 ---
 
-#### Section 14.5 — Threat Model
+#### Section 16 — Threat Model
 
 **Attack Vectors & Mitigations:**
 
@@ -244,6 +245,7 @@ CorpActionClient.processPayment(caId: string): PaymentResult
    - **Residual Risk:** Compromised external source.
 
 **Security Controls:**
+
 - Immutable ledger integration (K-16)
 - Maker-checker for all critical operations
 - Multi-source verification
@@ -251,3 +253,15 @@ CorpActionClient.processPayment(caId: string): PaymentResult
 - T2 rule pack governance
 - Audit logging of all operations
 - Independent reconciliation
+
+---
+
+## Changelog
+
+### Version 1.0.1 (2026-03-10)
+
+**Type:** PATCH  
+**Changes:**
+
+- Standardized section numbering to the sequential 16-section format.
+- Added changelog metadata for future epic maintenance.

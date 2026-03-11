@@ -15,19 +15,23 @@
 The Configuration Engine serves as the **single source of truth** for all runtime configuration across Project Siddhanta. It provides hierarchical configuration resolution, hot-reload capabilities, and tamper-evident audit trails.
 
 **Core Responsibilities**:
+
 - Schema-validated configuration storage and retrieval
 - Hierarchical resolution: `Global → Jurisdiction → Operator → Tenant → Account → User`
 - Hot-reload delivery via Event Bus (K-05)
 - Cryptographic verification for air-gapped deployments
 - Dual-calendar effective date activation
 - CQRS-based read/write separation for performance
+- Versioned metadata catalogs for dynamic value sets, task schemas, and process-template parameters
 
 **Invariants**:
+
 1. All configurations MUST validate against registered schemas
 2. Resolution hierarchy MUST be deterministic and reproducible
 3. Configuration changes MUST be immutable (append-only history)
 4. Hot-reload MUST NOT cause service restarts
 5. Effective dates MUST respect dual-calendar (BS + Gregorian)
+6. Metadata catalogs MUST be schema-validated, versioned, and auditable like any other controlled configuration asset
 
 ### 1.2 Explicit Non-Goals
 
@@ -38,12 +42,12 @@ The Configuration Engine serves as the **single source of truth** for all runtim
 
 ### 1.3 Dependencies (Kernel Gates)
 
-| Dependency | Purpose | Readiness Gate |
-|------------|---------|----------------|
-| K-05 Event Bus | Hot-reload event delivery | K-05 stable |
-| K-07 Audit Framework | Tamper-evident audit trail | K-07 stable |
-| K-15 Dual-Calendar | Effective date resolution | K-15 stable |
-| K-01 IAM | Maker-checker authorization | K-01 stable |
+| Dependency           | Purpose                     | Readiness Gate |
+| -------------------- | --------------------------- | -------------- |
+| K-05 Event Bus       | Hot-reload event delivery   | K-05 stable    |
+| K-07 Audit Framework | Tamper-evident audit trail  | K-07 stable    |
+| K-15 Dual-Calendar   | Effective date resolution   | K-15 stable    |
+| K-01 IAM             | Maker-checker authorization | K-01 stable    |
 
 ---
 
@@ -137,6 +141,77 @@ Response 200:
   "pack_id": "np_fee_schedule_v2",
   "status": "APPROVED",
   "activated_at": "2025-03-01T00:00:00Z"
+}
+```
+
+```yaml
+POST /api/v1/config/metadata-assets
+Authorization: Bearer {admin_token}
+Content-Type: application/json
+
+Request:
+{
+  "asset_id": "workflow.task-schema.kyc-review.v1",
+  "asset_type": "TASK_SCHEMA",
+  "scope": "JURISDICTION",
+  "context_key": "NP",
+  "schema_id": "kyc_review_task",
+  "schema_version": "1.0.0",
+  "ui_schema": {
+    "layout": "two-column",
+    "sections": ["identity", "risk", "decision"]
+  },
+  "payload": {
+    "title": "KYC Review",
+    "fields": [
+      {"name": "risk_decision", "type": "select", "catalog_ref": "risk_decision_codes"},
+      {"name": "review_notes", "type": "textarea", "required": true}
+    ]
+  },
+  "effective_date": {
+    "bs": "2082-01-01",
+    "gregorian": "2026-04-14T00:00:00Z"
+  },
+  "maker_id": "user_123",
+  "reason": "Align review task with revised onboarding policy"
+}
+
+Response 202:
+{
+  "asset_id": "workflow.task-schema.kyc-review.v1",
+  "status": "PENDING_APPROVAL",
+  "approval_required": true,
+  "workflow_id": "wf_789"
+}
+```
+
+```yaml
+GET /api/v1/config/value-catalogs/{catalog_key}/resolve
+Authorization: Bearer {service_token}
+Query Parameters:
+  - tenant_id: uuid (required)
+  - jurisdiction: string (optional)
+  - as_of_date: ISO8601 (optional)
+
+Response 200:
+{
+  "catalog_key": "risk_decision_codes",
+  "version": "3.1.0",
+  "scope": "TENANT",
+  "values": [
+    {"code": "APPROVE", "label": "Approve", "order": 1},
+    {"code": "EDD", "label": "Enhanced Due Diligence", "order": 2},
+    {"code": "REJECT", "label": "Reject", "order": 3}
+  ],
+  "constraints": {
+    "allows_custom_value": false,
+    "deprecated_codes": []
+  },
+  "resolution_path": [
+    {"level": "GLOBAL", "asset_id": "catalog.risk_decision.global.v1"},
+    {"level": "JURISDICTION", "asset_id": "catalog.risk_decision.np.v2"},
+    {"level": "TENANT", "asset_id": "catalog.risk_decision.tenant_42.v3"}
+  ]
 }
 ```
 
@@ -297,7 +372,10 @@ interface ConfigClient {
    * Watch for configuration changes
    * @returns AsyncIterator that yields config updates
    */
-  watch(schemaIds: string[], tenantId: string): AsyncIterator<ConfigChangeEvent>;
+  watch(
+    schemaIds: string[],
+    tenantId: string,
+  ): AsyncIterator<ConfigChangeEvent>;
 
   /**
    * Validate configuration payload against schema
@@ -332,18 +410,19 @@ interface ResolvedConfig<T> {
 
 ### 2.5 Error Model
 
-| Error Code | HTTP Status | Retryable | Idempotent | Description |
-|------------|-------------|-----------|------------|-------------|
-| CFG_E001 | 400 | No | Yes | Schema validation failed |
-| CFG_E002 | 404 | No | Yes | Schema not found |
-| CFG_E003 | 409 | No | Yes | Schema version conflict |
-| CFG_E004 | 400 | No | Yes | Invalid effective date |
-| CFG_E005 | 403 | No | Yes | Maker-checker approval required |
-| CFG_E006 | 500 | Yes | Yes | Resolution engine failure |
-| CFG_E007 | 503 | Yes | Yes | Event bus unavailable |
-| CFG_E008 | 409 | No | Yes | Duplicate pack_id |
+| Error Code | HTTP Status | Retryable | Idempotent | Description                     |
+| ---------- | ----------- | --------- | ---------- | ------------------------------- |
+| CFG_E001   | 400         | No        | Yes        | Schema validation failed        |
+| CFG_E002   | 404         | No        | Yes        | Schema not found                |
+| CFG_E003   | 409         | No        | Yes        | Schema version conflict         |
+| CFG_E004   | 400         | No        | Yes        | Invalid effective date          |
+| CFG_E005   | 403         | No        | Yes        | Maker-checker approval required |
+| CFG_E006   | 500         | Yes       | Yes        | Resolution engine failure       |
+| CFG_E007   | 503         | Yes       | Yes        | Event bus unavailable           |
+| CFG_E008   | 409         | No        | Yes        | Duplicate pack_id               |
 
 **Retry Strategy**:
+
 - Retryable errors: Exponential backoff (100ms, 200ms, 400ms, max 3 retries)
 - Non-retryable errors: Fail fast, return error to caller
 - Idempotency: All write operations use `command_id` for deduplication
@@ -361,19 +440,40 @@ interface ResolvedConfig<T> {
   "$schema": "http://json-schema.org/draft-07/schema#",
   "type": "object",
   "properties": {
-    "event_id": {"type": "string", "format": "uuid"},
-    "event_version": {"type": "string", "const": "1.0.0"},
-    "pack_id": {"type": "string"},
-    "type": {"type": "string", "enum": ["GLOBAL", "JURISDICTION", "OPERATOR", "TENANT", "ACCOUNT", "USER"]},
-    "context_key": {"type": "string"},
-    "schema_id": {"type": "string"},
-    "schema_version": {"type": "string"},
-    "effective_date_bs": {"type": "string", "pattern": "^\\d{4}-\\d{2}-\\d{2}$"},
-    "effective_date_gregorian": {"type": "string", "format": "date-time"},
-    "activated_by": {"type": "string"},
-    "timestamp": {"type": "string", "format": "date-time"}
+    "event_id": { "type": "string", "format": "uuid" },
+    "event_version": { "type": "string", "const": "1.0.0" },
+    "pack_id": { "type": "string" },
+    "type": {
+      "type": "string",
+      "enum": [
+        "GLOBAL",
+        "JURISDICTION",
+        "OPERATOR",
+        "TENANT",
+        "ACCOUNT",
+        "USER"
+      ]
+    },
+    "context_key": { "type": "string" },
+    "schema_id": { "type": "string" },
+    "schema_version": { "type": "string" },
+    "effective_date_bs": {
+      "type": "string",
+      "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+    },
+    "effective_date_gregorian": { "type": "string", "format": "date-time" },
+    "activated_by": { "type": "string" },
+    "timestamp": { "type": "string", "format": "date-time" }
   },
-  "required": ["event_id", "event_version", "pack_id", "type", "schema_id", "effective_date_gregorian", "timestamp"]
+  "required": [
+    "event_id",
+    "event_version",
+    "pack_id",
+    "type",
+    "schema_id",
+    "effective_date_gregorian",
+    "timestamp"
+  ]
 }
 ```
 
@@ -386,26 +486,44 @@ interface ResolvedConfig<T> {
   "$schema": "http://json-schema.org/draft-07/schema#",
   "type": "object",
   "properties": {
-    "command_id": {"type": "string", "format": "uuid"},
-    "command_version": {"type": "string", "const": "1.0.0"},
-    "pack_id": {"type": "string"},
-    "type": {"type": "string", "enum": ["GLOBAL", "JURISDICTION", "OPERATOR", "TENANT", "ACCOUNT", "USER"]},
-    "context_key": {"type": "string"},
-    "schema_id": {"type": "string"},
-    "schema_version": {"type": "string"},
-    "payload": {"type": "object"},
+    "command_id": { "type": "string", "format": "uuid" },
+    "command_version": { "type": "string", "const": "1.0.0" },
+    "pack_id": { "type": "string" },
+    "type": {
+      "type": "string",
+      "enum": [
+        "GLOBAL",
+        "JURISDICTION",
+        "OPERATOR",
+        "TENANT",
+        "ACCOUNT",
+        "USER"
+      ]
+    },
+    "context_key": { "type": "string" },
+    "schema_id": { "type": "string" },
+    "schema_version": { "type": "string" },
+    "payload": { "type": "object" },
     "effective_date": {
       "type": "object",
       "properties": {
-        "bs": {"type": "string"},
-        "gregorian": {"type": "string", "format": "date-time"}
+        "bs": { "type": "string" },
+        "gregorian": { "type": "string", "format": "date-time" }
       },
       "required": ["bs", "gregorian"]
     },
-    "maker_id": {"type": "string"},
-    "reason": {"type": "string"}
+    "maker_id": { "type": "string" },
+    "reason": { "type": "string" }
   },
-  "required": ["command_id", "pack_id", "type", "schema_id", "payload", "effective_date", "maker_id"]
+  "required": [
+    "command_id",
+    "pack_id",
+    "type",
+    "schema_id",
+    "payload",
+    "effective_date",
+    "maker_id"
+  ]
 }
 ```
 
@@ -456,11 +574,97 @@ CREATE INDEX idx_config_packs_context ON config_packs(type, context_key, schema_
 CREATE INDEX idx_config_packs_effective ON config_packs(effective_date_gregorian) WHERE status IN ('APPROVED', 'ACTIVE');
 ```
 
+#### metadata_assets
+
+```sql
+CREATE TABLE metadata_assets (
+  asset_id VARCHAR(255) PRIMARY KEY,
+  asset_type VARCHAR(50) NOT NULL CHECK (asset_type IN ('PROCESS_TEMPLATE', 'STEP_TEMPLATE', 'TASK_SCHEMA', 'VALUE_CATALOG', 'ROUTING_POLICY')),
+  scope VARCHAR(20) NOT NULL CHECK (scope IN ('GLOBAL', 'JURISDICTION', 'OPERATOR', 'TENANT')),
+  context_key VARCHAR(255) NOT NULL,
+  schema_id VARCHAR(255) NOT NULL,
+  schema_version VARCHAR(50) NOT NULL,
+  payload JSONB NOT NULL,
+  ui_schema JSONB,
+  compatibility_mode VARCHAR(20) NOT NULL DEFAULT 'STRICT' CHECK (compatibility_mode IN ('STRICT', 'ADDITIVE_ONLY', 'MIGRATABLE')),
+  effective_date_bs VARCHAR(10) NOT NULL,
+  effective_date_gregorian TIMESTAMPTZ NOT NULL,
+  status VARCHAR(20) NOT NULL CHECK (status IN ('PENDING_APPROVAL', 'APPROVED', 'ACTIVE', 'DEPRECATED', 'ROLLED_BACK')),
+  maker_id VARCHAR(255) NOT NULL,
+  checker_id VARCHAR(255),
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX idx_metadata_assets_lookup ON metadata_assets(asset_type, scope, context_key, schema_id) WHERE status = 'ACTIVE';
+CREATE INDEX idx_metadata_assets_effective ON metadata_assets(effective_date_gregorian) WHERE status IN ('APPROVED', 'ACTIVE');
+```
+
+#### value_catalog_entries
+
+```sql
+CREATE TABLE value_catalog_entries (
+  asset_id VARCHAR(255) NOT NULL REFERENCES metadata_assets(asset_id),
+  code VARCHAR(100) NOT NULL,
+  label VARCHAR(255) NOT NULL,
+  sort_order INT NOT NULL DEFAULT 0,
+  metadata JSONB NOT NULL DEFAULT '{}'::jsonb,
+  is_deprecated BOOLEAN NOT NULL DEFAULT false,
+  PRIMARY KEY (asset_id, code)
+);
+
+CREATE INDEX idx_value_catalog_active ON value_catalog_entries(asset_id, sort_order) WHERE is_deprecated = false;
+```
+
+### 3.4 Metadata Asset Taxonomy
+
+| Asset Type         | Purpose                                                      | Primary Consumer      | Example                         |
+| ------------------ | ------------------------------------------------------------ | --------------------- | ------------------------------- |
+| `PROCESS_TEMPLATE` | Defines a reusable process profile or workflow variant       | W-01, O-01            | Nepal broker onboarding profile |
+| `STEP_TEMPLATE`    | Defines typed handler contract and reusable step defaults    | W-01, K-17            | `maker_checker_approval`        |
+| `TASK_SCHEMA`      | Defines human-task form fields, validation, and UI hints     | W-01, K-13            | KYC review task form            |
+| `VALUE_CATALOG`    | Defines controlled option sets or bounded domains            | K-13, domain services | risk decision codes             |
+| `ROUTING_POLICY`   | Defines assignment/escalation or rule-based branching inputs | W-01, O-01            | high-risk onboarding escalation |
+
+### 3.5 Example Value Catalog Schema
+
+```json
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "ValueCatalog",
+  "type": "object",
+  "properties": {
+    "catalog_key": { "type": "string" },
+    "version": { "type": "string" },
+    "value_type": {
+      "type": "string",
+      "enum": ["STRING", "NUMBER", "BOOLEAN", "OBJECT"]
+    },
+    "allows_custom_value": { "type": "boolean" },
+    "entries": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "code": { "type": "string" },
+          "label": { "type": "string" },
+          "order": { "type": "integer" },
+          "metadata": { "type": "object" },
+          "deprecated": { "type": "boolean" }
+        },
+        "required": ["code", "label", "order"]
+      }
+    }
+  },
+  "required": ["catalog_key", "version", "value_type", "entries"]
+}
+```
+
 #### resolved_config_cache (Materialized View)
 
 ```sql
 CREATE MATERIALIZED VIEW resolved_config_cache AS
-SELECT 
+SELECT
   md5(tenant_id || schema_id || COALESCE(account_id, '') || COALESCE(user_id, '')) AS cache_key,
   tenant_id,
   schema_id,
@@ -479,16 +683,17 @@ CREATE UNIQUE INDEX idx_resolved_cache_key ON resolved_config_cache(cache_key);
 CREATE INDEX idx_resolved_cache_expires ON resolved_config_cache(expires_at);
 ```
 
-### 3.4 Retention & Residency Tags
+### 3.6 Retention & Residency Tags
 
-| Table | Retention Policy | Residency Rule |
-|-------|------------------|----------------|
-| config_schemas | Permanent | Global (replicated) |
-| config_packs | Permanent | Per jurisdiction (if context_key is jurisdiction) |
-| resolved_config_cache | 24 hours (auto-refresh) | Same as tenant |
-| audit_trail | Per K-07 policy (min 10 years) | Per jurisdiction |
+| Table                 | Retention Policy               | Residency Rule                                    |
+| --------------------- | ------------------------------ | ------------------------------------------------- |
+| config_schemas        | Permanent                      | Global (replicated)                               |
+| config_packs          | Permanent                      | Per jurisdiction (if context_key is jurisdiction) |
+| resolved_config_cache | 24 hours (auto-refresh)        | Same as tenant                                    |
+| audit_trail           | Per K-07 policy (min 10 years) | Per jurisdiction                                  |
 
 **Residency Enforcement**:
+
 - Jurisdiction-level packs (type=JURISDICTION) stored in jurisdiction-specific region
 - Tenant-level packs inherit tenant's data residency settings from K-02 itself
 - Global packs replicated to all regions
@@ -614,6 +819,7 @@ ConfigLoader → Return success report
 ### 4.6 Correlation ID Propagation
 
 All operations propagate `correlation_id` (trace ID) through:
+
 1. HTTP Header: `X-Correlation-ID`
 2. gRPC Metadata: `correlation-id`
 3. Event Payload: `correlation_id` field
@@ -640,11 +846,11 @@ K-07 Audit → Record with correlation_id
 ### 5.1 Configuration Resolution Algorithm
 
 ```python
-def resolve_config(tenant_id: str, schema_id: str, account_id: Optional[str] = None, 
+def resolve_config(tenant_id: str, schema_id: str, account_id: Optional[str] = None,
                    user_id: Optional[str] = None, as_of_date: datetime = None) -> ResolvedConfig:
     """
     Hierarchical configuration resolution with override semantics.
-    
+
     Resolution order (later overrides earlier):
     1. GLOBAL
     2. JURISDICTION (derived from tenant)
@@ -654,12 +860,12 @@ def resolve_config(tenant_id: str, schema_id: str, account_id: Optional[str] = N
     6. USER (if user_id provided)
     """
     as_of_date = as_of_date or datetime.utcnow()
-    
+
     # Step 1: Fetch tenant metadata to derive jurisdiction
     tenant = get_tenant(tenant_id)
     jurisdiction = tenant.jurisdiction_code
     operator_id = tenant.operator_id
-    
+
     # Step 2: Query all applicable config packs
     packs = query_config_packs(
         schema_id=schema_id,
@@ -674,15 +880,15 @@ def resolve_config(tenant_id: str, schema_id: str, account_id: Optional[str] = N
         effective_before=as_of_date,
         status="ACTIVE"
     )
-    
+
     # Step 3: Sort by hierarchy level
     hierarchy_order = ["GLOBAL", "JURISDICTION", "OPERATOR", "TENANT", "ACCOUNT", "USER"]
     packs.sort(key=lambda p: hierarchy_order.index(p.type))
-    
+
     # Step 4: Deep merge payloads (later overrides earlier)
     resolved_payload = {}
     resolution_path = []
-    
+
     for pack in packs:
         resolved_payload = deep_merge(resolved_payload, pack.payload)
         resolution_path.append({
@@ -690,11 +896,11 @@ def resolve_config(tenant_id: str, schema_id: str, account_id: Optional[str] = N
             "pack_id": pack.pack_id,
             "effective_date": pack.effective_date_gregorian
         })
-    
+
     # Step 5: Validate merged result against schema
     schema = get_schema(schema_id, latest_version=True)
     validate_against_schema(resolved_payload, schema.json_schema)
-    
+
     # Step 6: Return resolved config with metadata
     return ResolvedConfig(
         schema_id=schema_id,
@@ -730,10 +936,10 @@ def activate_config_pack(pack_id: str):
     pack.status = "ACTIVE"
     pack.activated_at = datetime.utcnow()
     save(pack)
-    
+
     # Step 2: Invalidate materialized view cache
     refresh_materialized_view("resolved_config_cache", where=f"schema_id = '{pack.schema_id}'")
-    
+
     # Step 3: Publish activation event
     event = ConfigPackActivatedEvent(
         event_id=uuid4(),
@@ -747,7 +953,7 @@ def activate_config_pack(pack_id: str):
         timestamp=datetime.utcnow()
     )
     event_bus.publish("config.pack.activated", event)
-    
+
     # Step 4: Audit log
     audit_client.record(
         action="CONFIG_PACK_ACTIVATED",
@@ -768,14 +974,14 @@ def canary_rollout(pack_id: str, canary_percentage: int = 10):
     Gradually roll out config changes to a percentage of tenants.
     """
     pack = get_config_pack(pack_id)
-    
+
     # Step 1: Identify canary cohort (deterministic hash-based)
     all_tenants = get_all_tenants()
     canary_tenants = [
-        t for t in all_tenants 
+        t for t in all_tenants
         if (hash(t.tenant_id + pack_id) % 100) < canary_percentage
     ]
-    
+
     # Step 2: Create tenant-specific override packs
     for tenant in canary_tenants:
         canary_pack = create_config_pack(
@@ -787,10 +993,10 @@ def canary_rollout(pack_id: str, canary_percentage: int = 10):
             effective_date=datetime.utcnow()
         )
         activate_config_pack(canary_pack.pack_id)
-    
+
     # Step 3: Monitor metrics for canary cohort
     monitor_canary_metrics(pack_id, canary_tenants, duration_minutes=30)
-    
+
     # Step 4: If metrics healthy, promote to full rollout
     if canary_metrics_healthy():
         activate_config_pack(pack_id)  # Activate for all tenants
@@ -805,15 +1011,16 @@ def canary_rollout(pack_id: str, canary_percentage: int = 10):
 
 ### 6.1 Latency Budgets
 
-| Operation | P50 | P95 | P99 | P99.9 | Timeout |
-|-----------|-----|-----|-----|-------|---------|
-| resolve() - cache hit | 0.5ms | 1ms | 2ms | 5ms | 10ms |
-| resolve() - cache miss | 5ms | 15ms | 30ms | 50ms | 100ms |
-| update() - write | 10ms | 25ms | 50ms | 100ms | 500ms |
-| approve() - workflow | 50ms | 100ms | 200ms | 500ms | 2s |
-| watch() - event delivery | N/A | 50ms | 100ms | 200ms | N/A |
+| Operation                | P50   | P95   | P99   | P99.9 | Timeout |
+| ------------------------ | ----- | ----- | ----- | ----- | ------- |
+| resolve() - cache hit    | 0.5ms | 1ms   | 2ms   | 5ms   | 10ms    |
+| resolve() - cache miss   | 5ms   | 15ms  | 30ms  | 50ms  | 100ms   |
+| update() - write         | 10ms  | 25ms  | 50ms  | 100ms | 500ms   |
+| approve() - workflow     | 50ms  | 100ms | 200ms | 500ms | 2s      |
+| watch() - event delivery | N/A   | 50ms  | 100ms | 200ms | N/A     |
 
 **Budget Allocation**:
+
 - Local cache lookup: 0.5ms
 - gRPC call overhead: 2ms
 - Database query (indexed): 5ms
@@ -823,21 +1030,23 @@ def canary_rollout(pack_id: str, canary_percentage: int = 10):
 
 ### 6.2 Throughput Targets
 
-| Operation | Target TPS | Peak TPS | Sustained TPS |
-|-----------|------------|----------|---------------|
-| resolve() | 20,000 | 50,000 | 15,000 |
-| update() | 100 | 500 | 50 |
-| watch() (concurrent streams) | 10,000 | 20,000 | 8,000 |
+| Operation                    | Target TPS | Peak TPS | Sustained TPS |
+| ---------------------------- | ---------- | -------- | ------------- |
+| resolve()                    | 20,000     | 50,000   | 15,000        |
+| update()                     | 100        | 500      | 50            |
+| watch() (concurrent streams) | 10,000     | 20,000   | 8,000         |
 
 ### 6.3 Resource Limits
 
 **Per Instance**:
+
 - CPU: 2 cores (request), 4 cores (limit)
 - Memory: 4GB (request), 8GB (limit)
 - Disk: 50GB (SSD for cache)
 - Network: 1Gbps
 
 **Horizontal Scaling**:
+
 - Min replicas: 3
 - Max replicas: 20
 - Scale-up trigger: CPU > 70% or request queue > 1000
@@ -845,13 +1054,13 @@ def canary_rollout(pack_id: str, canary_percentage: int = 10):
 
 ### 6.4 SLOs & Alert Thresholds
 
-| SLO | Target | Warning Threshold | Critical Threshold |
-|-----|--------|-------------------|-------------------|
-| Availability | 99.999% | 99.99% | 99.9% |
-| P99 latency (resolve) | < 5ms | > 10ms | > 20ms |
-| Error rate | < 0.01% | > 0.1% | > 1% |
-| Cache hit rate | > 95% | < 90% | < 80% |
-| Event delivery lag | < 100ms | > 500ms | > 2s |
+| SLO                   | Target  | Warning Threshold | Critical Threshold |
+| --------------------- | ------- | ----------------- | ------------------ |
+| Availability          | 99.999% | 99.99%            | 99.9%              |
+| P99 latency (resolve) | < 5ms   | > 10ms            | > 20ms             |
+| Error rate            | < 0.01% | > 0.1%            | > 1%               |
+| Cache hit rate        | > 95%   | < 90%             | < 80%              |
+| Event delivery lag    | < 100ms | > 500ms           | > 2s               |
 
 ---
 
@@ -860,11 +1069,13 @@ def canary_rollout(pack_id: str, canary_percentage: int = 10):
 ### 7.1 AuthN/AuthZ Boundaries
 
 **Authentication**:
+
 - Admin API: OAuth 2.0 Bearer tokens (issued by K-01 IAM)
 - Service-to-service: mTLS with service identity certificates
 - gRPC: TLS 1.3 with mutual authentication
 
 **Authorization**:
+
 - Admin operations: RBAC with roles `config_admin`, `config_maker`, `config_checker`
 - Read operations: Service identity verification (any authenticated service can read)
 - Maker-checker: Enforced via K-03 Rules Engine policy
@@ -895,11 +1106,13 @@ allow {
 ### 7.2 Zero-Trust & mTLS
 
 **Service Identity**:
+
 - Each service issued unique X.509 certificate by internal CA
 - Certificate CN format: `service-name.namespace.cluster.local`
 - Certificate rotation: Every 30 days (automated)
 
 **mTLS Enforcement**:
+
 ```yaml
 # Istio/Envoy configuration
 apiVersion: security.istio.io/v1beta1
@@ -917,6 +1130,7 @@ spec:
 ### 7.3 Tenant Isolation Enforcement
 
 **Row-Level Security**:
+
 ```sql
 -- PostgreSQL RLS policy
 ALTER TABLE config_packs ENABLE ROW LEVEL SECURITY;
@@ -930,14 +1144,15 @@ CREATE POLICY tenant_isolation ON config_packs
 ```
 
 **Application-Level Enforcement**:
+
 ```python
 def resolve_config(tenant_id: str, schema_id: str, **kwargs):
     # Set tenant context for RLS
     db.execute("SET app.tenant_id = %s", [tenant_id])
-    
+
     # All subsequent queries automatically filtered by RLS
     packs = query_config_packs(schema_id=schema_id, ...)
-    
+
     # Reset context
     db.execute("RESET app.tenant_id")
 ```
@@ -945,6 +1160,7 @@ def resolve_config(tenant_id: str, schema_id: str, **kwargs):
 ### 7.4 Signing & Verification (Air-Gapped)
 
 **Bundle Signing**:
+
 ```python
 def sign_config_bundle(bundle_path: str, private_key_path: str) -> str:
     """
@@ -952,23 +1168,24 @@ def sign_config_bundle(bundle_path: str, private_key_path: str) -> str:
     """
     with open(bundle_path, 'rb') as f:
         bundle_data = f.read()
-    
+
     with open(private_key_path, 'rb') as f:
         private_key = Ed25519PrivateKey.from_private_bytes(f.read())
-    
+
     signature = private_key.sign(bundle_data)
-    
+
     # Append signature to bundle
     signed_bundle = bundle_data + b'\n---SIGNATURE---\n' + signature
-    
+
     signed_path = bundle_path + '.signed'
     with open(signed_path, 'wb') as f:
         f.write(signed_bundle)
-    
+
     return signed_path
 ```
 
 **Bundle Verification**:
+
 ```python
 def verify_config_bundle(signed_bundle_path: str, public_key_path: str) -> bool:
     """
@@ -976,12 +1193,12 @@ def verify_config_bundle(signed_bundle_path: str, public_key_path: str) -> bool:
     """
     with open(signed_bundle_path, 'rb') as f:
         signed_data = f.read()
-    
+
     bundle_data, signature = signed_data.split(b'\n---SIGNATURE---\n')
-    
+
     with open(public_key_path, 'rb') as f:
         public_key = Ed25519PublicKey.from_public_bytes(f.read())
-    
+
     try:
         public_key.verify(signature, bundle_data)
         return True
@@ -990,6 +1207,7 @@ def verify_config_bundle(signed_bundle_path: str, public_key_path: str) -> bool:
 ```
 
 **Supply Chain Protection**:
+
 - Config bundles stored in artifact registry with SHA-256 checksums
 - All schema changes require code review + approval
 - Automated vulnerability scanning of dependencies
@@ -1008,28 +1226,28 @@ metrics:
     help: Configuration resolution latency
     labels: [schema_id, cache_hit, tenant_id]
     buckets: [0.001, 0.005, 0.01, 0.05, 0.1, 0.5]
-  
+
   - name: config_cache_hit_rate
     type: gauge
     help: Cache hit rate percentage
     labels: [schema_id]
-  
+
   - name: config_pack_activations_total
     type: counter
     help: Total config pack activations
     labels: [type, schema_id, status]
-  
+
   - name: config_validation_errors_total
     type: counter
     help: Schema validation errors
     labels: [schema_id, error_type]
-  
+
   - name: config_event_delivery_lag_seconds
     type: histogram
     help: Event delivery lag from publish to subscriber receipt
     labels: [event_type]
     buckets: [0.01, 0.05, 0.1, 0.5, 1, 5]
-  
+
   - name: config_materialized_view_refresh_duration_seconds
     type: histogram
     help: Time to refresh materialized view
@@ -1055,6 +1273,7 @@ metrics:
 ```
 
 **Required Fields**:
+
 - `timestamp`: ISO8601 with milliseconds
 - `correlation_id`: Trace ID for distributed tracing
 - `tenant_id`: For tenant-specific filtering
@@ -1076,7 +1295,7 @@ spans:
       - grpc_call
       - schema_validation
       - deep_merge
-  
+
   - name: ConfigService.ResolveConfig
     attributes:
       schema_id: string
@@ -1085,7 +1304,7 @@ spans:
       - query_database
       - build_resolution_path
       - validate_result
-  
+
   - name: ConfigCommandHandler.UpdateConfig
     attributes:
       pack_id: string
@@ -1130,14 +1349,16 @@ spans:
 
 ### 9.1 Extension Points
 
-| Extension Point | Type | Purpose | Example |
-|----------------|------|---------|---------|
-| Custom Resolution Logic | Plugin Hook | Override default hierarchy | Multi-region resolution |
-| Schema Validators | Plugin Hook | Add custom validation rules | Business rule validation |
-| Cache Strategies | Plugin Hook | Custom caching behavior | Redis vs in-memory |
-| Event Transformers | Plugin Hook | Transform events before publish | Add custom metadata |
+| Extension Point         | Type        | Purpose                                               | Example                           |
+| ----------------------- | ----------- | ----------------------------------------------------- | --------------------------------- |
+| Custom Resolution Logic | Plugin Hook | Override default hierarchy                            | Multi-region resolution           |
+| Schema Validators       | Plugin Hook | Add custom validation rules                           | Business rule validation          |
+| Cache Strategies        | Plugin Hook | Custom caching behavior                               | Redis vs in-memory                |
+| Event Transformers      | Plugin Hook | Transform events before publish                       | Add custom metadata               |
+| Value Catalog Providers | Plugin Hook | Supply dynamic option sets or bounded numeric domains | Jurisdiction-specific order types |
 
 **Example: Custom Resolution Plugin**:
+
 ```python
 class CustomResolutionPlugin:
     def resolve(self, context: ResolutionContext) -> Optional[dict]:
@@ -1153,6 +1374,7 @@ class CustomResolutionPlugin:
 ### 9.2 Backward Compatibility Rules
 
 **Schema Evolution**:
+
 1. ✅ **Allowed**: Add optional fields
 2. ✅ **Allowed**: Add new enum values (with default handling)
 3. ✅ **Allowed**: Relax validation (e.g., increase max length)
@@ -1161,11 +1383,56 @@ class CustomResolutionPlugin:
 6. ❌ **Prohibited**: Rename fields
 
 **API Versioning**:
+
 - REST API: `/api/v1/`, `/api/v2/` (version in path)
 - gRPC: Package versioning (`siddhanta.config.v1`, `siddhanta.config.v2`)
 - Minimum support: 2 major versions (v1 and v2 coexist)
 
-### 9.3 Schema Evolution Policy
+### 9.3 Metadata-Driven Process and Value Governance
+
+1. Workflow/task metadata may reference value catalogs by key and pinned version.
+2. Active workflows must resolve against the version pinned at instance start unless an explicit migration policy says otherwise.
+3. Value catalogs may add options or widen bounded ranges in a backward-compatible release.
+4. Value catalogs must not remove or rename an active option while open instances, forms, or persisted domain records still reference it.
+5. Human-task schemas and process-template parameters must support scope overlays (`GLOBAL`, `JURISDICTION`, `OPERATOR`, `TENANT`) with deterministic fallback.
+6. All catalog activations and deprecations require maker-checker approval when they affect regulated workflows.
+
+### 9.4 Metadata Compatibility Matrix
+
+| Change Type                            | Example                                 | Compatibility Class | Allowed For Active Instances | Required Handling                                                               |
+| -------------------------------------- | --------------------------------------- | ------------------- | ---------------------------- | ------------------------------------------------------------------------------- |
+| Add optional field                     | Add `review_reason_code` to task schema | Additive            | Yes                          | Existing instances may continue on pinned version or upgrade at safe checkpoint |
+| Add new catalog entry                  | Add `ESCALATE_TO_COMPLIANCE` option     | Additive            | Yes                          | Preserve existing ordering semantics; no removal of older codes                 |
+| Widen numeric bounds                   | Increase `max_retry_count` from 3 to 5  | Additive            | Yes                          | Revalidate new submissions only                                                 |
+| Change default route using same schema | New routing-policy target queue         | Migratable          | Only at declared checkpoint  | Require explicit migration policy and audit event                               |
+| Remove existing field                  | Remove `review_notes`                   | Breaking            | No                           | Publish new version only; old active instances remain pinned                    |
+| Rename catalog code                    | `EDD` -> `ENHANCED_DD`                  | Breaking            | No                           | Add new code, deprecate old code, migrate data first                            |
+| Narrow allowed enum/list               | Remove `REJECT` from decision list      | Breaking            | No                           | Block activation until no active references remain                              |
+| Change field type                      | `amount` number -> string               | Breaking            | No                           | Require new major version and migration tooling                                 |
+
+### 9.5 Metadata Asset Lifecycle
+
+```
+Draft metadata asset created
+  ↓
+Schema validation + compatibility check
+  ↓
+Maker submits for approval
+  ↓
+Checker approves or rejects
+  ↓
+Approved asset waits for effective_date
+  ↓
+Asset becomes ACTIVE and emits change event
+  ↓
+Consumers resolve pinned version at workflow/task/query start or safe checkpoint
+  ↓
+Asset later marked DEPRECATED with replacement guidance
+  ↓
+Asset retired only after no active instances or retained records depend on it
+```
+
+### 9.6 Schema Evolution Policy
 
 ```python
 def validate_schema_compatibility(old_schema: dict, new_schema: dict) -> ValidationResult:
@@ -1173,14 +1440,14 @@ def validate_schema_compatibility(old_schema: dict, new_schema: dict) -> Validat
     Validate backward compatibility between schema versions.
     """
     errors = []
-    
+
     # Check for removed required fields
     old_required = set(old_schema.get('required', []))
     new_required = set(new_schema.get('required', []))
     removed_required = old_required - new_required
     if removed_required:
         errors.append(f"Removed required fields: {removed_required}")
-    
+
     # Check for type changes
     old_props = old_schema.get('properties', {})
     new_props = new_schema.get('properties', {})
@@ -1188,22 +1455,24 @@ def validate_schema_compatibility(old_schema: dict, new_schema: dict) -> Validat
         if field in new_props:
             if old_def.get('type') != new_props[field].get('type'):
                 errors.append(f"Changed type of field '{field}'")
-    
+
     return ValidationResult(
         compatible=len(errors) == 0,
         errors=errors
     )
 ```
 
-### 9.4 Deprecation Policy
+### 9.7 Deprecation Policy
 
 **Timeline**:
+
 1. **T+0**: Announce deprecation (release notes, API docs)
 2. **T+90 days**: Add deprecation warnings in API responses
 3. **T+180 days**: Mark as deprecated in schema registry
 4. **T+365 days**: Remove from active use (keep in archive for audits)
 
 **Deprecation Response Header**:
+
 ```http
 HTTP/1.1 200 OK
 Deprecation: true
@@ -1214,6 +1483,7 @@ Link: </api/v2/config/packs>; rel="successor-version"
 ### 9.5 Region/Country Variability Injection
 
 **T1 Config Packs** (Jurisdiction-Specific Data):
+
 ```json
 {
   "pack_id": "np_trading_hours",
@@ -1230,6 +1500,7 @@ Link: </api/v2/config/packs>; rel="successor-version"
 ```
 
 **T2 Rule Packs** (Jurisdiction-Specific Logic):
+
 ```rego
 # Nepal-specific validation rules
 package np.order_validation
@@ -1250,6 +1521,7 @@ deny[msg] {
 ```
 
 **T3 Executable Packs** (Custom Adapters):
+
 - Not applicable to Config Engine (consumed by other modules)
 
 ---
@@ -1269,7 +1541,7 @@ class TestConfigResolution:
         assert result.config["brokerage_rate"] == 0.005  # Global default
         assert len(result.resolution_path) == 1
         assert result.resolution_path[0]["level"] == "GLOBAL"
-    
+
     def test_jurisdiction_override(self):
         """Test jurisdiction config overrides global."""
         result = resolve_config(
@@ -1279,17 +1551,17 @@ class TestConfigResolution:
         assert result.config["brokerage_rate"] == 0.004  # Nepal override
         assert len(result.resolution_path) == 2
         assert result.resolution_path[1]["level"] == "JURISDICTION"
-    
+
     def test_deep_merge_behavior(self):
         """Test deep merge preserves nested structures."""
         global_config = {"fees": {"brokerage": 0.005, "exchange": 0.001}}
         tenant_config = {"fees": {"brokerage": 0.004}}
-        
+
         result = deep_merge(global_config, tenant_config)
-        
+
         assert result["fees"]["brokerage"] == 0.004  # Overridden
         assert result["fees"]["exchange"] == 0.001  # Preserved
-    
+
     def test_schema_validation_failure(self):
         """Test invalid config rejected."""
         with pytest.raises(SchemaValidationError):
@@ -1297,17 +1569,17 @@ class TestConfigResolution:
                 schema_id="fee_schedule",
                 payload={"brokerage_rate": -0.01}  # Negative not allowed
             )
-    
+
     def test_effective_date_filtering(self):
         """Test configs activated only after effective date."""
         future_date = datetime.utcnow() + timedelta(days=30)
-        
+
         result = resolve_config(
             tenant_id="tenant_1",
             schema_id="fee_schedule",
             as_of_date=datetime.utcnow()
         )
-        
+
         # Future config not included
         assert "future_field" not in result.config
 ```
@@ -1362,30 +1634,30 @@ class TestConfigIntegration:
             },
             "maker_id": "maker_1"
         })
-        
+
         assert response.status_code == 202
         pack_id = response.json()["pack_id"]
         assert response.json()["status"] == "PENDING_APPROVAL"
-        
+
         # Step 2: Checker approves
         response = admin_client.put(f"/api/v1/config/packs/{pack_id}/approve", json={
             "checker_id": "checker_1"
         })
-        
+
         assert response.status_code == 200
         assert response.json()["status"] == "APPROVED"
-        
+
         # Step 3: Wait for activation (or trigger manually)
         time.sleep(1)
-        
+
         # Step 4: Verify config resolved correctly
         result = config_client.resolve(
             tenant_id="tenant_test",
             schema_id="fee_schedule"
         )
-        
+
         assert result.config["brokerage_rate"] == 0.003
-    
+
     @pytest.mark.integration
     def test_hot_reload_propagation(self):
         """Test hot reload propagates to all subscribers."""
@@ -1393,15 +1665,15 @@ class TestConfigIntegration:
         changes = []
         def on_change(event):
             changes.append(event)
-        
+
         config_client.watch(["fee_schedule"], "tenant_test", on_change)
-        
+
         # Activate new config
         activate_config_pack("test_pack_2")
-        
+
         # Wait for event propagation
         time.sleep(0.5)
-        
+
         # Verify event received
         assert len(changes) == 1
         assert changes[0].schema_id == "fee_schedule"
@@ -1416,20 +1688,20 @@ class TestEventReplay:
         """Test materialized view can be rebuilt from events."""
         # Step 1: Clear materialized view
         db.execute("TRUNCATE resolved_config_cache")
-        
+
         # Step 2: Replay all ConfigPackActivated events
         events = event_store.replay(
             event_type="ConfigPackActivatedEvent",
             from_offset=0
         )
-        
+
         for event in events:
             handle_config_pack_activated(event)
-        
+
         # Step 3: Verify cache rebuilt correctly
         cache_count = db.execute("SELECT COUNT(*) FROM resolved_config_cache").scalar()
         assert cache_count > 0
-        
+
         # Step 4: Verify resolution still works
         result = config_client.resolve(
             tenant_id="tenant_1",
@@ -1447,36 +1719,36 @@ class TestChaosEngineering:
         """Test behavior during database partition."""
         # Inject network partition
         chaos.partition_network(target="postgres", duration=10)
-        
+
         # Verify reads served from cache
         result = config_client.resolve(
             tenant_id="tenant_1",
             schema_id="fee_schedule"
         )
         assert result.config is not None  # Served from local cache
-        
+
         # Verify writes rejected gracefully
         with pytest.raises(ServiceUnavailableError):
             admin_client.post("/api/v1/config/packs", json={...})
-    
+
     @pytest.mark.chaos
     def test_event_bus_failure(self):
         """Test behavior when event bus unavailable."""
         # Stop Kafka
         chaos.stop_service("kafka")
-        
+
         # Verify config updates queued locally
         response = admin_client.post("/api/v1/config/packs", json={...})
         assert response.status_code == 202
-        
+
         # Restart Kafka
         chaos.start_service("kafka")
-        
+
         # Verify queued events published
         time.sleep(2)
         events = event_store.query(event_type="ConfigPackActivatedEvent")
         assert len(events) > 0
-    
+
     @pytest.mark.chaos
     def test_cache_invalidation_failure(self):
         """Test eventual consistency when cache invalidation fails."""
@@ -1486,20 +1758,20 @@ class TestChaosEngineering:
             failure_rate=1.0,
             duration=5
         )
-        
+
         # Activate new config
         activate_config_pack("test_pack_3")
-        
+
         # Verify stale config served temporarily
         result = config_client.resolve(
             tenant_id="tenant_1",
             schema_id="fee_schedule"
         )
         # May be stale
-        
+
         # Wait for background sync
         time.sleep(10)
-        
+
         # Verify eventually consistent
         result = config_client.resolve(
             tenant_id="tenant_1",
@@ -1520,15 +1792,15 @@ class TestSecurity:
             ...
         })
         pack_id = response.json()["pack_id"]
-        
+
         # Same user tries to approve
         response = admin_client.put(f"/api/v1/config/packs/{pack_id}/approve", json={
             "checker_id": "user_123"  # Same as maker
         })
-        
+
         assert response.status_code == 403
         assert "MAKER_CHECKER_VIOLATION" in response.json()["error"]
-    
+
     def test_tenant_isolation(self):
         """Test tenant cannot access other tenant's configs."""
         # Tenant A creates config
@@ -1537,23 +1809,23 @@ class TestSecurity:
             "context_key": "tenant_a",
             ...
         })
-        
+
         # Tenant B tries to resolve
         result = config_client.resolve(
             tenant_id="tenant_b",
             schema_id="fee_schedule"
         )
-        
+
         # Verify Tenant A's config not included
         assert "tenant_a_specific_field" not in result.config
-    
+
     def test_unsigned_bundle_rejected(self):
         """Test unsigned config bundles rejected."""
         unsigned_bundle = create_config_bundle(sign=False)
-        
+
         with pytest.raises(SignatureVerificationError):
             load_config_bundle(unsigned_bundle)
-    
+
     def test_mtls_enforcement(self):
         """Test mTLS required for service-to-service calls."""
         # Call without client certificate

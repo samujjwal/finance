@@ -1,8 +1,8 @@
-EPIC-ID:    EPIC-D-04
-EPIC NAME:  Market Data
-LAYER:      DOMAIN
-MODULE:     D-04 Market Data
-VERSION:    1.0.0
+EPIC-ID: EPIC-D-04
+EPIC NAME: Market Data
+LAYER: DOMAIN
+MODULE: D-04 Market Data
+VERSION: 1.0.1
 
 ---
 
@@ -62,54 +62,54 @@ Deliver the D-04 Market Data module to ingest, normalize, and distribute real-ti
 
 #### Section 6 — Event Model Definition
 
-| Field | Description |
-|---|---|
-| Event Name | `MarketHaltEvent` |
-| Schema Version | `v1.0.0` |
-| Trigger Condition | Price movement exceeds configured circuit breaker limit, or exchange adapter reports a manual halt. |
-| Payload | `{ "symbol": "NABIL", "exchange": "NEPSE", "halt_reason": "CIRCUIT_BREAKER", "resume_time": "..." }` |
-| Consumers | OMS, EMS, Client Portal |
-| Idempotency Key | `hash(symbol + exchange + halt_timestamp)` |
-| Replay Behavior | Ignored for live systems; updates historical halt records. |
-| Retention Policy | Permanent. |
+| Field             | Description                                                                                          |
+| ----------------- | ---------------------------------------------------------------------------------------------------- |
+| Event Name        | `MarketHaltEvent`                                                                                    |
+| Schema Version    | `v1.0.0`                                                                                             |
+| Trigger Condition | Price movement exceeds configured circuit breaker limit, or exchange adapter reports a manual halt.  |
+| Payload           | `{ "symbol": "NABIL", "exchange": "NEPSE", "halt_reason": "CIRCUIT_BREAKER", "resume_time": "..." }` |
+| Consumers         | OMS, EMS, Client Portal                                                                              |
+| Idempotency Key   | `hash(symbol + exchange + halt_timestamp)`                                                           |
+| Replay Behavior   | Ignored for live systems; updates historical halt records.                                           |
+| Retention Policy  | Permanent.                                                                                           |
 
 ---
 
-#### Section 6.5 — Command Model Definition
+#### Section 7 — Command Model Definition
 
-| Field | Description |
-|---|---|
-| Command Name | `SubscribeCommand` |
-| Schema Version | `v1.0.0` |
-| Validation Rules | Symbol valid, feed available, subscriber authorized |
-| Handler | `SubscriptionCommandHandler` in D-04 Market Data |
-| Success Event | `SubscriptionCreated` |
-| Failure Event | `SubscriptionFailed` |
-| Idempotency | Command ID must be unique; duplicate commands return original result |
+| Field            | Description                                                          |
+| ---------------- | -------------------------------------------------------------------- |
+| Command Name     | `SubscribeCommand`                                                   |
+| Schema Version   | `v1.0.0`                                                             |
+| Validation Rules | Symbol valid, feed available, subscriber authorized                  |
+| Handler          | `SubscriptionCommandHandler` in D-04 Market Data                     |
+| Success Event    | `SubscriptionCreated`                                                |
+| Failure Event    | `SubscriptionFailed`                                                 |
+| Idempotency      | Command ID must be unique; duplicate commands return original result |
 
-| Field | Description |
-|---|---|
-| Command Name | `UnsubscribeCommand` |
-| Schema Version | `v1.0.0` |
-| Validation Rules | Subscription exists, requester authorized |
-| Handler | `SubscriptionCommandHandler` in D-04 Market Data |
-| Success Event | `SubscriptionCancelled` |
-| Failure Event | `UnsubscribeFailed` |
-| Idempotency | Command ID must be unique; duplicate commands return original result |
+| Field            | Description                                                          |
+| ---------------- | -------------------------------------------------------------------- |
+| Command Name     | `UnsubscribeCommand`                                                 |
+| Schema Version   | `v1.0.0`                                                             |
+| Validation Rules | Subscription exists, requester authorized                            |
+| Handler          | `SubscriptionCommandHandler` in D-04 Market Data                     |
+| Success Event    | `SubscriptionCancelled`                                              |
+| Failure Event    | `UnsubscribeFailed`                                                  |
+| Idempotency      | Command ID must be unique; duplicate commands return original result |
 
-| Field | Description |
-|---|---|
-| Command Name | `HaltMarketCommand` |
-| Schema Version | `v1.0.0` |
-| Validation Rules | Circuit breaker triggered, symbol valid, requester authorized |
-| Handler | `CircuitBreakerHandler` in D-04 Market Data |
-| Success Event | `MarketHaltEvent` |
-| Failure Event | `MarketHaltFailed` |
-| Idempotency | Command ID must be unique; duplicate commands return original result |
+| Field            | Description                                                          |
+| ---------------- | -------------------------------------------------------------------- |
+| Command Name     | `HaltMarketCommand`                                                  |
+| Schema Version   | `v1.0.0`                                                             |
+| Validation Rules | Circuit breaker triggered, symbol valid, requester authorized        |
+| Handler          | `CircuitBreakerHandler` in D-04 Market Data                          |
+| Success Event    | `MarketHaltEvent`                                                    |
+| Failure Event    | `MarketHaltFailed`                                                   |
+| Idempotency      | Command ID must be unique; duplicate commands return original result |
 
 ---
 
-#### Section 7 — AI Integration Requirements
+#### Section 8 — AI Integration Requirements
 
 - **AI Hook Type:** Anomaly Detection
 - **Workflow Steps Exposed:** Inbound feed processing.
@@ -121,28 +121,28 @@ Deliver the D-04 Market Data module to ingest, normalize, and distribute real-ti
 
 ---
 
-#### Section 8 — NFRs
+#### Section 9 — NFRs
 
-| NFR Category | Required Targets |
-|---|---|
-| Latency / Throughput | Ingest-to-publish latency < 500 microseconds; 100,000 ticks/sec |
-| Scalability | Multicast or low-latency pub/sub internally |
-| Availability | 99.999% during market hours |
-| Consistency Model | Strict ordering per symbol |
-| Security | Internal mTLS |
-| Data Residency | N/A (public data) |
-| Data Retention | 10 years minimum for tick data |
-| Auditability | Manual price corrections logged |
-| Observability | Metrics: `feed.latency`, `tick.drop.rate` |
-| Extensibility | New feed adapter < 1 sprint |
-| Upgrade / Compatibility | N/A |
-| On-Prem Constraints | Can run local hardware acceleration for feeds |
-| Ledger Integrity | N/A |
-| Dual-Calendar Correctness | Correct OHLC bucket mappings |
+| NFR Category              | Required Targets                                                |
+| ------------------------- | --------------------------------------------------------------- |
+| Latency / Throughput      | Ingest-to-publish latency < 500 microseconds; 100,000 ticks/sec |
+| Scalability               | Multicast or low-latency pub/sub internally                     |
+| Availability              | 99.999% during market hours                                     |
+| Consistency Model         | Strict ordering per symbol                                      |
+| Security                  | Internal mTLS                                                   |
+| Data Residency            | N/A (public data)                                               |
+| Data Retention            | 10 years minimum for tick data                                  |
+| Auditability              | Manual price corrections logged                                 |
+| Observability             | Metrics: `feed.latency`, `tick.drop.rate`                       |
+| Extensibility             | New feed adapter < 1 sprint                                     |
+| Upgrade / Compatibility   | N/A                                                             |
+| On-Prem Constraints       | Can run local hardware acceleration for feeds                   |
+| Ledger Integrity          | N/A                                                             |
+| Dual-Calendar Correctness | Correct OHLC bucket mappings                                    |
 
 ---
 
-#### Section 9 — Acceptance Criteria
+#### Section 10 — Acceptance Criteria
 
 1. **Given** a raw FIX message from a T3 adapter, **When** ingested, **Then** it is normalized to `MarketTick` and published in < 500 microseconds.
 2. **Given** a Nepal T1 config defining a 10% daily price limit, **When** a trade hits +10.1%, **Then** the module immediately suppresses further order book updates and emits `MarketHaltEvent`.
@@ -150,32 +150,32 @@ Deliver the D-04 Market Data module to ingest, normalize, and distribute real-ti
 
 ---
 
-#### Section 10 — Failure Modes & Resilience
+#### Section 11 — Failure Modes & Resilience
 
 - **Primary Feed Down:** Instantly failover to secondary feed (e.g., from direct exchange feed to Reuters/Bloomberg) with an alert.
 - **Stale Data:** Mark data as 'Stale' if no ticks received within heartbeat window.
 
 ---
 
-#### Section 11 — Observability & Audit
+#### Section 12 — Observability & Audit
 
-| Telemetry Type | Required Details |
-|---|---|
-| Metrics | `tick.processing.latency`, `feed.disconnect.count` |
-| Logs | Halt events |
-| Traces | N/A (Tracing skipped for high-freq ticks) |
-| Audit Events | Action: `ManualHaltOverride` |
-| Regulatory Evidence | Floorsheet generation [ASR-RPT-001] |
+| Telemetry Type      | Required Details                                   |
+| ------------------- | -------------------------------------------------- |
+| Metrics             | `tick.processing.latency`, `feed.disconnect.count` |
+| Logs                | Halt events                                        |
+| Traces              | N/A (Tracing skipped for high-freq ticks)          |
+| Audit Events        | Action: `ManualHaltOverride`                       |
+| Regulatory Evidence | Floorsheet generation [ASR-RPT-001]                |
 
 ---
 
-#### Section 12 — Compliance & Regulatory Traceability
+#### Section 13 — Compliance & Regulatory Traceability
 
 - Market integrity and circuit breaker compliance [ASR-CB-001]
 
 ---
 
-#### Section 13 — Extension Points & Contracts
+#### Section 14 — Extension Points & Contracts
 
 - **SDK Contract:** `MarketDataClient.subscribe(symbol)`, `MarketDataClient.getSnapshot(symbol)`, `MarketDataClient.getOHLC(symbol, interval)`.
 - **Jurisdiction Plugin Extension Points:** T3 Feed Adapters (e.g., NEPSE real-time feed, Bloomberg B-PIPE).
@@ -195,17 +195,17 @@ Deliver the D-04 Market Data module to ingest, normalize, and distribute real-ti
 
 ---
 
-#### Section 14 — Future-Safe Architecture Evaluation
+#### Section 15 — Future-Safe Architecture Evaluation
 
-| Question | Expected Answer |
-|---|---|
-| Can this module support India/Bangladesh via plugin? | Yes. |
-| Can a new exchange be connected? | Yes, via T3 Adapter. |
-| Can this run in an air-gapped deployment? | Partially; requires external feed adapters. |
+| Question                                             | Expected Answer                             |
+| ---------------------------------------------------- | ------------------------------------------- |
+| Can this module support India/Bangladesh via plugin? | Yes.                                        |
+| Can a new exchange be connected?                     | Yes, via T3 Adapter.                        |
+| Can this run in an air-gapped deployment?            | Partially; requires external feed adapters. |
 
 ---
 
-#### Section 14.5 — Threat Model
+#### Section 16 — Threat Model
 
 **Attack Vectors & Mitigations:**
 
@@ -235,6 +235,7 @@ Deliver the D-04 Market Data module to ingest, normalize, and distribute real-ti
    - **Residual Risk:** Compromised rule pack.
 
 **Security Controls:**
+
 - Feed arbitration and validation
 - T3 adapter sandboxing
 - Cryptographic feed signing
@@ -242,3 +243,16 @@ Deliver the D-04 Market Data module to ingest, normalize, and distribute real-ti
 - Entitlement management
 - Encryption at rest and in transit
 - Audit logging of all feed access
+
+---
+
+## Changelog
+
+### Version 1.0.1 (2026-03-10)
+
+**Type:** PATCH  
+**Changes:**
+
+- Standardized section numbering to the sequential 16-section format.
+- Registered circuit-breaker traceability under the compliance code registry.
+- Added changelog metadata for future epic maintenance.

@@ -1,8 +1,8 @@
-EPIC-ID:    EPIC-K-05
-EPIC NAME:  Event Bus, Event Store & Workflow Orchestration
-LAYER:      KERNEL
-MODULE:     K-05 Event Bus
-VERSION:    1.1.0
+EPIC-ID: EPIC-K-05
+EPIC NAME: Event Bus, Event Store & Workflow Orchestration
+LAYER: KERNEL
+MODULE: K-05 Event Bus
+VERSION: 1.1.1
 
 ---
 
@@ -70,54 +70,54 @@ Deliver the central Event Bus and Event Store (K-05) that forms the nervous syst
 
 #### Section 6 — Event Model Definition
 
-| Field | Description |
-|---|---|
-| Event Name | N/A (Infrastructure) |
-| Schema Version | N/A |
-| Trigger Condition | N/A |
-| Payload | N/A |
-| Consumers | All Modules |
-| Idempotency Key | `event_id` |
-| Replay Behavior | Native capability. |
-| Retention Policy | Permanent (Immutable Source of Truth). |
+| Field             | Description                            |
+| ----------------- | -------------------------------------- |
+| Event Name        | N/A (Infrastructure)                   |
+| Schema Version    | N/A                                    |
+| Trigger Condition | N/A                                    |
+| Payload           | N/A                                    |
+| Consumers         | All Modules                            |
+| Idempotency Key   | `event_id`                             |
+| Replay Behavior   | Native capability.                     |
+| Retention Policy  | Permanent (Immutable Source of Truth). |
 
 ---
 
-#### Section 6.5 — Command Model Definition
+#### Section 7 — Command Model Definition
 
-| Field | Description |
-|---|---|
-| Command Name | `PublishEventCommand` |
-| Schema Version | `v1.0.0` |
+| Field            | Description                                                       |
+| ---------------- | ----------------------------------------------------------------- |
+| Command Name     | `PublishEventCommand`                                             |
+| Schema Version   | `v1.0.0`                                                          |
 | Validation Rules | Event schema valid, event type registered, payload matches schema |
-| Handler | `EventBusCommandHandler` in K-05 Event Bus |
-| Success Event | `EventPublished` |
-| Failure Event | `EventPublishFailed` |
-| Idempotency | Event ID must be unique; duplicate events are deduplicated |
+| Handler          | `EventBusCommandHandler` in K-05 Event Bus                        |
+| Success Event    | `EventPublished`                                                  |
+| Failure Event    | `EventPublishFailed`                                              |
+| Idempotency      | Event ID must be unique; duplicate events are deduplicated        |
 
-| Field | Description |
-|---|---|
-| Command Name | `StartSagaCommand` |
-| Schema Version | `v1.0.0` |
-| Validation Rules | Saga definition exists, initial context valid |
-| Handler | `SagaCommandHandler` in K-05 Event Bus |
-| Success Event | `SagaStarted` |
-| Failure Event | `SagaStartFailed` |
-| Idempotency | Command ID must be unique; duplicate commands return original saga instance |
+| Field            | Description                                                                 |
+| ---------------- | --------------------------------------------------------------------------- |
+| Command Name     | `StartSagaCommand`                                                          |
+| Schema Version   | `v1.0.0`                                                                    |
+| Validation Rules | Saga definition exists, initial context valid                               |
+| Handler          | `SagaCommandHandler` in K-05 Event Bus                                      |
+| Success Event    | `SagaStarted`                                                               |
+| Failure Event    | `SagaStartFailed`                                                           |
+| Idempotency      | Command ID must be unique; duplicate commands return original saga instance |
 
-| Field | Description |
-|---|---|
-| Command Name | `RebuildProjectionCommand` |
-| Schema Version | `v1.0.0` |
-| Validation Rules | Projection name exists, requester authorized |
-| Handler | `ProjectionCommandHandler` in K-05 Event Bus |
-| Success Event | `ProjectionRebuilt` |
-| Failure Event | `ProjectionRebuildFailed` |
-| Idempotency | Command ID must be unique; duplicate commands return progress of existing rebuild |
+| Field            | Description                                                                       |
+| ---------------- | --------------------------------------------------------------------------------- |
+| Command Name     | `RebuildProjectionCommand`                                                        |
+| Schema Version   | `v1.0.0`                                                                          |
+| Validation Rules | Projection name exists, requester authorized                                      |
+| Handler          | `ProjectionCommandHandler` in K-05 Event Bus                                      |
+| Success Event    | `ProjectionRebuilt`                                                               |
+| Failure Event    | `ProjectionRebuildFailed`                                                         |
+| Idempotency      | Command ID must be unique; duplicate commands return progress of existing rebuild |
 
 ---
 
-#### Section 7 — AI Integration Requirements
+#### Section 8 — AI Integration Requirements
 
 - **AI Hook Type:** Anomaly Detection
 - **Workflow Steps Exposed:** Event stream monitoring.
@@ -129,29 +129,29 @@ Deliver the central Event Bus and Event Store (K-05) that forms the nervous syst
 
 ---
 
-#### Section 8 — NFRs
+#### Section 9 — NFRs
 
-| NFR Category | Required Targets |
-|---|---|
-| Latency / Throughput | P99 publish latency < 2ms; 100,000 TPS |
-| Scalability | Horizontally scalable partitioned topics (e.g., Kafka/Pulsar model) |
-| Availability | 99.999% uptime |
-| Consistency Model | Strict ordering per `stream_id` |
-| Security | mTLS for all publishers/subscribers; payload encryption for sensitive topics |
-| Data Residency | Event store replication bound by Jurisdiction rules |
-| Data Retention | Permanent |
-| Auditability | The Event Store *is* the ultimate system audit log |
-| Observability | Metrics: `event.publish.latency`, `event.lag` |
-| Extensibility | New event types via schema registration < 1 hour; new projection types via plugin |
-| Projection Rebuild | Rebuild throughput > 50,000 events/sec; progress tracking with ETA; zero downtime |
-| Schema Evolution | Backward/forward compatible schema changes; breaking changes require version coexistence |
-| On-Prem Constraints | Runs efficiently on local clusters |
-| Ledger Integrity | N/A |
-| Dual-Calendar Correctness | Envelope timestamps verified. |
+| NFR Category              | Required Targets                                                                         |
+| ------------------------- | ---------------------------------------------------------------------------------------- |
+| Latency / Throughput      | P99 publish latency < 2ms; 100,000 TPS                                                   |
+| Scalability               | Horizontally scalable partitioned topics (e.g., Kafka/Pulsar model)                      |
+| Availability              | 99.999% uptime                                                                           |
+| Consistency Model         | Strict ordering per `stream_id`                                                          |
+| Security                  | mTLS for all publishers/subscribers; payload encryption for sensitive topics             |
+| Data Residency            | Event store replication bound by Jurisdiction rules                                      |
+| Data Retention            | Permanent                                                                                |
+| Auditability              | The Event Store _is_ the ultimate system audit log                                       |
+| Observability             | Metrics: `event.publish.latency`, `event.lag`                                            |
+| Extensibility             | New event types via schema registration < 1 hour; new projection types via plugin        |
+| Projection Rebuild        | Rebuild throughput > 50,000 events/sec; progress tracking with ETA; zero downtime        |
+| Schema Evolution          | Backward/forward compatible schema changes; breaking changes require version coexistence |
+| On-Prem Constraints       | Runs efficiently on local clusters                                                       |
+| Ledger Integrity          | N/A                                                                                      |
+| Dual-Calendar Correctness | Envelope timestamps verified.                                                            |
 
 ---
 
-#### Section 9 — Acceptance Criteria
+#### Section 10 — Acceptance Criteria
 
 1. **Given** an event payload missing a required schema field, **When** published, **Then** the bus rejects it synchronously and does not append it to the store.
 2. **Given** a subscriber that crashes during processing, **When** it restarts, **Then** it resumes consumption from its last acknowledged offset.
@@ -163,7 +163,7 @@ Deliver the central Event Bus and Event Store (K-05) that forms the nervous syst
 
 ---
 
-#### Section 10 — Failure Modes & Resilience
+#### Section 11 — Failure Modes & Resilience
 
 - **Storage Full:** Triggers automatic volume expansion or archival to cold storage (retaining index).
 - **Poison Pill Event:** Subscriber moves unprocessable event to DLQ after 3 retries and continues; alert raised.
@@ -171,26 +171,26 @@ Deliver the central Event Bus and Event Store (K-05) that forms the nervous syst
 
 ---
 
-#### Section 11 — Observability & Audit
+#### Section 12 — Observability & Audit
 
-| Telemetry Type | Required Details |
-|---|---|
-| Metrics | `bus.throughput.tps`, `consumer.lag.messages`, `dlq.size` |
-| Logs | Structured: `event_id`, `topic`, `action` |
-| Traces | Trace context propagated through event headers. |
-| Audit Events | Covered by Event Store inherently. |
+| Telemetry Type      | Required Details                                          |
+| ------------------- | --------------------------------------------------------- |
+| Metrics             | `bus.throughput.tps`, `consumer.lag.messages`, `dlq.size` |
+| Logs                | Structured: `event_id`, `topic`, `action`                 |
+| Traces              | Trace context propagated through event headers.           |
+| Audit Events        | Covered by Event Store inherently.                        |
 | Regulatory Evidence | Full event replay provides complete system state history. |
 
 ---
 
-#### Section 12 — Compliance & Regulatory Traceability
+#### Section 13 — Compliance & Regulatory Traceability
 
 - Record retention — Immutable ledger of all actions [LCA-RET-001]
 - Audit trails [LCA-AUDIT-001]
 
 ---
 
-#### Section 13 — Extension Points & Contracts
+#### Section 14 — Extension Points & Contracts
 
 - **SDK Contract:** `EventBus.publish(event)` → `EventPublished`, `EventBus.subscribe(eventType, handler)` → `Subscription`, `EventStore.replay(fromOffset, toOffset)` → `EventStream`, `Saga.start(definition, context)` → `SagaInstance`, `Projection.rebuild(projectionName, options)` → `RebuildStatus`, `SchemaRegistry.evolve(eventType, newSchema, migrationFn)` → `SchemaVersion`
 - **Event Schema Registry Interface:** `SchemaRegistry.register(eventType, schema)`, `SchemaRegistry.validate(event)`, `SchemaRegistry.checkCompatibility(oldSchema, newSchema)`
@@ -208,13 +208,25 @@ Deliver the central Event Bus and Event Store (K-05) that forms the nervous syst
 
 ---
 
-#### Section 14 — Future-Safe Architecture Evaluation
+#### Section 15 — Future-Safe Architecture Evaluation
 
-| Question | Expected Answer |
-|---|---|
+| Question                                             | Expected Answer                                                                                      |
+| ---------------------------------------------------- | ---------------------------------------------------------------------------------------------------- |
 | Can this module support India/Bangladesh via plugin? | Yes — event infrastructure is jurisdiction-neutral; new jurisdictions publish events on the same bus |
-| Can this run in an air-gapped deployment? | Yes — standard clustered deployment (Kafka/Pulsar); no external dependencies |
-| Can the event store backend be swapped? | Yes — EventStore interface is abstracted; can swap Kafka→Pulsar→EventStoreDB without SDK changes |
-| Can event retention be made jurisdiction-specific? | Yes — topic-level retention policies configurable via K-02 per jurisdiction |
-| Can long-term event replay (10yr+) be supported? | Yes — cold storage archival with index; replay API supports cross-tier (hot/warm/cold) reads |
-| Can WASM-based saga steps be supported? | Yes — saga step handlers are pluggable; WASM runtime integration via K-04 |
+| Can this run in an air-gapped deployment?            | Yes — standard clustered deployment (Kafka/Pulsar); no external dependencies                         |
+| Can the event store backend be swapped?              | Yes — EventStore interface is abstracted; can swap Kafka→Pulsar→EventStoreDB without SDK changes     |
+| Can event retention be made jurisdiction-specific?   | Yes — topic-level retention policies configurable via K-02 per jurisdiction                          |
+| Can long-term event replay (10yr+) be supported?     | Yes — cold storage archival with index; replay API supports cross-tier (hot/warm/cold) reads         |
+| Can WASM-based saga steps be supported?              | Yes — saga step handlers are pluggable; WASM runtime integration via K-04                            |
+
+---
+
+## Changelog
+
+### Version 1.1.1 (2026-03-10)
+
+**Type:** PATCH  
+**Changes:**
+
+- Standardized section numbering to the sequential 16-section format.
+- Added changelog metadata for future epic maintenance.

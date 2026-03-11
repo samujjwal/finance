@@ -1,9 +1,14 @@
 # PROJECT SIDDHANTA — FULL STORY BACKLOG
+
 ## Critical Path Epics: Complete Story Templates
 
-**Version**: 1.0.0  
+**Version**: 1.1.0  
 **Format**: Mandatory Story Template (Given/When/Then ACs, Edge Cases, Full Test Plans, DoD)  
 **Naming Convention**: STORY-{MODULE}-{NUMBER}
+
+> Baseline note: `stories/STORY_INDEX.md` is the authoritative normalized backlog for sprint counts and story-point totals. This file remains the long-form story template catalog for critical-path implementation detail.
+>
+> Workflow/process note: dynamic process definitions, human-task schemas, and value catalogs are now primarily governed by W-01, K-02, and K-13 in the current milestone files and LLDs. The K-05 saga stories below remain kernel transaction primitives, not the full operator/business workflow DSL.
 
 ---
 
@@ -20,6 +25,7 @@
 **Business Value**: Foundation of the entire event-sourced architecture — every module depends on reliable event storage.
 
 **Technical Scope**:
+
 - PostgreSQL `event_store` table with REVOKE UPDATE/DELETE
 - Schema: event_id UUID, event_type VARCHAR, aggregate_id UUID, aggregate_type VARCHAR, sequence_number BIGINT, data JSONB, metadata JSONB, created_at_utc TIMESTAMPTZ, created_at_bs VARCHAR(10), partition_key VARCHAR
 - Write API: `appendEvent(aggregateId, aggregateType, eventType, data, metadata): EventRecord`
@@ -30,12 +36,14 @@
 **Dependencies**: PostgreSQL cluster provisioned
 
 **Acceptance Criteria**:
+
 - **AC1**: Given valid event data, When `appendEvent()` is called, Then event is stored with monotonically increasing sequence number per aggregate
 - **AC2**: Given duplicate event_id, When `appendEvent()` is called, Then idempotent write returns original record (no duplicate)
 - **AC3**: Given an attempt to UPDATE or DELETE an event row, When SQL is executed against event_store, Then database rejects the operation with permission error
 - **AC4**: Given two concurrent writes to same aggregate with same sequence, When both execute, Then exactly one succeeds and the other receives ConflictError
 
 **Edge Cases**:
+
 - Concurrent writes to same aggregate (sequence collision → retry with incremented sequence)
 - Event payload exceeding 1MB (reject with PAYLOAD_TOO_LARGE)
 - Database connection pool exhaustion under sustained write load
@@ -78,6 +86,7 @@
 **Business Value**: Enables all downstream consumers to receive events reliably without data loss.
 
 **Technical Scope**:
+
 - Kafka producer with `partition_key = aggregate_id`
 - Outbox relay service: poll `event_outbox` table → publish → mark published
 - Batch publishing (configurable batch size, default 100)
@@ -88,12 +97,14 @@
 **Dependencies**: STORY-K05-001, Kafka cluster
 
 **Acceptance Criteria**:
+
 - **AC1**: Given event stored in event_store, When outbox relay polls, Then event published to correct Kafka topic within 100ms of storage
 - **AC2**: Given Kafka unavailable for 30 seconds, When publish fails, Then events remain in outbox for automatic retry — zero data loss
 - **AC3**: Given consumer restarts after crash, When it reconnects, Then it resumes from last committed offset without missing events
 - **AC4**: Given 10,000 events in outbox batch, When relay processes, Then all published within 1 second
 
 **Edge Cases**:
+
 - Kafka broker failure mid-batch (partial publish → idempotent re-publish on retry)
 - Outbox relay crash after publish but before marking complete (idempotent consumers handle duplicates)
 - Topic partition rebalance during publish (producer retries on new partition leader)
@@ -131,6 +142,7 @@
 **Business Value**: Standardized consumption pattern ensures every service processes events consistently with guaranteed delivery.
 
 **Technical Scope**:
+
 - `EventConsumer` base class: `subscribe(topic, groupId, handler)`
 - Manual offset commit after successful processing
 - JSON schema validation on consume (reject invalid → DLQ)
@@ -141,12 +153,14 @@
 **Dependencies**: STORY-K05-002, K-06 (observability for correlation)
 
 **Acceptance Criteria**:
+
 - **AC1**: Given consumer subscribes to topic, When event published, Then handler invoked with deserialized event within 50ms
 - **AC2**: Given handler throws transient error, When retried 3 times, Then succeeds — offset committed
 - **AC3**: Given handler throws permanent error, When all retries exhausted, Then event routed to DLQ — offset committed (consumer continues)
 - **AC4**: Given consumer crashes, When restarted, Then resumes from last committed offset
 
 **Edge Cases**:
+
 - Consumer rebalance (revoked partitions → stop processing, new partitions → resume)
 - Deserialization failure (schema mismatch → DLQ with reason)
 - Slow consumer (backpressure triggers pause/resume)
@@ -182,6 +196,7 @@
 **Business Value**: Prevents schema drift across services; ensures event consumers never receive malformed data.
 
 **Technical Scope**:
+
 - Schema storage: PostgreSQL table (event_type, version, json_schema, status)
 - POST `/schemas` — register new schema version
 - Schema validation middleware in event store write path
@@ -191,12 +206,14 @@
 **Dependencies**: STORY-K05-001
 
 **Acceptance Criteria**:
+
 - **AC1**: Given registered schema for OrderPlaced v1, When event with matching structure published, Then validation passes
 - **AC2**: Given event that violates schema (missing required field), When published, Then rejected with SCHEMA_VALIDATION_ERROR
 - **AC3**: Given new schema version that removes required field, When registered, Then rejected as backward-incompatible
 - **AC4**: Given schema v2 registered, When v1 event consumed, Then consumer can still deserialize (backward compat)
 
 **Edge Cases**:
+
 - Schema with recursive references (max depth enforced)
 - Schema registration race condition (version conflict)
 - Empty schema (rejected)
@@ -232,6 +249,7 @@
 **Business Value**: Prevents duplicate order placements, double ledger postings, and duplicate settlements — critical for financial correctness.
 
 **Technical Scope**:
+
 - Redis SET with NX + TTL for idempotency keys
 - Middleware: `IdempotencyGuard(key, ttl, handler)` → check → execute → store result → return
 - Configurable TTL per command type (default 24h)
@@ -241,12 +259,14 @@
 **Dependencies**: Redis cluster, K-05 event consumer
 
 **Acceptance Criteria**:
+
 - **AC1**: Given command with new idempotency_key, When processed, Then executed and result cached in Redis
 - **AC2**: Given command with existing idempotency_key (within TTL), When processed, Then cached result returned — no re-execution
 - **AC3**: Given idempotency_key expired (past TTL), When same key resubmitted, Then treated as new command
 - **AC4**: Given Redis unavailable, When idempotency check runs, Then falls back to PostgreSQL-based check (degraded mode)
 
 **Edge Cases**:
+
 - Redis key set but handler fails before result cached (cleanup on error)
 - Concurrent requests with same idempotency_key (only one executes)
 - Key collision (UUID v4 — probability negligible but handle gracefully)
@@ -276,27 +296,31 @@
 **Feature**: K05-F05 Saga orchestration  
 **Priority**: P0 | **Sprint**: 5
 
-**Description**: Implement the saga orchestration engine that coordinates multi-service transactions. Supports saga definition as a state machine with steps, compensations, and timeouts. Persists saga state in PostgreSQL with event sourcing.
+**Description**: Implement the saga orchestration engine that coordinates multi-service transactions. Supports saga definition as a state machine with steps, compensations, and timeouts. Persists saga state in PostgreSQL with event sourcing. This is the low-level transactional primitive beneath W-01 workflow orchestration, which adds metadata-driven step templates, human-task schemas, and value-catalog-backed process customization.
 
 **Business Value**: Enables complex workflows (order → risk → execution → settlement) to execute atomically with guaranteed compensation on failure.
 
 **Technical Scope**:
+
 - SagaDefinition: steps (name, action, compensation, timeout)
 - SagaInstance: state machine (STARTED → step1_pending → step1_complete → ... → COMPLETED | COMPENSATING → COMPENSATED | FAILED)
 - Event-sourced saga state (SagaStepCompleted, SagaStepFailed, SagaCompensationStarted, etc.)
 - Timeout handling: if step exceeds timeout → trigger compensation chain
 - Saga registry: register saga definitions
 - Correlation: saga_id propagated through all step events
+- W-01 compatibility: step handlers exposed as reusable primitives that higher-level workflow definitions can reference via metadata
 
 **Dependencies**: STORY-K05-001, STORY-K05-002, STORY-K05-003, K-17 (DTC)
 
 **Acceptance Criteria**:
+
 - **AC1**: Given 3-step saga (A→B→C), When all steps succeed, Then saga state → COMPLETED, all step events recorded
 - **AC2**: Given 3-step saga, When step B fails, Then compensation for A executed, saga state → COMPENSATED
 - **AC3**: Given step exceeds timeout (30s), When no response, Then compensation chain triggered automatically
 - **AC4**: Given saga engine restarts, When pending sagas rehydrated, Then they resume from last completed step
 
 **Edge Cases**:
+
 - Compensation step itself fails (retry compensation 3x → manual intervention flag)
 - Concurrent saga updates (optimistic locking on saga instance)
 - Nested sagas (parent waits for child completion)
@@ -333,6 +357,7 @@
 **Business Value**: Ensures financial consistency — if order execution fails after margin reservation, the margin is released.
 
 **Technical Scope**:
+
 - `CompensationHandler` interface: `compensate(sagaId, stepName, originalEvent): CompensationResult`
 - Compensation registry: map (sagaDefinition, stepName) → compensationHandler
 - Retry logic: 3 retries with exponential backoff for compensation steps
@@ -342,12 +367,14 @@
 **Dependencies**: STORY-K05-006, K-07 (audit)
 
 **Acceptance Criteria**:
+
 - **AC1**: Given margin reserved in step A, When step B fails, Then compensation releases margin — balance restored
 - **AC2**: Given compensation invoked twice for same step, When second invocation runs, Then idempotent — no double-release
 - **AC3**: Given compensation fails, When retried 3 times, Then on final failure → manual review queue + alert
 - **AC4**: Every compensation attempt recorded in audit trail with saga_id, step, outcome
 
 **Edge Cases**:
+
 - Compensation for already-compensated step (idempotent — no double reversal)
 - Partial compensation (e.g., partial fill → partial unwind)
 - Compensation timeout (longer timeout than forward steps)
@@ -384,6 +411,7 @@
 **Business Value**: Regulatory requirement — audit trail must be provably tamper-proof for regulator inspections.
 
 **Technical Scope**:
+
 - `audit_log` table: id, timestamp_utc, timestamp_bs, actor_id, actor_type, action, resource_type, resource_id, old_value JSONB, new_value JSONB, metadata JSONB, previous_hash VARCHAR(64), entry_hash VARCHAR(64)
 - Hash computation: SHA-256(previous_hash + action + resource_id + timestamp + data)
 - REVOKE UPDATE, DELETE on audit_log from application role
@@ -393,11 +421,13 @@
 **Dependencies**: PostgreSQL cluster
 
 **Acceptance Criteria**:
+
 - **AC1**: Given audit entry, When stored, Then entry_hash = SHA-256(previous_hash || action || resource_id || timestamp || data)
 - **AC2**: Given sequence of entries, When any entry tampered, Then hash chain breaks — detectable via chain_valid() function
 - **AC3**: Given attempt to UPDATE audit_log, When SQL executed, Then permission denied error
 
 **Edge Cases**:
+
 - First entry in chain (previous_hash = genesis hash "0000...0000")
 - Concurrent writes (serialize via advisory lock or sequence)
 - Partition boundary (chain continues across partitions)
@@ -431,6 +461,7 @@
 **Business Value**: Standardized audit capture across all 33 microservices ensures consistent regulatory evidence.
 
 **Technical Scope**:
+
 - `AuditSDK.log(action, resourceType, resourceId, { oldValue?, newValue?, metadata? }): Promise<void>`
 - Automatic enrichment: actor_id from request context (JWT), correlation_id, timestamp_bs (K-15), timestamp_utc
 - Async write to audit_log (fire-and-forget with retry)
@@ -441,11 +472,13 @@
 **Dependencies**: STORY-K07-001, K-01 (JWT context), K-15 (dual-calendar)
 
 **Acceptance Criteria**:
+
 - **AC1**: Given SDK configured in service, When `audit.log()` called, Then entry created with actor, correlation, dual timestamps
 - **AC2**: Given Express middleware enabled, When POST/PUT/DELETE request processed, Then audit entry auto-created
 - **AC3**: Given audit store unavailable, When `audit.log()` called, Then event buffered in memory (max 1000) and retried
 
 **Edge Cases**:
+
 - No JWT context (system-level operations → actor = "SYSTEM")
 - Very high volume (10K writes/sec → batch mode)
 - Circular references in old/new values (serialize safely)
@@ -482,6 +515,7 @@
 **Business Value**: Core identity infrastructure — no service call succeeds without an authenticated token.
 
 **Technical Scope**:
+
 - POST `/auth/token` (grant_type: authorization_code, client_credentials, refresh_token)
 - RS256 JWT generation with kid rotation (JWKS endpoint)
 - Claims: sub, tenant_id, roles[], permissions[], iss, aud, iat, exp, iat_bs, jti
@@ -493,12 +527,14 @@
 **Dependencies**: K-14 (signing keys), K-15 (iat_bs), K-05 (AuthEvents emission), Redis
 
 **Acceptance Criteria**:
+
 - **AC1**: Given valid credentials + grant_type=client_credentials, When POST /auth/token, Then JWT returned with tenant-scoped claims, 200 OK
 - **AC2**: Given valid refresh_token, When grant_type=refresh_token, Then new access token issued, old refresh token invalidated (rotation)
 - **AC3**: Given 5 failed login attempts, When 6th attempt, Then 429 Too Many Requests, account locked 15 minutes
 - **AC4**: Given expired access token, When API call made, Then 401 Unauthorized with WWW-Authenticate header
 
 **Edge Cases**:
+
 - Clock skew: JWT nbf/exp validated with 30-second tolerance
 - Concurrent refresh token usage: second use revokes entire family
 - JWKS rotation: new kid active, old kid valid for 24h grace period
@@ -539,6 +575,7 @@
 **Business Value**: Users may operate across multiple tenants and devices — sessions must be isolated and auditable.
 
 **Technical Scope**:
+
 - Session entity: session_id, user_id, tenant_id, device_fingerprint, created_at, last_active, expires_at, ip_address
 - Redis storage: key = `session:{session_id}`, TTL per tenant config
 - Max concurrent sessions per user (configurable, default 5)
@@ -548,12 +585,14 @@
 **Dependencies**: STORY-K01-001, K-02 (tenant config for TTL), Redis
 
 **Acceptance Criteria**:
+
 - **AC1**: Given user authenticates, When session created, Then stored in Redis with tenant-specific TTL
 - **AC2**: Given user has 5 active sessions, When 6th login, Then oldest session revoked automatically
 - **AC3**: Given admin revokes all sessions for user, When revocation executes, Then all sessions deleted from Redis
 - **AC4**: Given session idle > configured timeout, When next request made, Then 401 — session expired
 
 **Edge Cases**:
+
 - Redis failover (session loss → re-authenticate)
 - Session created during tenant config reload (use old TTL)
 - Cross-tenant session access attempt (strict tenant isolation)
@@ -586,6 +625,7 @@
 **Business Value**: Fine-grained access control required for regulatory compliance — users must only access authorized resources.
 
 **Technical Scope**:
+
 - Role model: Role → Permission[] mapping in PostgreSQL
 - Permission model: resource:action (e.g., "orders:create", "ledger:read")
 - ABAC integration: K-03 OPA evaluation with request context as input
@@ -596,12 +636,14 @@
 **Dependencies**: STORY-K01-001, K-03 (OPA), K-02 (role config), Redis
 
 **Acceptance Criteria**:
+
 - **AC1**: Given user with role "trader", When accessing "orders:create", Then authorized (permission exists)
 - **AC2**: Given user with role "viewer", When accessing "orders:create", Then 403 Forbidden
 - **AC3**: Given ABAC policy "traders can only view own department orders", When trader queries other department, Then 403
 - **AC4**: Given role permission change, When event fires, Then all cached permissions invalidated within 1 second
 
 **Edge Cases**:
+
 - User with multiple roles (union of permissions)
 - Cyclic role inheritance (detect and prevent at registration)
 - K-03 timeout (fallback to RBAC only with degraded flag)
@@ -638,6 +680,7 @@
 **Business Value**: Financial integrity backbone — every trade, fee, dividend, and margin movement flows through balanced ledger entries.
 
 **Technical Scope**:
+
 - POST `/ledger/journals` — create journal with entries[]
 - JournalEntry: journal_id, entry_id, account_id, direction (DEBIT/CREDIT), amount DECIMAL(28,12), currency, reference, description
 - Balance enforcement: ∑debits == ∑credits per journal (per currency)
@@ -648,12 +691,14 @@
 **Dependencies**: K-02 (chart of accounts), K-05 (events), K-15 (calendar)
 
 **Acceptance Criteria**:
+
 - **AC1**: Given balanced journal entry (debit=5000 NPR, credit=5000 NPR), When posted, Then journal created, balances updated, JournalPosted event emitted
 - **AC2**: Given unbalanced journal (debit=5000, credit=4999), When posted, Then rejected with UNBALANCED_JOURNAL error
 - **AC3**: Given multi-leg entry (A→B 3000, A→C 2000, total debit A=5000, credit B=3000+C=2000), When posted, Then balanced and accepted
 - **AC4**: Given attempt to UPDATE or DELETE journal entry, When SQL executed, Then permission denied
 
 **Edge Cases**:
+
 - Multi-currency journal (each currency must independently balance)
 - Precision overflow (NPR 2 decimals, BTC 8 decimals — use DECIMAL(28,12))
 - Concurrent postings to same account (safe with balance trigger)
@@ -694,6 +739,7 @@
 **Business Value**: Core trading capability — the entry point for every trade on the platform.
 
 **Technical Scope**:
+
 - POST `/orders`: { instrument_id, quantity, side (BUY/SELL), order_type (MARKET/LIMIT), price?, client_id, time_in_force, idempotency_key }
 - Validation: required fields, instrument exists (D-11), instrument.status == ACTIVE
 - Lot size check: quantity % min_lot == 0 (from K-02 jurisdiction config)
@@ -706,12 +752,14 @@
 **Dependencies**: K-01 (auth), K-02 (config), K-05 (events + idemp), K-15 (calendar), D-11 (ref data)
 
 **Acceptance Criteria**:
+
 - **AC1**: Given valid BUY order for active instrument, When POST /orders, Then order created in PENDING state, OrderPlaced event emitted, 201 Created
 - **AC2**: Given SELL order with quantity < min_lot (e.g., 5 kitta where min=10), When POST /orders, Then 422 with "BELOW_MIN_LOT" error
 - **AC3**: Given order for suspended instrument, When POST /orders, Then 422 with "INSTRUMENT_SUSPENDED"
 - **AC4**: Given duplicate idempotency_key, When POST /orders again, Then returns original order (no duplicate), 200 OK
 
 **Edge Cases**:
+
 - Market closes between validation and creation (race condition → check again in event handler)
 - Instrument suspended after validation but before event processing (idempotent rejection downstream)
 - Very large quantity (max order value check from config)
@@ -751,6 +799,7 @@
 **Business Value**: Ensures audit-safe order lifecycle — invalid state transitions are architecturally impossible.
 
 **Technical Scope**:
+
 - State enum: DRAFT, PENDING, PENDING_APPROVAL, APPROVED, ROUTED, PARTIALLY_FILLED, FILLED, CANCELLED, REJECTED
 - Transition matrix (allowed_transitions map)
 - Command handlers: submit(), approve(), route(), partialFill(), fill(), cancel(), reject()
@@ -761,12 +810,14 @@
 **Dependencies**: STORY-D01-001, K-05 (events)
 
 **Acceptance Criteria**:
+
 - **AC1**: Given order in PENDING, When approved, Then state → APPROVED, OrderApproved event emitted
 - **AC2**: Given order in FILLED, When cancel attempted, Then InvalidTransitionError — no event emitted
 - **AC3**: Given order in ROUTED, When partialFill(qty=50) on order(qty=100), Then state → PARTIALLY_FILLED, filled_qty=50
 - **AC4**: Given event stream [OrderPlaced, OrderApproved, OrderRouted], When reconstructed, Then current state = ROUTED
 
 **Edge Cases**:
+
 - Concurrent approve and cancel commands (first wins, second fails)
 - Partial fill followed by cancel (PARTIALLY_FILLED → CANCELLED allowed — remaining qty cancelled)
 - Multiple partial fills → final fill → FILLED
@@ -803,6 +854,7 @@
 **Business Value**: Regulatory requirement — every order MUST pass compliance and risk checks before execution. Prevents regulatory violations.
 
 **Technical Scope**:
+
 - Pipeline: [ComplianceCheck, RiskCheck, MakerCheckerCheck(if configured)] → APPROVED | REJECTED
 - ComplianceCheck: D-07 rules evaluation (lock-in, restricted list, beneficial ownership)
 - RiskCheck: D-06 pre-trade risk (margin, position limits, concentration)
@@ -813,12 +865,14 @@
 **Dependencies**: K-02 (config), K-03 (rules), D-06 (risk), D-07 (compliance)
 
 **Acceptance Criteria**:
+
 - **AC1**: Given order passing all checks, When pipeline runs, Then order state → APPROVED, all check results recorded
 - **AC2**: Given order failing compliance (restricted instrument), When pipeline runs, Then order → REJECTED with "RESTRICTED_INSTRUMENT"
 - **AC3**: Given order exceeding maker-checker threshold, When pipeline runs, Then order → PENDING_APPROVAL, notification sent to approver
 - **AC4**: Given pipeline configuration for jurisdiction "NP", When NP-specific rules loaded, Then NP rules evaluated (not other jurisdictions)
 
 **Edge Cases**:
+
 - Multiple checks fail simultaneously (all reasons aggregated in rejection)
 - D-06 timeout (circuit breaker → configurable: reject or degrade)
 - Check passes but subsequent check modifies context (pipeline runs sequentially)
@@ -857,6 +911,7 @@
 **Business Value**: Prevents unauthorized risk exposure. Regulatory requirement for every trade.
 
 **Technical Scope**:
+
 - `RiskCheckRequest { client_id, instrument_id, side, quantity, price, order_type }` → `RiskCheckResult { approved: boolean, reasons: string[], risk_metrics }`
 - Margin check: available_margin >= required_margin (D-06 margin model)
 - Position limit: current_position + order_quantity <= max_position (K-02 config)
@@ -869,12 +924,14 @@
 **Dependencies**: K-02 (limits config), K-03 (rules), K-05 (events for cache updates), Redis
 
 **Acceptance Criteria**:
+
 - **AC1**: Given margin_required=10K, margin_available=5K, When risk check, Then DENY with "INSUFFICIENT_MARGIN" in < 2ms
 - **AC2**: Given all limits within bounds, When risk check, Then APPROVE in < 5ms P99
 - **AC3**: Given concentration at 4.8% with max 5%, When order would push to 5.2%, Then DENY with "CONCENTRATION_LIMIT"
 - **AC4**: Given Redis cache miss, When position lookup falls back to PostgreSQL, Then check completes (degraded latency) < 50ms
 
 **Edge Cases**:
+
 - Concurrent orders consuming same margin (atomic Redis decrement with check)
 - Redis down (fallback to PostgreSQL — degrade to 50ms SLA)
 - Negative margin (impossible — clamp to 0)
@@ -915,6 +972,7 @@
 **Business Value**: Dual-calendar is a platform invariant. Every timestamp, report, and settlement date must exist in both calendar systems.
 
 **Technical Scope**:
+
 - `bsToGregorian(bsYear, bsMonth, bsDay): { year, month, day }`
 - `gregorianToBs(year, month, day): { bsYear, bsMonth, bsDay }`
 - `DualDate` type: `{ gregorian: Date, bs: { year, month, day }, fiscalYear: string }`
@@ -926,12 +984,14 @@
 **Dependencies**: None (foundational)
 
 **Acceptance Criteria**:
+
 - **AC1**: Given Gregorian 2024-04-13, When converted to BS, Then returns 2081-01-01 (BS New Year)
 - **AC2**: Given BS 2081-01-01, When converted to Gregorian, Then returns 2024-04-13
 - **AC3**: Given invalid BS date (month=13), When conversion attempted, Then throws InvalidDateError
 - **AC4**: Given date range 2000-2100 BS, When all days converted round-trip, Then original date equals result (no loss)
 
 **Edge Cases**:
+
 - BS year with 32-day month (some Ashadh months have 32 days)
 - Boundary between BS years (last day of Chaitra → first day of Baisakh)
 - Gregorian leap year alignment with BS
@@ -969,6 +1029,7 @@
 **Business Value**: Every trading, risk, compliance, and settlement check needs instrument data — this is the single source of truth.
 
 **Technical Scope**:
+
 - Instrument entity: id, symbol, isin, name, type (EQUITY/BOND/MF/DERIVATIVE), status (ACTIVE/SUSPENDED/DELISTED), sector, lot_size, tick_size, currency, exchange, effective_from, effective_to
 - CRUD API: GET/POST/PUT /instruments with maker-checker workflow
 - Temporal validity: queries return data valid-as-of a given date
@@ -979,12 +1040,14 @@
 **Dependencies**: K-01 (auth), K-02 (config), K-05 (events), K-07 (audit)
 
 **Acceptance Criteria**:
+
 - **AC1**: Given new instrument registration, When POST /instruments, Then created with PENDING_APPROVAL status, maker-checker initiated
 - **AC2**: Given instrument approved, When queried with GET /instruments/{id}, Then returns instrument data with cache header
 - **AC3**: Given instrument suspended, When OMS queries tradability, Then returns status=SUSPENDED
 - **AC4**: Given historical query (as_of=2080-06-15 BS), When GET /instruments?as_of=2080-06-15, Then returns data valid at that date
 
 **Edge Cases**:
+
 - Instrument with same symbol but different exchange (unique by symbol+exchange)
 - Bulk import with 5000 instruments (batch processing, partial failure handling)
 - Cache invalidation race (event arrives before DB commit → eventual consistency)
@@ -1023,6 +1086,7 @@
 **Business Value**: Secrets never hardcoded; JWT signing keys, DB passwords, API keys managed centrally with rotation support.
 
 **Technical Scope**:
+
 - `SecretProvider` interface: `getSecret(path)`, `putSecret(path, value)`, `rotateSecret(path)`, `listSecrets(prefix)`
 - HashiCorp Vault provider (KV v2 engine)
 - AWS Secrets Manager provider
@@ -1034,12 +1098,14 @@
 **Dependencies**: K-07 (audit logging)
 
 **Acceptance Criteria**:
+
 - **AC1**: Given Vault provider configured, When `getSecret("db/postgres/password")`, Then returns current secret value
 - **AC2**: Given secret rotated in Vault, When `getSecret()` called after cache TTL, Then returns new value
 - **AC3**: Given air-gap deployment with file provider, When `getSecret()` called, Then decrypts and returns from local file
 - **AC4**: Every `getSecret()` and `putSecret()` call recorded in audit trail
 
 **Edge Cases**:
+
 - Vault unavailable (use cached value until TTL expires; if expired → fail-open or fail-closed configurable)
 - Secret not found (clear error with path)
 - Concurrent rotation requests (first wins, second no-ops)
@@ -1078,6 +1144,7 @@
 **Business Value**: Prevents cascade failures across microservices — if downstream service fails, callers degrade gracefully.
 
 **Technical Scope**:
+
 - CircuitBreaker class: `execute(fn, fallback?)` → result | fallback
 - States: CLOSED (normal), OPEN (fail-fast), HALF_OPEN (probe)
 - Config: failure_threshold (default 5), timeout_ms (default 30000), half_open_probes (default 3)
@@ -1089,12 +1156,14 @@
 **Dependencies**: K-06 (metrics), K-05 (events)
 
 **Acceptance Criteria**:
+
 - **AC1**: Given circuit CLOSED, When 5 consecutive failures, Then circuit → OPEN, subsequent calls return fallback immediately
 - **AC2**: Given circuit OPEN for 30 seconds, When timeout expires, Then circuit → HALF_OPEN, next calls treated as probes
 - **AC3**: Given circuit HALF_OPEN, When 3 probe calls succeed, Then circuit → CLOSED, normal operation resumes
 - **AC4**: Given circuit transitions, When state changes, Then CircuitOpened/CircuitClosed event emitted, Prometheus metric updated
 
 **Edge Cases**:
+
 - Intermittent failures (5 failures need not be consecutive with time-based window)
 - Concurrent execution during HALF_OPEN (only probe count allowed, rest fail-fast)
 - Fallback itself throws (propagate fallback error)
@@ -1134,6 +1203,7 @@
 **Business Value**: Regulatory obligation — every trade, onboarding, and payment must be screened against sanctions lists. Fines for violations are severe.
 
 **Technical Scope**:
+
 - POST `/screening/check` { name, type (INDIVIDUAL/ENTITY), nationality?, dob?, additional_identifiers[] }
 - Screening against in-memory sanctions list (loaded from DB, refreshed hourly)
 - Match result: { match_found: boolean, matches: [{ list, entry, score, match_type }] }
@@ -1144,12 +1214,14 @@
 **Dependencies**: K-01 (auth), K-02 (config for thresholds), K-05 (events), K-07 (audit)
 
 **Acceptance Criteria**:
+
 - **AC1**: Given name matching OFAC SDN list entry (exact), When screened, Then match_found=true, score=1.0, match_type="EXACT", < 50ms
 - **AC2**: Given name not on any list, When screened, Then match_found=false, < 50ms
 - **AC3**: Given fuzzy match (score=0.78), When screened, Then match_found=true, match_type="FUZZY", flagged for REVIEW
 - **AC4**: Every screening attempt and result recorded in audit trail (K-07)
 
 **Edge Cases**:
+
 - Name with special characters (normalize before matching)
 - Name in non-Latin script (transliteration support)
 - Multiple matches across different lists (aggregate results)
@@ -1183,19 +1255,19 @@
 
 # BACKLOG STATISTICS
 
-| Metric | Value |
-|--------|-------|
-| Total Epics | 42 |
-| Total Features | 246 |
-| Estimated Stories | ~603 (+150 infra) |
-| Total Story Points | ~2,500 |
-| Stories Fully Detailed (above) | 25 (representative critical path) |
-| Stories to Detail in Grooming | ~728 |
-| Sprint Cadence | 2 weeks |
-| Planned Sprints | 40 |
-| Teams | 6 |
-| Engineers | 27 |
-| MVP Target | Sprint 30 (April 2027) |
+| Metric                                  | Value                             |
+| --------------------------------------- | --------------------------------- |
+| Total Epics                             | 42                                |
+| Total Features                          | 246                               |
+| Normalized Backlog Stories              | 654                               |
+| Normalized Backlog Story Points         | ~1,930                            |
+| Stories Fully Detailed (above)          | 25 (representative critical path) |
+| Stories Remaining To Detail In Grooming | ~629                              |
+| Sprint Cadence                          | 2 weeks                           |
+| Planned Sprints                         | 30                                |
+| Teams                                   | 6                                 |
+| Engineers                               | 27                                |
+| MVP Target                              | Sprint 30 (April 2027)            |
 
 ---
 

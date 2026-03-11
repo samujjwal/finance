@@ -1,8 +1,8 @@
-EPIC-ID:    EPIC-K-09
-EPIC NAME:  AI Governance
-LAYER:      KERNEL
-MODULE:     K-09 AI Governance
-VERSION:    1.1.0
+EPIC-ID: EPIC-K-09
+EPIC NAME: AI Governance
+LAYER: KERNEL
+MODULE: K-09 AI Governance
+VERSION: 1.1.1
 
 ---
 
@@ -65,87 +65,87 @@ Deliver the K-09 AI Governance module to provide a centralized registry, evaluat
 
 #### Section 6 — Event Model Definition
 
-| Field | Description |
-|---|---|
-| Event Name | `AiDecisionOverridden` |
-| Schema Version | `v1.0.0` |
-| Trigger Condition | A human operator rejects or modifies an AI recommendation. |
-| Payload | `{ "decision_id": "...", "model_id": "...", "operator_id": "...", "reason": "...", "timestamp_bs": "..." }` |
-| Consumers | AI Feedback Loop (fine-tuning), Audit Framework |
-| Idempotency Key | `hash(decision_id + operator_id)` |
-| Replay Behavior | Updates the materialized view of model accuracy. |
-| Retention Policy | Permanent. |
+| Field             | Description                                                                                                 |
+| ----------------- | ----------------------------------------------------------------------------------------------------------- |
+| Event Name        | `AiDecisionOverridden`                                                                                      |
+| Schema Version    | `v1.0.0`                                                                                                    |
+| Trigger Condition | A human operator rejects or modifies an AI recommendation.                                                  |
+| Payload           | `{ "decision_id": "...", "model_id": "...", "operator_id": "...", "reason": "...", "timestamp_bs": "..." }` |
+| Consumers         | AI Feedback Loop (fine-tuning), Audit Framework                                                             |
+| Idempotency Key   | `hash(decision_id + operator_id)`                                                                           |
+| Replay Behavior   | Updates the materialized view of model accuracy.                                                            |
+| Retention Policy  | Permanent.                                                                                                  |
 
 ---
 
-#### Section 6.5 — Command Model Definition
+#### Section 7 — Command Model Definition
 
-| Field | Description |
-|---|---|
-| Command Name | `DeployModelCommand` |
-| Schema Version | `v1.0.0` |
+| Field            | Description                                                              |
+| ---------------- | ------------------------------------------------------------------------ |
+| Command Name     | `DeployModelCommand`                                                     |
+| Schema Version   | `v1.0.0`                                                                 |
 | Validation Rules | Model validated, evals passed, approval obtained, compatibility verified |
-| Handler | `ModelCommandHandler` in K-09 AI Governance |
-| Success Event | `ModelDeployed` |
-| Failure Event | `ModelDeploymentFailed` |
-| Idempotency | Command ID must be unique; duplicate commands return original result |
+| Handler          | `ModelCommandHandler` in K-09 AI Governance                              |
+| Success Event    | `ModelDeployed`                                                          |
+| Failure Event    | `ModelDeploymentFailed`                                                  |
+| Idempotency      | Command ID must be unique; duplicate commands return original result     |
 
-| Field | Description |
-|---|---|
-| Command Name | `RollbackModelCommand` |
-| Schema Version | `v1.0.0` |
-| Validation Rules | Previous version exists, requester authorized |
-| Handler | `ModelCommandHandler` in K-09 AI Governance |
-| Success Event | `ModelRolledBack` |
-| Failure Event | `ModelRollbackFailed` |
-| Idempotency | Command ID must be unique; duplicate commands return original result |
+| Field            | Description                                                          |
+| ---------------- | -------------------------------------------------------------------- |
+| Command Name     | `RollbackModelCommand`                                               |
+| Schema Version   | `v1.0.0`                                                             |
+| Validation Rules | Previous version exists, requester authorized                        |
+| Handler          | `ModelCommandHandler` in K-09 AI Governance                          |
+| Success Event    | `ModelRolledBack`                                                    |
+| Failure Event    | `ModelRollbackFailed`                                                |
+| Idempotency      | Command ID must be unique; duplicate commands return original result |
 
-| Field | Description |
-|---|---|
-| Command Name | `ApprovePromptCommand` |
-| Schema Version | `v1.0.0` |
-| Validation Rules | Prompt template valid, maker-checker approval obtained |
-| Handler | `PromptCommandHandler` in K-09 AI Governance |
-| Success Event | `PromptApproved` |
-| Failure Event | `PromptApprovalFailed` |
-| Idempotency | Command ID must be unique; duplicate commands return original result |
+| Field            | Description                                                          |
+| ---------------- | -------------------------------------------------------------------- |
+| Command Name     | `ApprovePromptCommand`                                               |
+| Schema Version   | `v1.0.0`                                                             |
+| Validation Rules | Prompt template valid, maker-checker approval obtained               |
+| Handler          | `PromptCommandHandler` in K-09 AI Governance                         |
+| Success Event    | `PromptApproved`                                                     |
+| Failure Event    | `PromptApprovalFailed`                                               |
+| Idempotency      | Command ID must be unique; duplicate commands return original result |
 
 ---
 
-#### Section 7 — AI Integration Requirements
+#### Section 8 — AI Integration Requirements
 
 - **AI Hook Type:** Meta-AI (Evaluator)
 - **Workflow Steps Exposed:** Drift monitoring and evaluation.
 - **Model Registry Usage:** `model-evaluator-v1`
 - **Explainability Requirement:** The evaluator must explain why it believes a target model has drifted.
 - **Human Override Path:** Operator can dismiss the drift alert.
-- **Drift Monitoring:** N/A (this *is* the monitor).
+- **Drift Monitoring:** N/A (this _is_ the monitor).
 - **Fallback Behavior:** N/A.
 
 ---
 
-#### Section 8 — NFRs
+#### Section 9 — NFRs
 
-| NFR Category | Required Targets |
-|---|---|
-| Latency / Throughput | Registry lookup < 2ms; async audit write < 1ms overhead |
-| Scalability | Horizontally scalable edge caches for prompts |
-| Availability | 99.999% uptime |
-| Consistency Model | Strong consistency for model/prompt deployments |
-| Security | Strict RBAC on model approvals (Maker-Checker enforced) |
-| Data Residency | Model usage telemetry obeys T1 residency rules |
-| Data Retention | Explainability artifacts kept per audit rules |
-| Auditability | All governance actions logged [LCA-AUDIT-001] |
-| Observability | Metrics: `ai.override.rate`, `ai.eval.latency` |
-| Extensibility | N/A |
-| Upgrade / Compatibility | Shadow deployments supported for A/B testing |
-| On-Prem Constraints | Local model execution support |
-| Ledger Integrity | N/A |
-| Dual-Calendar Correctness | Correct approval timestamps |
+| NFR Category              | Required Targets                                        |
+| ------------------------- | ------------------------------------------------------- |
+| Latency / Throughput      | Registry lookup < 2ms; async audit write < 1ms overhead |
+| Scalability               | Horizontally scalable edge caches for prompts           |
+| Availability              | 99.999% uptime                                          |
+| Consistency Model         | Strong consistency for model/prompt deployments         |
+| Security                  | Strict RBAC on model approvals (Maker-Checker enforced) |
+| Data Residency            | Model usage telemetry obeys T1 residency rules          |
+| Data Retention            | Explainability artifacts kept per audit rules           |
+| Auditability              | All governance actions logged [LCA-AUDIT-001]           |
+| Observability             | Metrics: `ai.override.rate`, `ai.eval.latency`          |
+| Extensibility             | N/A                                                     |
+| Upgrade / Compatibility   | Shadow deployments supported for A/B testing            |
+| On-Prem Constraints       | Local model execution support                           |
+| Ledger Integrity          | N/A                                                     |
+| Dual-Calendar Correctness | Correct approval timestamps                             |
 
 ---
 
-#### Section 9 — Acceptance Criteria
+#### Section 10 — Acceptance Criteria
 
 1. **Given** a new prompt template, **When** submitted by a developer, **Then** it remains in pending state until approved by a designated AI Governance Officer (Maker-Checker).
 2. **Given** an AI-generated surveillance alert, **When** an operator dismisses it as a false positive, **Then** an `AiDecisionOverridden` event is published and stored in K-07.
@@ -154,7 +154,7 @@ Deliver the K-09 AI Governance module to provide a centralized registry, evaluat
 
 ---
 
-#### Section 10 — Failure Modes & Resilience
+#### Section 11 — Failure Modes & Resilience
 
 - **External Inference API Down:** K-09 signals domain modules to execute rule-based fallback paths immediately.
 - **Registry Unreachable:** API Gateway uses locally cached model routing rules.
@@ -163,38 +163,50 @@ Deliver the K-09 AI Governance module to provide a centralized registry, evaluat
 
 ---
 
-#### Section 11 — Observability & Audit
+#### Section 12 — Observability & Audit
 
-| Telemetry Type | Required Details |
-|---|---|
-| Metrics | `ai.decision.count`, `ai.hitl.override_rate` |
-| Logs | Structured logs with `model_id`, `version`, `decision_id` |
-| Traces | Spans for `ModelClient.infer` |
-| Audit Events | Action: `DeployModel`, `OverrideDecision` |
+| Telemetry Type      | Required Details                                               |
+| ------------------- | -------------------------------------------------------------- |
+| Metrics             | `ai.decision.count`, `ai.hitl.override_rate`                   |
+| Logs                | Structured logs with `model_id`, `version`, `decision_id`      |
+| Traces              | Spans for `ModelClient.infer`                                  |
+| Audit Events        | Action: `DeployModel`, `OverrideDecision`                      |
 | Regulatory Evidence | Explainability artifacts for NRB/SEBON AI audits [LCA-AI-001]. |
 
 ---
 
-#### Section 12 — Compliance & Regulatory Traceability
+#### Section 13 — Compliance & Regulatory Traceability
 
 - AI Guidelines compliance (NRB) [LCA-AI-001]
 - Audit trails [LCA-AUDIT-001]
 
 ---
 
-#### Section 13 — Extension Points & Contracts
+#### Section 14 — Extension Points & Contracts
 
 - **SDK Contract:** `AiGovernanceClient.recordDecision(metadata)`, `AiGovernanceClient.override(decisionId)`.
 - **Jurisdiction Plugin Extension Points:** T2 Rule Packs for AI autonomous limits.
 
 ---
 
-#### Section 14 — Future-Safe Architecture Evaluation
+#### Section 15 — Future-Safe Architecture Evaluation
 
-| Question | Expected Answer |
-|---|---|
-| Can this module support India/Bangladesh via plugin? | Yes. |
-| Can a new AI model safely replace the current one? | Yes, via hot-swap and registry. |
-| Can this run in an air-gapped deployment? | Yes, with local SLMs. |
-| Can this module handle digital assets (tokenized securities, crypto)? | Yes, ML models for digital asset fraud detection use the same governance framework. |
-| Is the design ready for CBDC integration or T+0 settlement? | Yes, AI-driven T+0 settlement risk scoring follows the same model registry and explainability. |
+| Question                                                              | Expected Answer                                                                                |
+| --------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------- |
+| Can this module support India/Bangladesh via plugin?                  | Yes.                                                                                           |
+| Can a new AI model safely replace the current one?                    | Yes, via hot-swap and registry.                                                                |
+| Can this run in an air-gapped deployment?                             | Yes, with local SLMs.                                                                          |
+| Can this module handle digital assets (tokenized securities, crypto)? | Yes, ML models for digital asset fraud detection use the same governance framework.            |
+| Is the design ready for CBDC integration or T+0 settlement?           | Yes, AI-driven T+0 settlement risk scoring follows the same model registry and explainability. |
+
+---
+
+## Changelog
+
+### Version 1.1.1 (2026-03-10)
+
+**Type:** PATCH  
+**Changes:**
+
+- Standardized section numbering to the sequential 16-section format.
+- Anchored AI governance compliance references to the authoritative registry.

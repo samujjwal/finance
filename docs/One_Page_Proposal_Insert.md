@@ -1,8 +1,8 @@
 # Project Siddhanta: One-Page Proposal Insert
 
-Version: 1.0  
-Status: Customer-facing insert derived from verified and clause-backed claims only  
-Last revised: March 1, 2026
+Version: 1.0.1
+Status: Customer-facing insert derived from verified and clause-backed claims only
+Last revised: March 10, 2026
 
 Primary source baseline: [Customer_Facing_Claims_Pack.md](Customer_Facing_Claims_Pack.md)  
 Source register: [Authoritative_Source_Register.md](Authoritative_Source_Register.md)  
@@ -31,9 +31,11 @@ The market is large enough to justify infrastructure-grade workflow automation, 
 
 ## What Siddhanta Delivers
 
-Project Siddhanta is an AI-native, controls-first capital markets operating platform for Nepal.
+Project Siddhanta is an AI-native, controls-first capital markets operating platform — built as a generic, extensible core with Nepal as the first jurisdiction instantiation.
 
-It is designed to deliver:
+The architecture is designed as **one platform for all operators, all jurisdictions, all asset classes**: a single Generic Core (19 kernel modules covering identity, ledger, compliance, events, AI governance, and more) extended by pluggable Jurisdiction Packs, Operator Packs, and Exchange Adapters. Adding a new country means shipping a new plugin bundle — not rebuilding the platform. Adding a new operator category means composing a new Operator Pack — not forking the codebase.
+
+For Nepal's current market, Siddhanta delivers:
 
 - clause-backed broker control automation,
 - primary-market workflow orchestration for merchant bankers,

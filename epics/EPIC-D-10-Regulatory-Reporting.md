@@ -1,8 +1,8 @@
-EPIC-ID:    EPIC-D-10
-EPIC NAME:  Regulatory Reporting & Filings
-LAYER:      DOMAIN
-MODULE:     D-10 Regulatory Reporting & Filings
-VERSION:    1.1.0
+EPIC-ID: EPIC-D-10
+EPIC NAME: Regulatory Reporting & Filings
+LAYER: DOMAIN
+MODULE: D-10 Regulatory Reporting & Filings
+VERSION: 1.1.1
 
 ---
 
@@ -63,54 +63,54 @@ Deliver the D-10 Regulatory Reporting & Filings module, responsible for generati
 
 #### Section 6 — Event Model Definition
 
-| Field | Description |
-|---|---|
-| Event Name | `ReportSubmitted` |
-| Schema Version | `v1.0.0` |
-| Trigger Condition | A report is successfully transmitted to the regulatory portal. |
-| Payload | `{ "report_id": "...", "regulator": "SEBON", "submission_ref": "...", "submitted_at_bs": "..." }` |
-| Consumers | Audit Framework, Admin Portal |
-| Idempotency Key | `hash(report_id + submission_ref)` |
-| Replay Behavior | Updates submission status view. |
-| Retention Policy | Permanent. |
+| Field             | Description                                                                                       |
+| ----------------- | ------------------------------------------------------------------------------------------------- |
+| Event Name        | `ReportSubmitted`                                                                                 |
+| Schema Version    | `v1.0.0`                                                                                          |
+| Trigger Condition | A report is successfully transmitted to the regulatory portal.                                    |
+| Payload           | `{ "report_id": "...", "regulator": "SEBON", "submission_ref": "...", "submitted_at_bs": "..." }` |
+| Consumers         | Audit Framework, Admin Portal                                                                     |
+| Idempotency Key   | `hash(report_id + submission_ref)`                                                                |
+| Replay Behavior   | Updates submission status view.                                                                   |
+| Retention Policy  | Permanent.                                                                                        |
 
 ---
 
-#### Section 6.5 — Command Model Definition
+#### Section 7 — Command Model Definition
 
-| Field | Description |
-|---|---|
-| Command Name | `GenerateReportCommand` |
-| Schema Version | `v1.0.0` |
+| Field            | Description                                                     |
+| ---------------- | --------------------------------------------------------------- |
+| Command Name     | `GenerateReportCommand`                                         |
+| Schema Version   | `v1.0.0`                                                        |
 | Validation Rules | Report template exists, data period valid, requester authorized |
-| Handler | `ReportCommandHandler` in D-10 Regulatory Reporting |
-| Success Event | `ReportGenerated` |
-| Failure Event | `ReportGenerationFailed` |
-| Idempotency | Same template + period returns cached report |
+| Handler          | `ReportCommandHandler` in D-10 Regulatory Reporting             |
+| Success Event    | `ReportGenerated`                                               |
+| Failure Event    | `ReportGenerationFailed`                                        |
+| Idempotency      | Same template + period returns cached report                    |
 
-| Field | Description |
-|---|---|
-| Command Name | `SubmitReportCommand` |
-| Schema Version | `v1.0.0` |
+| Field            | Description                                                                       |
+| ---------------- | --------------------------------------------------------------------------------- |
+| Command Name     | `SubmitReportCommand`                                                             |
+| Schema Version   | `v1.0.0`                                                                          |
 | Validation Rules | Report validated, submission deadline not passed, maker-checker approval obtained |
-| Handler | `SubmissionCommandHandler` in D-10 Regulatory Reporting |
-| Success Event | `ReportSubmitted` |
-| Failure Event | `ReportSubmissionFailed` |
-| Idempotency | Command ID must be unique; duplicate commands return original result |
+| Handler          | `SubmissionCommandHandler` in D-10 Regulatory Reporting                           |
+| Success Event    | `ReportSubmitted`                                                                 |
+| Failure Event    | `ReportSubmissionFailed`                                                          |
+| Idempotency      | Command ID must be unique; duplicate commands return original result              |
 
-| Field | Description |
-|---|---|
-| Command Name | `ValidateReportCommand` |
-| Schema Version | `v1.0.0` |
-| Validation Rules | Report exists, validation schema available |
-| Handler | `ValidationHandler` in D-10 Regulatory Reporting |
-| Success Event | `ReportValidated` |
-| Failure Event | `ReportValidationFailed` |
-| Idempotency | Same report returns cached validation result |
+| Field            | Description                                      |
+| ---------------- | ------------------------------------------------ |
+| Command Name     | `ValidateReportCommand`                          |
+| Schema Version   | `v1.0.0`                                         |
+| Validation Rules | Report exists, validation schema available       |
+| Handler          | `ValidationHandler` in D-10 Regulatory Reporting |
+| Success Event    | `ReportValidated`                                |
+| Failure Event    | `ReportValidationFailed`                         |
+| Idempotency      | Same report returns cached validation result     |
 
 ---
 
-#### Section 7 — AI Integration Requirements
+#### Section 8 — AI Integration Requirements
 
 - **AI Hook Type:** Copilot Assist
 - **Workflow Steps Exposed:** Report validation and pre-submission review.
@@ -122,28 +122,28 @@ Deliver the D-10 Regulatory Reporting & Filings module, responsible for generati
 
 ---
 
-#### Section 8 — NFRs
+#### Section 9 — NFRs
 
-| NFR Category | Required Targets |
-|---|---|
-| Latency / Throughput | Generate a 10,000-row report in < 30 seconds |
-| Scalability | Batch processing scaled horizontally |
-| Availability | 99.99% |
-| Consistency Model | Strong consistency for report data snapshots |
-| Security | Reports encrypted at rest |
-| Data Residency | Enforced via K-08 |
-| Data Retention | Retain submitted reports 10 years |
-| Auditability | All submissions logged [LCA-AUDIT-001] |
-| Observability | Metrics: `report.generation.duration`, `report.submission.fail_rate` |
-| Extensibility | New templates via T1 Packs |
-| Upgrade / Compatibility | N/A |
-| On-Prem Constraints | Can generate reports locally |
-| Ledger Integrity | Pulls from K-16 |
-| Dual-Calendar Correctness | Correct period boundaries |
+| NFR Category              | Required Targets                                                     |
+| ------------------------- | -------------------------------------------------------------------- |
+| Latency / Throughput      | Generate a 10,000-row report in < 30 seconds                         |
+| Scalability               | Batch processing scaled horizontally                                 |
+| Availability              | 99.99%                                                               |
+| Consistency Model         | Strong consistency for report data snapshots                         |
+| Security                  | Reports encrypted at rest                                            |
+| Data Residency            | Enforced via K-08                                                    |
+| Data Retention            | Retain submitted reports 10 years                                    |
+| Auditability              | All submissions logged [LCA-AUDIT-001]                               |
+| Observability             | Metrics: `report.generation.duration`, `report.submission.fail_rate` |
+| Extensibility             | New templates via T1 Packs                                           |
+| Upgrade / Compatibility   | N/A                                                                  |
+| On-Prem Constraints       | Can generate reports locally                                         |
+| Ledger Integrity          | Pulls from K-16                                                      |
+| Dual-Calendar Correctness | Correct period boundaries                                            |
 
 ---
 
-#### Section 9 — Acceptance Criteria
+#### Section 10 — Acceptance Criteria
 
 1. **Given** a SEBON T1 Template Pack for the Quarterly Broker Report, **When** the report generation job runs for BS Q1 2082, **Then** it queries K-16 for all relevant ledger entries and renders a valid PDF.
 2. **Given** a generated report, **When** submitted to the SEBON portal via the T3 Adapter, **Then** the adapter returns a submission reference and D-10 emits `ReportSubmitted`.
@@ -151,35 +151,36 @@ Deliver the D-10 Regulatory Reporting & Filings module, responsible for generati
 
 ---
 
-#### Section 10 — Failure Modes & Resilience
+#### Section 11 — Failure Modes & Resilience
 
 - **Portal Down:** Report queued locally; retries until success or manual intervention.
 - **Data Corruption:** Validation catches schema violations before submission.
 
 ---
 
-#### Section 11 — Observability & Audit
+#### Section 12 — Observability & Audit
 
-| Telemetry Type | Required Details |
-|---|---|
-| Metrics | `report.queue.size`, `report.ack.latency` |
-| Logs | Submission errors |
-| Traces | Span `Reporting.generate` |
-| Audit Events | Action: `SubmitReport`, `RegenerateReport` |
-| Regulatory Evidence | Core system for [ASR-RPT-001]. |
+| Telemetry Type      | Required Details                           |
+| ------------------- | ------------------------------------------ |
+| Metrics             | `report.queue.size`, `report.ack.latency`  |
+| Logs                | Submission errors                          |
+| Traces              | Span `Reporting.generate`                  |
+| Audit Events        | Action: `SubmitReport`, `RegenerateReport` |
+| Regulatory Evidence | Core system for [ASR-RPT-001].             |
 
 ---
 
-#### Section 12 — Compliance & Regulatory Traceability
+#### Section 13 — Compliance & Regulatory Traceability
 
 - Regulatory filing accuracy [ASR-RPT-001]
 - Audit trails [LCA-AUDIT-001]
 
 ---
 
-#### Section 13 — Extension Points & Contracts
+#### Section 14 — Extension Points & Contracts
 
 **SDK Methods (Platform SDK):**
+
 ```
 ReportingClient.generateReport(reportType: string, jurisdiction: string, period: DateRange): ReportResult
 ReportingClient.getReportStatus(reportId: string): ReportStatus
@@ -207,17 +208,17 @@ ReportingClient.submitToRegulator(reportId: string): SubmissionResult
 
 ---
 
-#### Section 14 — Future-Safe Architecture Evaluation
+#### Section 15 — Future-Safe Architecture Evaluation
 
-| Question | Expected Answer |
-|---|---|
-| Can this module support India/Bangladesh via plugin? | Yes, via new T1/T3 packs. |
-| Can report formats change without redeploy? | Yes, via T1 Template Pack updates. |
-| Can this run in an air-gapped deployment? | Partially; requires regulator portal connectivity. |
+| Question                                             | Expected Answer                                    |
+| ---------------------------------------------------- | -------------------------------------------------- |
+| Can this module support India/Bangladesh via plugin? | Yes, via new T1/T3 packs.                          |
+| Can report formats change without redeploy?          | Yes, via T1 Template Pack updates.                 |
+| Can this run in an air-gapped deployment?            | Partially; requires regulator portal connectivity. |
 
 ---
 
-#### Section 14.5 — Threat Model
+#### Section 16 — Threat Model
 
 **Attack Vectors & Mitigations:**
 
@@ -247,6 +248,7 @@ ReportingClient.submitToRegulator(reportId: string): SubmissionResult
    - **Residual Risk:** Compromised config pack.
 
 **Security Controls:**
+
 - Immutable source data (K-05, K-16)
 - Maker-checker for templates and adjustments
 - Cryptographic signing of reports
@@ -254,3 +256,15 @@ ReportingClient.submitToRegulator(reportId: string): SubmissionResult
 - Encryption at rest and in transit
 - Audit logging of all operations
 - Automated deadline monitoring
+
+---
+
+## Changelog
+
+### Version 1.1.1 (2026-03-10)
+
+**Type:** PATCH  
+**Changes:**
+
+- Standardized section numbering to the sequential 16-section format.
+- Added changelog metadata for future epic maintenance.

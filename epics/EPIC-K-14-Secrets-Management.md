@@ -1,8 +1,8 @@
-EPIC-ID:    EPIC-K-14
-EPIC NAME:  Secrets Management & Key Vault
-LAYER:      KERNEL
-MODULE:     K-14 Secrets Management
-VERSION:    1.0.0
+EPIC-ID: EPIC-K-14
+EPIC NAME: Secrets Management & Key Vault
+LAYER: KERNEL
+MODULE: K-14 Secrets Management
+VERSION: 1.0.1
 
 ---
 
@@ -70,54 +70,54 @@ Deliver the K-14 Secrets Management & Key Vault module, providing a unified, sec
 
 #### Section 6 — Event Model Definition
 
-| Field | Description |
-|---|---|
-| Event Name | `SecretRotated` |
-| Schema Version | `v1.0.0` |
-| Trigger Condition | A secret is automatically rotated or manually updated. |
-| Payload | `{ "secret_id": "...", "old_version": 5, "new_version": 6, "rotation_type": "AUTOMATIC", "timestamp_bs": "..." }` |
-| Consumers | All services consuming the secret (via SDK notification), Audit Framework, Observability |
-| Idempotency Key | `hash(secret_id + new_version)` |
-| Replay Behavior | Updates the materialized view of active secret versions. |
-| Retention Policy | Permanent. |
+| Field             | Description                                                                                                       |
+| ----------------- | ----------------------------------------------------------------------------------------------------------------- |
+| Event Name        | `SecretRotated`                                                                                                   |
+| Schema Version    | `v1.0.0`                                                                                                          |
+| Trigger Condition | A secret is automatically rotated or manually updated.                                                            |
+| Payload           | `{ "secret_id": "...", "old_version": 5, "new_version": 6, "rotation_type": "AUTOMATIC", "timestamp_bs": "..." }` |
+| Consumers         | All services consuming the secret (via SDK notification), Audit Framework, Observability                          |
+| Idempotency Key   | `hash(secret_id + new_version)`                                                                                   |
+| Replay Behavior   | Updates the materialized view of active secret versions.                                                          |
+| Retention Policy  | Permanent.                                                                                                        |
 
 ---
 
-#### Section 6.5 — Command Model Definition
+#### Section 7 — Command Model Definition
 
-| Field | Description |
-|---|---|
-| Command Name | `RotateSecretCommand` |
-| Schema Version | `v1.0.0` |
-| Validation Rules | Secret exists, new value generated, requester authorized |
-| Handler | `SecretCommandHandler` in K-14 Secrets Management |
-| Success Event | `SecretRotated` |
-| Failure Event | `SecretRotationFailed` |
-| Idempotency | Command ID must be unique; duplicate commands return original result |
+| Field            | Description                                                          |
+| ---------------- | -------------------------------------------------------------------- |
+| Command Name     | `RotateSecretCommand`                                                |
+| Schema Version   | `v1.0.0`                                                             |
+| Validation Rules | Secret exists, new value generated, requester authorized             |
+| Handler          | `SecretCommandHandler` in K-14 Secrets Management                    |
+| Success Event    | `SecretRotated`                                                      |
+| Failure Event    | `SecretRotationFailed`                                               |
+| Idempotency      | Command ID must be unique; duplicate commands return original result |
 
-| Field | Description |
-|---|---|
-| Command Name | `RevokeSecretCommand` |
-| Schema Version | `v1.0.0` |
-| Validation Rules | Secret exists, no active consumers, requester authorized |
-| Handler | `SecretCommandHandler` in K-14 Secrets Management |
-| Success Event | `SecretRevoked` |
-| Failure Event | `SecretRevocationFailed` |
-| Idempotency | Command ID must be unique; duplicate commands return original result |
+| Field            | Description                                                          |
+| ---------------- | -------------------------------------------------------------------- |
+| Command Name     | `RevokeSecretCommand`                                                |
+| Schema Version   | `v1.0.0`                                                             |
+| Validation Rules | Secret exists, no active consumers, requester authorized             |
+| Handler          | `SecretCommandHandler` in K-14 Secrets Management                    |
+| Success Event    | `SecretRevoked`                                                      |
+| Failure Event    | `SecretRevocationFailed`                                             |
+| Idempotency      | Command ID must be unique; duplicate commands return original result |
 
-| Field | Description |
-|---|---|
-| Command Name | `RenewCertificateCommand` |
-| Schema Version | `v1.0.0` |
-| Validation Rules | Certificate exists, renewal window valid, CA accessible |
-| Handler | `CertificateCommandHandler` in K-14 Secrets Management |
-| Success Event | `CertificateRenewed` |
-| Failure Event | `CertificateRenewalFailed` |
-| Idempotency | Command ID must be unique; duplicate commands return original result |
+| Field            | Description                                                          |
+| ---------------- | -------------------------------------------------------------------- |
+| Command Name     | `RenewCertificateCommand`                                            |
+| Schema Version   | `v1.0.0`                                                             |
+| Validation Rules | Certificate exists, renewal window valid, CA accessible              |
+| Handler          | `CertificateCommandHandler` in K-14 Secrets Management               |
+| Success Event    | `CertificateRenewed`                                                 |
+| Failure Event    | `CertificateRenewalFailed`                                           |
+| Idempotency      | Command ID must be unique; duplicate commands return original result |
 
 ---
 
-#### Section 7 — AI Integration Requirements
+#### Section 8 — AI Integration Requirements
 
 - **AI Hook Type:** Anomaly Detection
 - **Workflow Steps Exposed:** Secret access pattern monitoring.
@@ -129,28 +129,28 @@ Deliver the K-14 Secrets Management & Key Vault module, providing a unified, sec
 
 ---
 
-#### Section 8 — NFRs
+#### Section 9 — NFRs
 
-| NFR Category | Required Targets |
-|---|---|
-| Latency / Throughput | Secret retrieval P99 < 10ms (cached), < 50ms (vault fetch); 10,000 TPS |
-| Scalability | Horizontally scalable with local caching per service instance |
-| Availability | 99.999% uptime (critical path for all services) |
-| Consistency Model | Strong consistency for secret writes; eventual consistency for rotation notifications |
-| Security | Secrets never logged in plaintext; encrypted in transit (mTLS) and at rest |
-| Data Residency | Vault location determined by jurisdiction config |
-| Data Retention | Secret metadata retained permanently; secret values purged per retention policy |
-| Auditability | Every access logged [LCA-AUDIT-001] |
-| Observability | Metrics: `secret.access.latency`, `secret.rotation.count`, `cert.expiry.days` |
-| Extensibility | New vault providers via adapter pattern < 1 sprint |
-| Upgrade / Compatibility | SDK backward compatible for 2 major versions |
-| On-Prem Constraints | Support local HashiCorp Vault or file-based sealed storage |
-| Ledger Integrity | N/A |
-| Dual-Calendar Correctness | Expiry calculations accurate |
+| NFR Category              | Required Targets                                                                      |
+| ------------------------- | ------------------------------------------------------------------------------------- |
+| Latency / Throughput      | Secret retrieval P99 < 10ms (cached), < 50ms (vault fetch); 10,000 TPS                |
+| Scalability               | Horizontally scalable with local caching per service instance                         |
+| Availability              | 99.999% uptime (critical path for all services)                                       |
+| Consistency Model         | Strong consistency for secret writes; eventual consistency for rotation notifications |
+| Security                  | Secrets never logged in plaintext; encrypted in transit (mTLS) and at rest            |
+| Data Residency            | Vault location determined by jurisdiction config                                      |
+| Data Retention            | Secret metadata retained permanently; secret values purged per retention policy       |
+| Auditability              | Every access logged [LCA-AUDIT-001]                                                   |
+| Observability             | Metrics: `secret.access.latency`, `secret.rotation.count`, `cert.expiry.days`         |
+| Extensibility             | New vault providers via adapter pattern < 1 sprint                                    |
+| Upgrade / Compatibility   | SDK backward compatible for 2 major versions                                          |
+| On-Prem Constraints       | Support local HashiCorp Vault or file-based sealed storage                            |
+| Ledger Integrity          | N/A                                                                                   |
+| Dual-Calendar Correctness | Expiry calculations accurate                                                          |
 
 ---
 
-#### Section 9 — Acceptance Criteria
+#### Section 10 — Acceptance Criteria
 
 1. **Given** a service requires a database password, **When** it calls `SecretsClient.getSecret("db/postgres/password")`, **Then** the SDK retrieves it from the configured vault in < 50ms and caches it locally.
 2. **Given** a secret with a 90-day rotation policy, **When** 90 days elapse, **Then** K-14 automatically generates a new version, updates the vault, and emits `SecretRotated` event.
@@ -162,7 +162,7 @@ Deliver the K-14 Secrets Management & Key Vault module, providing a unified, sec
 
 ---
 
-#### Section 10 — Failure Modes & Resilience
+#### Section 11 — Failure Modes & Resilience
 
 - **Vault Unreachable:** SDK serves from local cache (with staleness warning); alerts operations. If cache expires, fail closed (deny access) to prevent unencrypted fallback.
 - **Rotation Failure:** Retry with exponential backoff up to 3 times; if all fail, alert operations and keep old version active.
@@ -171,19 +171,19 @@ Deliver the K-14 Secrets Management & Key Vault module, providing a unified, sec
 
 ---
 
-#### Section 11 — Observability & Audit
+#### Section 12 — Observability & Audit
 
-| Telemetry Type | Required Details |
-|---|---|
-| Metrics | `secret.cache.hit_rate`, `secret.rotation.success_rate`, `cert.days_until_expiry`, dimensions: `secret_path`, `vault_provider` |
-| Logs | Structured: `trace_id`, `secret_id`, `operation`, `result`, `latency_ms` |
-| Traces | Span `SecretsClient.getSecret` |
-| Audit Events | Action: `AccessSecret`, `RotateSecret`, `BreakGlassActivated` [LCA-AUDIT-001] |
-| Regulatory Evidence | Access logs for compliance audits; proof of rotation frequency |
+| Telemetry Type      | Required Details                                                                                                               |
+| ------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
+| Metrics             | `secret.cache.hit_rate`, `secret.rotation.success_rate`, `cert.days_until_expiry`, dimensions: `secret_path`, `vault_provider` |
+| Logs                | Structured: `trace_id`, `secret_id`, `operation`, `result`, `latency_ms`                                                       |
+| Traces              | Span `SecretsClient.getSecret`                                                                                                 |
+| Audit Events        | Action: `AccessSecret`, `RotateSecret`, `BreakGlassActivated` [LCA-AUDIT-001]                                                  |
+| Regulatory Evidence | Access logs for compliance audits; proof of rotation frequency                                                                 |
 
 ---
 
-#### Section 12 — Compliance & Regulatory Traceability
+#### Section 13 — Compliance & Regulatory Traceability
 
 - Access control and segregation of duties [LCA-SOD-001]
 - Audit trails for secret access [LCA-AUDIT-001]
@@ -191,7 +191,7 @@ Deliver the K-14 Secrets Management & Key Vault module, providing a unified, sec
 
 ---
 
-#### Section 13 — Extension Points & Contracts
+#### Section 14 — Extension Points & Contracts
 
 - **SDK Contract:** `SecretsClient.getSecret(path)`, `SecretsClient.watchSecret(path, callback)`, `SecretsClient.rotateSecret(path)`.
 - **Vault Provider Interface:** `VaultProvider` with methods `read(path)`, `write(path, value)`, `delete(path)`, `list(prefix)`.
@@ -199,20 +199,20 @@ Deliver the K-14 Secrets Management & Key Vault module, providing a unified, sec
 
 ---
 
-#### Section 14 — Future-Safe Architecture Evaluation
+#### Section 15 — Future-Safe Architecture Evaluation
 
-| Question | Expected Answer |
-|---|---|
-| Can this module support India/Bangladesh via plugin? | Yes, via vault provider selection and rotation policies. |
-| Can a new vault provider be added? | Yes, via VaultProvider interface implementation. |
-| Can rotation policies change without redeploy? | Yes, via K-02 Config Engine hot reload. |
-| Can this run in an air-gapped deployment? | Yes, using local HashiCorp Vault or sealed file storage. |
+| Question                                                              | Expected Answer                                                                                                |
+| --------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------- |
+| Can this module support India/Bangladesh via plugin?                  | Yes, via vault provider selection and rotation policies.                                                       |
+| Can a new vault provider be added?                                    | Yes, via VaultProvider interface implementation.                                                               |
+| Can rotation policies change without redeploy?                        | Yes, via K-02 Config Engine hot reload.                                                                        |
+| Can this run in an air-gapped deployment?                             | Yes, using local HashiCorp Vault or sealed file storage.                                                       |
 | Can this module handle digital assets (tokenized securities, crypto)? | Yes. Private key management for blockchain wallets and HSM-backed signing keys use the same vault abstraction. |
-| Is the design ready for CBDC integration or T+0 settlement? | Yes. Instant key rotation and real-time secret injection support T+0 settlement signing requirements. |
+| Is the design ready for CBDC integration or T+0 settlement?           | Yes. Instant key rotation and real-time secret injection support T+0 settlement signing requirements.          |
 
 ---
 
-#### Section 14.5 — Threat Model
+#### Section 16 — Threat Model
 
 **Attack Vectors & Mitigations:**
 
@@ -257,6 +257,7 @@ Deliver the K-14 Secrets Management & Key Vault module, providing a unified, sec
    - **Residual Risk:** Rotation policy exceptions for legacy systems.
 
 **Security Controls:**
+
 - Secrets never logged or stored in plaintext
 - mTLS for all vault communication
 - Service authentication via K-01 IAM
@@ -268,6 +269,18 @@ Deliver the K-14 Secrets Management & Key Vault module, providing a unified, sec
 - Customer-managed key (CMK) support
 - Secret versioning and rollback capability
 - Encrypted at rest and in transit
+
+---
+
+## Changelog
+
+### Version 1.0.1 (2026-03-10)
+
+**Type:** PATCH  
+**Changes:**
+
+- Standardized section numbering to the sequential 16-section format.
+- Added changelog metadata for future epic maintenance.
 - Regular security assessments
 - No hardcoded secrets (enforced via CI/CD)
 - Certificate lifecycle management

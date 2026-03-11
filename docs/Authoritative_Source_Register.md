@@ -1,8 +1,8 @@
 # Authoritative Source Register
 
-Version: 1.0  
-Status: Primary-source register for time-sensitive external facts used in active project documents  
-Last verified: March 1, 2026
+Version: 1.0.1
+Status: Primary-source register for time-sensitive external facts used in active project documents
+Last revised: March 10, 2026 | Source data verified: March 1, 2026
 
 ---
 
@@ -146,6 +146,39 @@ Current documentation rule:
 - Use `LCA-027` and `LCA-028` for clause-backed listed-issuer disclosure and suspension duties.
 - Treat exact NEPSE submission mechanics, channel workflow, and any exchange-specific listing-operation circulars as live-process assumptions that must be revalidated against the latest NEPSE notices before production rollout.
 - Do not present a generic `NEPSE Listing Rules` label as a clause-backed authority in active documents unless a current official NEPSE rule or circular extract is pinned.
+
+### NEPSE AI Interaction Policy Signal
+
+Reference ID: `ASR-NEP-NEPSE-AI-2026-01-29-ASSUMPTION`
+
+Primary source for future validation: [NEPSE official website](https://www.nepalstock.com/)
+
+Current documentation rule:
+
+- A reported January 29, 2026 `Capital Market in AI Era` interaction involving NEPSE leadership may be retained only as a policy-signal assumption pending an official NEPSE notice, publication, or equivalent authoritative source.
+- Do not present that interaction as a verified regulatory or exchange-position statement in active documents until a primary-source artifact is pinned.
+
+### NEPSE Settlement-Cycle Operating Assumption
+
+Reference ID: `ASR-NEP-NEPSE-SETTLEMENT-OPS-ASSUMPTION`
+
+Primary source for future validation: [NEPSE official website](https://www.nepalstock.com/)
+
+Current documentation rule:
+
+- Treat exact settlement-cycle text in active documents as an operating assumption that must be revalidated against current NEPSE/CDSC settlement notices before production rollout.
+- Keep settlement-cycle logic parameterized in product design and do not market a hard-coded cycle as clause-verified unless a current primary source is pinned.
+
+### NEPSE Circuit-Breaker Operating Assumption
+
+Reference ID: `ASR-NEP-NEPSE-CB-OPS-ASSUMPTION`
+
+Primary source for future validation: [NEPSE official website](https://www.nepalstock.com/)
+
+Current documentation rule:
+
+- Treat exact intraday circuit-breaker bands and halt triggers as operating assumptions that must be revalidated against the latest NEPSE circulars before production rollout.
+- Do not present specific percentage bands in active documents as fixed regulator-grade facts unless a current official notice is pinned.
 
 ### Market Capitalization and Turnover Benchmarks
 

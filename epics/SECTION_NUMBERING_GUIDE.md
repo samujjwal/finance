@@ -1,13 +1,14 @@
 # Section Numbering Standardization Guide
 
-**Date:** March 2, 2026  
+**Date:** March 10, 2026  
 **Purpose:** Guide for standardizing section numbering across all epics
 
 ---
 
-## Current State
+## Historical State
 
-Most epics use non-sequential section numbering:
+Legacy epics previously used non-sequential section numbering:
+
 - Section 6: Event Model Definition
 - **Section 6.5:** Command Model Definition ⚠️
 - Section 7: AI Integration Requirements
@@ -16,13 +17,16 @@ Most epics use non-sequential section numbering:
 - Section 14: Future-Safe Architecture Evaluation
 - **Section 14.5:** Threat Model ⚠️
 
-**Issue:** Sections 6.5 and 14.5 break the standard numbering pattern.
+**Issue:** Sections 6.5 and 14.5 broke the standard numbering pattern.
+
+**Status:** Completed. As of March 10, 2026, the active epic set under `epics/EPIC-*.md` has been migrated to the sequential numbering baseline.
 
 ---
 
 ## Target State
 
 All epics should use sequential integer numbering:
+
 - Section 6: Event Model Definition
 - **Section 7:** Command Model Definition ✅
 - **Section 8:** AI Integration Requirements ✅
@@ -39,62 +43,50 @@ All epics should use sequential integer numbering:
 
 ## Migration Mapping
 
-| Current Section | New Section | Section Name |
-|----------------|-------------|--------------|
-| 6 | 6 | Event Model Definition |
-| 6.5 | 7 | Command Model Definition |
-| 7 | 8 | AI Integration Requirements |
-| 8 | 9 | NFRs |
-| 9 | 10 | Acceptance Criteria |
-| 10 | 11 | Failure Modes & Resilience |
-| 11 | 12 | Observability & Audit |
-| 12 | 13 | Compliance & Regulatory Traceability |
-| 13 | 14 | Extension Points & Contracts |
-| 14 | 15 | Future-Safe Architecture Evaluation |
-| 14.2 | 15.2 | Workflow Sequence Diagram (if present) |
-| 14.5 | 16 | Threat Model (if present) |
+| Current Section | New Section | Section Name                                                                                            |
+| --------------- | ----------- | ------------------------------------------------------------------------------------------------------- |
+| 6               | 6           | Event Model Definition                                                                                  |
+| 6.5             | 7           | Command Model Definition                                                                                |
+| 7               | 8           | AI Integration Requirements                                                                             |
+| 8               | 9           | NFRs                                                                                                    |
+| 9               | 10          | Acceptance Criteria                                                                                     |
+| 10              | 11          | Failure Modes & Resilience                                                                              |
+| 11              | 12          | Observability & Audit                                                                                   |
+| 12              | 13          | Compliance & Regulatory Traceability                                                                    |
+| 13              | 14          | Extension Points & Contracts                                                                            |
+| 14              | 15          | Future-Safe Architecture Evaluation                                                                     |
+| 14.2            | normalize   | Historical extra subsection; fold into the sequential tail layout based on the epic's current structure |
+| 14.5            | 16          | Threat Model (if present)                                                                               |
 
 ---
 
-## Implementation Strategy
+## Migration Status
 
-### Phase 1: Template (✅ COMPLETE)
+### Template Baseline (✅ COMPLETE)
+
 - Update `EPIC_TEMPLATE.md` with correct numbering
 - All new epics will use correct numbering from day 1
 
-### Phase 2: High-Priority Epics (Recommended Next)
-Update the most frequently referenced epics first:
-1. K-01 IAM
-2. K-05 Event Bus
-3. K-07 Audit Framework
-4. D-01 OMS
-5. K-12 Platform SDK
+### Epic Migration (✅ COMPLETE)
 
-### Phase 3: Kernel Layer (K-*)
-Update all 16 kernel epics:
-- K-01 through K-16
+- Kernel, domain, workflow, operations, regulatory, pack, platform-unity, and testing epics have been migrated.
+- Legacy decimal sections have been removed from the active epic set.
 
-### Phase 4: Domain Layer (D-*)
-Update all 12 domain epics:
-- D-01 through D-12
+### Ongoing Use
 
-### Phase 5: Other Layers
-Update remaining epics:
-- W-01, W-02 (Workflow)
-- O-01 (Operations)
-- P-01 (Packs)
-- R-01 (Regulatory)
-- T-01 (Testing)
-- PU-004 (Platform Unity)
+- Keep this guide as the historical mapping reference for archived diffs, external documents, and any future imported epic content that still uses decimal sections.
+- Use `EPIC_TEMPLATE.md` as the canonical source for all new or substantially revised epics.
 
 ---
 
-## Migration Process (Per Epic)
+## Historical Migration Process (Per Epic)
 
 ### Step 1: Backup
+
 Create a backup or ensure version control is clean.
 
 ### Step 2: Find and Replace
+
 Use the following find/replace operations in order:
 
 ```bash
@@ -103,8 +95,8 @@ Find: "#### Section 14.5 — Threat Model"
 Replace: "#### Section 16 — Threat Model"
 
 # Replace Section 14.2 (if present)
-Find: "#### Section 14.2 — Workflow Sequence Diagram"
-Replace: "#### Section 15.2 — Workflow Sequence Diagram"
+# Historical nonstandard subsection: normalize into the sequential tail layout
+# based on the epic's current structure rather than preserving a decimal subsection.
 
 # Replace Section 14
 Find: "#### Section 14 — Future-Safe Architecture Evaluation"
@@ -144,21 +136,27 @@ Replace: "#### Section 7 — Command Model Definition"
 ```
 
 ### Step 3: Verify
+
 - Check that all sections are numbered sequentially
 - Ensure no duplicate section numbers
 - Verify table of contents (if present) is updated
 
 ### Step 4: Update Version
+
 - Increment epic version (PATCH version)
 - Add changelog entry:
+
   ```markdown
   ### Version X.Y.Z (YYYY-MM-DD)
+
   **Type:** PATCH  
   **Changes:**
+
   - Standardized section numbering (6.5→7, 14.5→16)
   ```
 
 ### Step 5: Commit
+
 ```bash
 git add epics/EPIC-{ID}-{NAME}.md
 git commit -m "[EPIC-{ID}] vX.Y.Z: Standardize section numbering (PATCH)"
@@ -185,21 +183,21 @@ echo "Standardizing section numbering in $EPIC_FILE..."
 # Create backup
 cp "$EPIC_FILE" "${EPIC_FILE}.bak"
 
-# Apply replacements in reverse order (to avoid conflicts)
-sed -i '' 's/#### Section 14\.5 — Threat Model/#### Section 16 — Threat Model/g' "$EPIC_FILE"
-sed -i '' 's/#### Section 14\.2 — Workflow Sequence Diagram/#### Section 15.2 — Workflow Sequence Diagram/g' "$EPIC_FILE"
-sed -i '' 's/#### Section 14 — Future-Safe Architecture Evaluation/#### Section 15 — Future-Safe Architecture Evaluation/g' "$EPIC_FILE"
-sed -i '' 's/#### Section 13 — Extension Points & Contracts/#### Section 14 — Extension Points & Contracts/g' "$EPIC_FILE"
-sed -i '' 's/#### Section 12 — Compliance & Regulatory Traceability/#### Section 13 — Compliance & Regulatory Traceability/g' "$EPIC_FILE"
-sed -i '' 's/#### Section 11 — Observability & Audit/#### Section 12 — Observability & Audit/g' "$EPIC_FILE"
-sed -i '' 's/#### Section 10 — Failure Modes & Resilience/#### Section 11 — Failure Modes & Resilience/g' "$EPIC_FILE"
-sed -i '' 's/#### Section 9 — Acceptance Criteria/#### Section 10 — Acceptance Criteria/g' "$EPIC_FILE"
-sed -i '' 's/#### Section 8 — NFRs/#### Section 9 — NFRs/g' "$EPIC_FILE"
-sed -i '' 's/#### Section 7 — AI Integration Requirements/#### Section 8 — AI Integration Requirements/g' "$EPIC_FILE"
-sed -i '' 's/#### Section 6\.5 — Command Model Definition/#### Section 7 — Command Model Definition/g' "$EPIC_FILE"
+# Apply replacements in reverse order (portable on GNU/BSD sed)
+sed -i.bak 's/#### Section 14\.5 — Threat Model/#### Section 16 — Threat Model/g' "$EPIC_FILE"
+sed -i.bak 's/#### Section 14\.2 — Workflow Sequence Diagram/#### Section 15.2 — Workflow Sequence Diagram/g' "$EPIC_FILE"
+sed -i.bak 's/#### Section 14 — Future-Safe Architecture Evaluation/#### Section 15 — Future-Safe Architecture Evaluation/g' "$EPIC_FILE"
+sed -i.bak 's/#### Section 13 — Extension Points & Contracts/#### Section 14 — Extension Points & Contracts/g' "$EPIC_FILE"
+sed -i.bak 's/#### Section 12 — Compliance & Regulatory Traceability/#### Section 13 — Compliance & Regulatory Traceability/g' "$EPIC_FILE"
+sed -i.bak 's/#### Section 11 — Observability & Audit/#### Section 12 — Observability & Audit/g' "$EPIC_FILE"
+sed -i.bak 's/#### Section 10 — Failure Modes & Resilience/#### Section 11 — Failure Modes & Resilience/g' "$EPIC_FILE"
+sed -i.bak 's/#### Section 9 — Acceptance Criteria/#### Section 10 — Acceptance Criteria/g' "$EPIC_FILE"
+sed -i.bak 's/#### Section 8 — NFRs/#### Section 9 — NFRs/g' "$EPIC_FILE"
+sed -i.bak 's/#### Section 7 — AI Integration Requirements/#### Section 8 — AI Integration Requirements/g' "$EPIC_FILE"
+sed -i.bak 's/#### Section 6\.5 — Command Model Definition/#### Section 7 — Command Model Definition/g' "$EPIC_FILE"
 
 echo "✓ Section numbering standardized"
-echo "✓ Backup created: ${EPIC_FILE}.bak"
+echo "✓ Inline edit backup created by sed: ${EPIC_FILE}.bak"
 echo ""
 echo "Next steps:"
 echo "1. Review changes: diff ${EPIC_FILE}.bak ${EPIC_FILE}"
@@ -233,7 +231,7 @@ After updating an epic:
 
 ---
 
-## Rationale for Incremental Approach
+## Rationale for the Incremental Approach
 
 ### Why Not Update All 35 Epics Immediately?
 
@@ -241,7 +239,7 @@ After updating an epic:
 2. **Merge Conflicts:** High risk of conflicts with ongoing work
 3. **Review Burden:** Difficult to review 35 file changes simultaneously
 4. **Low Priority:** Current numbering is functional, not broken
-5. **Natural Migration:** Epics will be updated during normal version increments
+5. **Natural Migration:** The migration was completed in manageable batches during normal documentation maintenance
 
 ### Benefits of Incremental Approach
 
@@ -253,24 +251,18 @@ After updating an epic:
 
 ---
 
-## Timeline
+## Timeline (Historical)
 
 ### Immediate (✅ Complete)
+
 - Template updated with correct numbering
 - Guide created for reference
 
-### Q2 2026 (Recommended)
-- Update 5 high-priority epics (K-01, K-05, K-07, D-01, K-12)
-- Validate process and tooling
+### March 2026 Completion
 
-### Q3 2026
-- Update all kernel epics (K-01 through K-16)
-
-### Q4 2026
-- Update all domain epics (D-01 through D-12)
-
-### Q1 2027
-- Update remaining epics (W-*, O-*, P-*, R-*, T-*, PU-*)
+- High-priority epics updated first to validate the pattern.
+- Kernel, domain, workflow, operations, regulatory, pack, platform-unity, and testing layers then completed in successive batches.
+- Registry and changelog hygiene were aligned during the same migration pass.
 
 ---
 
@@ -279,6 +271,7 @@ After updating an epic:
 ### When Updating Epics
 
 **Commit Message:**
+
 ```
 [EPIC-{ID}] v{X.Y.Z}: Standardize section numbering (PATCH)
 
@@ -289,15 +282,19 @@ After updating an epic:
 ```
 
 **Changelog Entry:**
+
 ```markdown
 ### Version X.Y.Z (YYYY-MM-DD)
+
 **Type:** PATCH  
 **Changes:**
+
 - Standardized section numbering for consistency with template
 - No content changes, only section number updates
 ```
 
 **Team Notification:**
+
 ```
 Subject: Epic Section Numbering Update - EPIC-{ID}
 
@@ -325,10 +322,10 @@ A: Decimal section numbers are unconventional and break sequential numbering. St
 A: No. References to section content (e.g., "see Command Model Definition") remain valid. Only the section number changes.
 
 **Q: Do we need to update all epics immediately?**  
-A: No. This is a gradual migration. New epics use correct numbering; existing epics can be updated incrementally.
+A: The active epic set has already been updated. Use this guide only for historical reference or newly imported legacy content.
 
 **Q: What if I'm working on an epic with old numbering?**  
-A: Continue using the old numbering. Update to new numbering when you increment the epic version for other reasons.
+A: Normalize it to the sequential 16-section layout rather than preserving legacy decimal numbering.
 
 **Q: How do I know which numbering scheme to use?**  
 A: Always use the template (`EPIC_TEMPLATE.md`) as the source of truth. It has the correct numbering.
@@ -336,6 +333,6 @@ A: Always use the template (`EPIC_TEMPLATE.md`) as the source of truth. It has t
 ---
 
 **Guide Status:** ✅ ACTIVE  
-**Last Updated:** March 2, 2026  
-**Next Review:** June 2, 2026  
+**Last Updated:** March 10, 2026  
+**Next Review:** June 10, 2026  
 **Owner:** Platform Architecture Team

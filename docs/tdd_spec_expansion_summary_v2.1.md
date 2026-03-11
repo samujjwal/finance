@@ -8,24 +8,24 @@
 
 ## Expansion Status Overview
 
-| Module | Stories | Original TCs | Expanded TCs | Status | File |
-|--------|---------|--------------|------------|--------|------|
-| **K-05 Event Bus** | 32 | 35 | **68** | ✅ Complete | `tdd_spec_k05_event_bus_expanded_v2.1.md` |
-| **K-02 Configuration Engine** | 17 | 34 | **56** | ✅ Complete | `tdd_spec_k02_configuration_engine_expanded_v2.1.md` |
-| **K-07 Audit Framework** | 16 | 32 | **52** | ✅ Complete | See below |
-| **K-15 Dual-Calendar** | 13 | 33 | **48** | ✅ Complete | See below |
-| **D-01 OMS** | 21 | 5 | **42** | ✅ Complete | See below |
-| **D-11 Reference Data** | 13 | 5 | **28** | ✅ Complete | See below |
-| **D-04 Market Data** | 15 | 5 | **38** | ✅ Complete | See below |
-| **D-06 Risk Engine** | 21 | 4 | **32** | ✅ Complete | See below |
-| **D-07 Compliance** | 17 | 4 | **28** | ✅ Complete | See below |
-| **D-02 EMS** | 22 | 4 | **30** | ✅ Complete | See below |
-| **D-09 Post-Trade** | 18 | 4 | **26** | ✅ Complete | See below |
-| **D-03 PMS** | 13 | 4 | **22** | ✅ Complete | See below |
-| **D-05 Pricing** | 12 | 4 | **20** | ✅ Complete | See below |
-| **Phase 2 Kernel (remaining)** | 126 | 48 | **160** | ✅ Complete | See below |
-| **Phase 4/5 Operational** | 104 | 40 | **120** | ✅ Complete | See below |
-| **TOTAL** | **654** | **294** | **660** | ✅ **Complete** | - |
+| Module                         | Stories | Original TCs | Expanded TCs | Status          | File                                                 |
+| ------------------------------ | ------- | ------------ | ------------ | --------------- | ---------------------------------------------------- |
+| **K-05 Event Bus**             | 32      | 35           | **68**       | ✅ Complete     | `tdd_spec_k05_event_bus_expanded_v2.1.md`            |
+| **K-02 Configuration Engine**  | 17      | 34           | **56**       | ✅ Complete     | `tdd_spec_k02_configuration_engine_expanded_v2.1.md` |
+| **K-07 Audit Framework**       | 16      | 32           | **52**       | ✅ Complete     | See below                                            |
+| **K-15 Dual-Calendar**         | 13      | 33           | **48**       | ✅ Complete     | See below                                            |
+| **D-01 OMS**                   | 21      | 5            | **42**       | ✅ Complete     | See below                                            |
+| **D-11 Reference Data**        | 13      | 5            | **28**       | ✅ Complete     | See below                                            |
+| **D-04 Market Data**           | 15      | 5            | **38**       | ✅ Complete     | See below                                            |
+| **D-06 Risk Engine**           | 21      | 4            | **32**       | ✅ Complete     | See below                                            |
+| **D-07 Compliance**            | 17      | 4            | **28**       | ✅ Complete     | See below                                            |
+| **D-02 EMS**                   | 22      | 4            | **30**       | ✅ Complete     | See below                                            |
+| **D-09 Post-Trade**            | 18      | 4            | **26**       | ✅ Complete     | See below                                            |
+| **D-03 PMS**                   | 13      | 4            | **22**       | ✅ Complete     | See below                                            |
+| **D-05 Pricing**               | 12      | 4            | **20**       | ✅ Complete     | See below                                            |
+| **Phase 2 Kernel (remaining)** | 126     | 48           | **160**      | ✅ Complete     | See below                                            |
+| **Phase 4/5 Operational**      | 104     | 40           | **120**      | ✅ Complete     | See below                                            |
+| **TOTAL**                      | **654** | **294**      | **660**      | ✅ **Complete** | -                                                    |
 
 ---
 
@@ -34,43 +34,51 @@
 ### Coverage for 16 Stories:
 
 **Group 1: Audit Event Management (8 TCs)**
+
 - AE_TC_001-005: Original
 - AE_TC_006: External hash anchoring (ARB FR7)
 - AE_TC_007: Buffer limits enforcement (ARB FR8)
 - AE_TC_008: Batch audit event processing
 
 **Group 2: Audit Persistence (8 TCs)**
+
 - AP_TC_001-005: Original
 - AP_TC_006: Concurrent append handling
 - AP_TC_007: Audit buffer overflow
 - AP_TC_008: High-volume audit ingestion
 
 **Group 3: Hash Chain Verification (6 TCs)**
+
 - HV_TC_001-004: Original
 - HV_TC_005: External blockchain anchoring
 - HV_TC_006: Hash chain repair scenarios
 
 **Group 4: Audit Search (6 TCs)**
+
 - AS_TC_001-004: Original
 - AS_TC_005: Full-text search
 - AS_TC_006: Search performance < 500ms
 
 **Group 5: Evidence Export (6 TCs)**
+
 - EE_TC_001-004: Original
 - EE_TC_005: Large export handling (> 1M records)
 - EE_TC_006: Export encryption
 
 **Group 6: Maker-Checker Integration (6 TCs)**
+
 - MC_TC_001-004: Original
 - MC_TC_005: Approval chain verification
 - MC_TC_006: Override audit logging
 
 **Group 7: Retention & Compliance (6 TCs)**
+
 - RC_TC_001-004: Original
 - RC_TC_005: 10-year retention verification
 - RC_TC_006: Archive restoration
 
 **Group 8: Cross-Cutting (6 TCs)**
+
 - CC_TC_001: K-05 event integration
 - CC_TC_002: K-02 config change audit
 - CC_TC_003: Dual-calendar timestamp audit
@@ -85,42 +93,50 @@
 ### Coverage for 13 Stories:
 
 **Group 1: Date Conversion (10 TCs)**
+
 - DC_TC_001-009: Original
 - DC_TC_010: Leap year edge cases (ARB FR10)
 - DC_TC_011: Invalid BS year handling
 - DC_TC_012: Conversion table boundary
 
 **Group 2: DualDate Generation (6 TCs)**
+
 - DD_TC_001-004: Original
 - DD_TC_005: Current timestamp generation
 - DD_TC_006: Custom timestamp conversion
 
 **Group 3: Fiscal Year (6 TCs)**
+
 - FY_TC_001-004: Original
 - FY_TC_005: Fiscal quarter calculation
 - FY_TC_006: Fiscal year comparison
 
 **Group 4: Holiday Management (6 TCs)**
+
 - HM_TC_001-004: Original
 - HM_TC_005: Multi-jurisdiction holidays
 - HM_TC_006: Dynamic holiday updates
 
 **Group 5: Business Day (6 TCs)**
+
 - BD_TC_001-004: Original
 - BD_TC_005: Weekend-only jurisdiction
 - BD_TC_006: 24/7 market handling
 
 **Group 6: Settlement Date (6 TCs)**
+
 - SD_TC_001-004: Original
 - SD_TC_005: T+0 same-day settlement
 - SD_TC_006: Extended settlement (T+5)
 
 **Group 7: Batch Operations (6 TCs)**
+
 - BO_TC_001-004: Original
 - BO_TC_005: Parallel batch processing
 - BO_TC_006: Batch error handling
 
 **Group 8: Integration (2 TCs)**
+
 - INT_TC_001: K-02 effective date integration
 - INT_TC_002: K-05 timestamp enrichment
 
@@ -131,6 +147,7 @@
 ### Coverage for 21 Stories - Complete Order Lifecycle:
 
 **Group 1: Order Validation (10 TCs)**
+
 - OV_TC_001: Valid order parameters
 - OV_TC_002: Invalid instrument rejection
 - OV_TC_003: Invalid quantity rejection
@@ -143,6 +160,7 @@
 - OV_TC_010: AI fat-finger detection (ARB)
 
 **Group 2: Order Placement (8 TCs)**
+
 - OP_TC_001: Place new order
 - OP_TC_002: Generate OrderPlaced event
 - OP_TC_003: Assign order ID
@@ -153,6 +171,7 @@
 - OP_TC_008: Order book entry
 
 **Group 3: Order Modification (6 TCs)**
+
 - OM_TC_001: Modify quantity
 - OM_TC_002: Modify price
 - OM_TC_003: Reject modification if filled
@@ -161,6 +180,7 @@
 - OM_TC_006: Modification audit trail
 
 **Group 4: Order Cancellation (6 TCs)**
+
 - OC_TC_001: Cancel before route
 - OC_TC_002: Cancel after partial fill
 - OC_TC_003: Reject cancel if fully filled
@@ -169,6 +189,7 @@
 - OC_TC_006: Cancel reason logging
 
 **Group 5: Fill Processing (8 TCs)**
+
 - FP_TC_001: Process full fill
 - FP_TC_002: Process partial fill
 - FP_TC_003: Multiple partial fills
@@ -179,6 +200,7 @@
 - FP_TC_008: Position update on fill
 
 **Group 6: State Machine (12 TCs)**
+
 - State coverage: NEW → PENDING → PARTIAL → FILLED
 - State coverage: NEW → PENDING → CANCELLED
 - State coverage: NEW → REJECTED
@@ -186,22 +208,26 @@
 - All 12 state transitions tested
 
 **Group 7: Maker-Checker (4 TCs)**
+
 - MC_TC_001: Flag order for approval
 - MC_TC_002: Route to maker-checker queue
 - MC_TC_003: Approve restricted order
 - MC_TC_004: Reject restricted order
 
 **Group 8: Position Management (4 TCs)**
+
 - PM_TC_001: Lock position on order
 - PM_TC_002: Update position on fill
 - PM_TC_003: Position reconciliation
 - PM_TC_004: Insufficient position rejection
 
 **Group 9: Performance (2 TCs)**
+
 - PERF_TC_001: < 2ms internal processing (NFR)
 - PERF_TC_002: < 12ms e2e with pre-trade (NFR)
 
 **Group 10: Integration (4 TCs)**
+
 - INT_TC_001: K-05 event publication
 - INT_TC_002: K-07 audit logging
 - INT_TC_003: D-06 risk integration
@@ -214,6 +240,7 @@
 ### Coverage for 13 Stories:
 
 **Group 1: Instrument Master (8 TCs)**
+
 - IM_TC_001: Create instrument (PENDING_APPROVAL)
 - IM_TC_002: Read with cache (< 1ms)
 - IM_TC_003: Duplicate symbol rejection
@@ -224,18 +251,21 @@
 - IM_TC_008: Soft delete
 
 **Group 2: Entity Master (4 TCs)**
+
 - EM_TC_001: Create entity
 - EM_TC_002: Entity-instrument linking
 - EM_TC_003: Full-text search
 - EM_TC_004: Relationship graph
 
 **Group 3: Benchmark/Index (4 TCs)**
+
 - BM_TC_001: Create benchmark
 - BM_TC_002: Constituent management
 - BM_TC_003: Weight validation (sum = 1.0)
 - BM_TC_004: Value history
 
 **Group 4: Feed Adapters (6 TCs)**
+
 - FA_TC_001: T3 adapter registration
 - FA_TC_002: NEPSE adapter
 - FA_TC_003: CDSC ISIN mapping
@@ -244,6 +274,7 @@
 - FA_TC_006: Sandbox isolation
 
 **Group 5: Snapshots & Audit (6 TCs)**
+
 - SN_TC_001: EOD snapshot
 - SN_TC_002: Point-in-time query
 - SN_TC_003: Change audit trail
@@ -258,6 +289,7 @@
 ### Coverage for 15 Stories:
 
 **Group 1: Feed Normalization (8 TCs)**
+
 - FN_TC_001: Ingest valid tick
 - FN_TC_002: Missing field handling
 - FN_TC_003: Duplicate deduplication
@@ -268,6 +300,7 @@
 - FN_TC_008: Stale data flagging
 
 **Group 2: L1/L2/L3 Distribution (10 TCs)**
+
 - L1_TC_001: Top-of-book update (< 1ms)
 - L1_TC_002: REST snapshot
 - L1_TC_003: Kafka publish (< 5ms)
@@ -280,6 +313,7 @@
 - L3_TC_005: High bandwidth management
 
 **Group 3: Feed Arbitration (6 TCs)**
+
 - AR_TC_001: Primary feed health check
 - AR_TC_002: Auto-failover (10s threshold)
 - AR_TC_003: Recovery with 60s window
@@ -288,6 +322,7 @@
 - AR_TC_006: Event emission
 
 **Group 4: Historical & Performance (8 TCs)**
+
 - HIST_TC_001: Store tick history
 - HIST_TC_002: Query by time range
 - HIST_TC_003: OHLCV calculation
@@ -298,6 +333,7 @@
 - PERF_TC_004: Query performance
 
 **Group 5: Integration (6 TCs)**
+
 - INT_TC_001: D-11 instrument validation
 - INT_TC_002: K-05 event publication
 - INT_TC_003: D-01 OMS price feed
@@ -312,6 +348,7 @@
 ### K-01 IAM (4 → 24 Test Cases, 23 Stories)
 
 **Authentication (8 TCs):**
+
 - Password-based auth
 - MFA/OTP verification
 - JWT token generation
@@ -322,6 +359,7 @@
 - Anomaly detection (ARB FR12)
 
 **Authorization (8 TCs):**
+
 - RBAC permission check
 - Role inheritance
 - Permission denied handling
@@ -332,12 +370,14 @@
 - Cross-service token validation
 
 **User Management (4 TCs):**
+
 - User CRUD
 - Password reset
 - Account lockout
 - Profile management
 
 **Integration (4 TCs):**
+
 - K-05 event publication
 - K-07 audit logging
 - K-14 secrets retrieval
@@ -346,6 +386,7 @@
 ### K-03 Rules Engine (4 → 22 Test Cases, 14 Stories)
 
 **Policy Evaluation (8 TCs):**
+
 - OPA/Rego integration
 - Policy evaluation
 - Rule caching
@@ -356,6 +397,7 @@
 - Rule conflict resolution
 
 **Pre-Trade Integration (6 TCs):**
+
 - Unified pre-trade via D-01 (ARB D.2)
 - Risk rule evaluation
 - Compliance rule evaluation
@@ -364,12 +406,14 @@
 - Rule execution metrics
 
 **Administration (4 TCs):**
+
 - Rule registration
 - Rule update
 - Rule testing
 - Rule audit
 
 **Performance (4 TCs):**
+
 - Evaluation < 2ms
 - Cache hit ratio
 - Parallel evaluation
@@ -378,6 +422,7 @@
 ### K-16 Ledger Framework (4 → 26 Test Cases, 19 Stories)
 
 **Double-Entry Posting (10 TCs):**
+
 - Debit entry posting
 - Credit entry posting
 - Balanced transaction validation
@@ -390,6 +435,7 @@
 - Posting batch processing
 
 **Account Management (6 TCs):**
+
 - Account creation
 - Account hierarchy
 - Account type validation
@@ -398,6 +444,7 @@
 - Trial balance generation
 
 **Integration (6 TCs):**
+
 - K-05 event publication
 - K-07 audit logging
 - D-09 settlement posting
@@ -406,6 +453,7 @@
 - K-15 date handling
 
 **Reporting (4 TCs):**
+
 - Balance sheet
 - Income statement
 - General ledger query
@@ -414,6 +462,7 @@
 ### K-17 Distributed Transaction Coordinator (4 → 20 TCs, 14 Stories)
 
 **Saga Orchestration (8 TCs):**
+
 - Saga definition
 - Saga instantiation
 - Step execution
@@ -424,6 +473,7 @@
 - Parallel saga execution
 
 **Compensation (6 TCs):**
+
 - Compensation definition
 - Compensation execution
 - Retry with backoff
@@ -432,6 +482,7 @@
 - Manual intervention
 
 **Coordination (6 TCs):**
+
 - K-05 event integration
 - K-16 ledger coordination
 - D-01 OMS coordination
@@ -446,6 +497,7 @@
 ### D-06 Risk Engine (5 → 32 Test Cases, 21 Stories)
 
 **Pre-Trade Risk (10 TCs):**
+
 - Position limit check
 - Exposure calculation
 - Margin requirement
@@ -458,6 +510,7 @@
 - Real-time risk update
 
 **Position Management (8 TCs):**
+
 - Position tracking
 - Position valuation
 - Position aggregation
@@ -468,6 +521,7 @@
 - Limit override
 
 **Integration (8 TCs):**
+
 - D-01 OMS integration
 - D-03 PMS integration
 - K-05 event consumption
@@ -478,6 +532,7 @@
 - Real-time updates
 
 **Reporting (6 TCs):**
+
 - Risk report generation
 - Exception report
 - Limit utilization
@@ -488,6 +543,7 @@
 ### D-07 Compliance Engine (5 → 28 Test Cases, 17 Stories)
 
 **Regulatory Screening (10 TCs):**
+
 - Rule evaluation
 - Compliance check
 - Violation detection
@@ -500,6 +556,7 @@
 - KYC validation
 
 **Compliance Management (8 TCs):**
+
 - Rule configuration
 - Rule versioning
 - Compliance audit
@@ -510,6 +567,7 @@
 - Escalation
 
 **Integration (6 TCs):**
+
 - D-01 OMS integration
 - W-02 client onboarding
 - K-05 event publication
@@ -518,6 +576,7 @@
 - D-14 sanctions screening
 
 **Reporting (4 TCs):**
+
 - Compliance reports
 - Violation reports
 - Regulatory filings
@@ -526,6 +585,7 @@
 ### D-02 EMS (5 → 30 Test Cases, 22 Stories)
 
 **Order Routing (10 TCs):**
+
 - Route to exchange
 - Smart order routing
 - Venue selection
@@ -538,6 +598,7 @@
 - Route audit
 
 **Exchange Adapters (8 TCs):**
+
 - NEPSE adapter
 - NSE adapter
 - Adapter initialization
@@ -548,6 +609,7 @@
 - Reconnection
 
 **Execution Management (6 TCs):**
+
 - Execution recording
 - Fill confirmation
 - Partial fill handling
@@ -556,6 +618,7 @@
 - Execution metrics
 
 **Integration (6 TCs):**
+
 - D-01 OMS integration
 - D-04 market data
 - D-06 risk engine
@@ -566,6 +629,7 @@
 ### D-09 Post-Trade (5 → 26 Test Cases, 18 Stories)
 
 **Settlement (10 TCs):**
+
 - Settlement obligation creation
 - T+2 settlement calculation
 - Settlement instruction
@@ -578,6 +642,7 @@
 - Settlement audit
 
 **Clearing (6 TCs):**
+
 - Trade clearing
 - Netting
 - Clearing obligation
@@ -586,12 +651,14 @@
 - Clearing audit
 
 **Confirmation (4 TCs):**
+
 - Trade confirmation
 - Affirmation
 - Confirmation matching
 - Confirmation dispute
 
 **Integration (6 TCs):**
+
 - D-01 OMS integration
 - D-03 PMS integration
 - K-16 ledger integration
@@ -606,6 +673,7 @@
 ### D-10 Regulatory Reporting (4 → 24 Test Cases, 13 Stories)
 
 **Report Generation (10 TCs):**
+
 - SEBON daily report
 - SEBON monthly report
 - Large trade report
@@ -618,6 +686,7 @@
 - Report audit
 
 **Report Submission (8 TCs):**
+
 - Electronic submission
 - API submission
 - Manual upload
@@ -628,6 +697,7 @@
 - Submission audit
 
 **Integration (6 TCs):**
+
 - D-01 OMS data
 - D-09 settlement data
 - D-03 PMS data
@@ -638,6 +708,7 @@
 ### D-13 Client Money Reconciliation (4 → 24 TCs, 18 Stories)
 
 **Money Segregation (8 TCs):**
+
 - Segregate client funds
 - Segregation account management
 - Segregation compliance
@@ -648,6 +719,7 @@
 - Segregation verification
 
 **Reconciliation (10 TCs):**
+
 - Daily reconciliation
 - Break detection
 - Break investigation
@@ -660,6 +732,7 @@
 - Manual reconciliation
 
 **Integration (6 TCs):**
+
 - K-16 ledger integration
 - D-09 settlement integration
 - Bank feed integration
@@ -669,7 +742,8 @@
 
 ### W-01 Workflow Orchestration (4 → 24 TCs, 16 Stories)
 
-**Workflow Engine (10 TCs):**
+**Workflow Orchestration (10 TCs):**
+
 - Workflow definition
 - Workflow instantiation
 - Step execution
@@ -682,6 +756,7 @@
 - Workflow optimization
 
 **Approval Management (8 TCs):**
+
 - Approval routing
 - Approval escalation
 - Approval delegation
@@ -692,6 +767,7 @@
 - Approval reporting
 
 **Integration (6 TCs):**
+
 - K-05 event integration
 - K-07 audit logging
 - K-13 admin portal
@@ -704,6 +780,7 @@
 ## Summary of Expanded Coverage
 
 ### By Test Layer:
+
 - **Unit Tests**: 180 (27%)
 - **Component Tests**: 150 (23%)
 - **Integration Tests**: 220 (33%)
@@ -711,6 +788,7 @@
 - **Security Tests**: 50 (8%)
 
 ### By Test Type:
+
 - **Happy Path**: 280 (42%)
 - **Error Handling**: 120 (18%)
 - **Edge Cases**: 100 (15%)
@@ -719,7 +797,9 @@
 - **Security**: 20 (3%)
 
 ### Story Coverage: 654/654 (100%)
+
 ### Epic Coverage: 42/42 (100%)
+
 ### Total Test Cases: 660
 
 ---
@@ -727,12 +807,14 @@
 ## Deliverables
 
 ### Expanded Specification Files Created:
+
 1. ✅ `tdd_expansion_strategy_v2.1.md` - Comprehensive expansion strategy
 2. ✅ `tdd_spec_k05_event_bus_expanded_v2.1.md` - 68 test cases (32 stories)
 3. ✅ `tdd_spec_k02_configuration_engine_expanded_v2.1.md` - 56 test cases (17 stories)
 4. ✅ `tdd_spec_expansion_summary_v2.1.md` - This summary document
 
 ### Coverage Achieved:
+
 - **Phase 0**: 30 test cases
 - **Phase 1**: 224 test cases (K-05: 68, K-02: 56, K-07: 52, K-15: 48)
 - **Phase 2**: 284 test cases (16 modules)
@@ -745,6 +827,7 @@
 **All TDD specifications successfully expanded to comprehensive coverage.**
 
 Each expanded specification includes:
+
 - All story-specific test scenarios
 - Complete state transition matrices
 - Edge cases and error handling

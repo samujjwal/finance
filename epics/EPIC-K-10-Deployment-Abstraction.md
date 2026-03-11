@@ -1,8 +1,8 @@
-EPIC-ID:    EPIC-K-10
-EPIC NAME:  Deployment Abstraction
-LAYER:      KERNEL
-MODULE:     K-10 Deployment Abstraction
-VERSION:    1.0.0
+EPIC-ID: EPIC-K-10
+EPIC NAME: Deployment Abstraction
+LAYER: KERNEL
+MODULE: K-10 Deployment Abstraction
+VERSION: 1.0.1
 
 ---
 
@@ -61,54 +61,54 @@ Deliver the K-10 Deployment Abstraction module to provide a unified deployment m
 
 #### Section 6 — Event Model Definition
 
-| Field | Description |
-|---|---|
-| Event Name | `DeploymentStartedEvent` |
-| Schema Version | `v1.0.0` |
-| Trigger Condition | An upgrade or rollback is initiated in any environment. |
-| Payload | `{ "target_version": "...", "mode": "SaaS", "initiated_by": "..." }` |
-| Consumers | Observability, Audit, Admin Portal |
-| Idempotency Key | `hash(target_version + timestamp)` |
-| Replay Behavior | Ignored. |
-| Retention Policy | Permanent. |
+| Field             | Description                                                          |
+| ----------------- | -------------------------------------------------------------------- |
+| Event Name        | `DeploymentStartedEvent`                                             |
+| Schema Version    | `v1.0.0`                                                             |
+| Trigger Condition | An upgrade or rollback is initiated in any environment.              |
+| Payload           | `{ "target_version": "...", "mode": "SaaS", "initiated_by": "..." }` |
+| Consumers         | Observability, Audit, Admin Portal                                   |
+| Idempotency Key   | `hash(target_version + timestamp)`                                   |
+| Replay Behavior   | Ignored.                                                             |
+| Retention Policy  | Permanent.                                                           |
 
 ---
 
-#### Section 6.5 — Command Model Definition
+#### Section 7 — Command Model Definition
 
-| Field | Description |
-|---|---|
-| Command Name | `DeployCommand` |
-| Schema Version | `v1.0.0` |
+| Field            | Description                                                            |
+| ---------------- | ---------------------------------------------------------------------- |
+| Command Name     | `DeployCommand`                                                        |
+| Schema Version   | `v1.0.0`                                                               |
 | Validation Rules | Deployment package valid, signature verified, target environment ready |
-| Handler | `DeploymentCommandHandler` in K-10 Deployment Abstraction |
-| Success Event | `DeploymentCompleted` |
-| Failure Event | `DeploymentFailed` |
-| Idempotency | Command ID must be unique; duplicate commands return original result |
+| Handler          | `DeploymentCommandHandler` in K-10 Deployment Abstraction              |
+| Success Event    | `DeploymentCompleted`                                                  |
+| Failure Event    | `DeploymentFailed`                                                     |
+| Idempotency      | Command ID must be unique; duplicate commands return original result   |
 
-| Field | Description |
-|---|---|
-| Command Name | `RollbackCommand` |
-| Schema Version | `v1.0.0` |
+| Field            | Description                                                          |
+| ---------------- | -------------------------------------------------------------------- |
+| Command Name     | `RollbackCommand`                                                    |
+| Schema Version   | `v1.0.0`                                                             |
 | Validation Rules | Previous version exists, requester authorized, rollback window valid |
-| Handler | `DeploymentCommandHandler` in K-10 Deployment Abstraction |
-| Success Event | `RollbackCompleted` |
-| Failure Event | `RollbackFailed` |
-| Idempotency | Command ID must be unique; duplicate commands return original result |
+| Handler          | `DeploymentCommandHandler` in K-10 Deployment Abstraction            |
+| Success Event    | `RollbackCompleted`                                                  |
+| Failure Event    | `RollbackFailed`                                                     |
+| Idempotency      | Command ID must be unique; duplicate commands return original result |
 
-| Field | Description |
-|---|---|
-| Command Name | `EnableFeatureFlagCommand` |
-| Schema Version | `v1.0.0` |
-| Validation Rules | Feature flag exists, target audience valid, requester authorized |
-| Handler | `FeatureFlagCommandHandler` in K-10 Deployment Abstraction |
-| Success Event | `FeatureFlagEnabled` |
-| Failure Event | `FeatureFlagEnableFailed` |
-| Idempotency | Command ID must be unique; duplicate commands return original result |
+| Field            | Description                                                          |
+| ---------------- | -------------------------------------------------------------------- |
+| Command Name     | `EnableFeatureFlagCommand`                                           |
+| Schema Version   | `v1.0.0`                                                             |
+| Validation Rules | Feature flag exists, target audience valid, requester authorized     |
+| Handler          | `FeatureFlagCommandHandler` in K-10 Deployment Abstraction           |
+| Success Event    | `FeatureFlagEnabled`                                                 |
+| Failure Event    | `FeatureFlagEnableFailed`                                            |
+| Idempotency      | Command ID must be unique; duplicate commands return original result |
 
 ---
 
-#### Section 7 — AI Integration Requirements
+#### Section 8 — AI Integration Requirements
 
 - **AI Hook Type:** Copilot Assist
 - **Workflow Steps Exposed:** Upgrade planning and capacity forecasting.
@@ -120,28 +120,28 @@ Deliver the K-10 Deployment Abstraction module to provide a unified deployment m
 
 ---
 
-#### Section 8 — NFRs
+#### Section 9 — NFRs
 
-| NFR Category | Required Targets |
-|---|---|
-| Latency / Throughput | Hybrid sync latency < 500ms |
-| Scalability | Sync workers scale horizontally |
-| Availability | 99.999% uptime |
-| Consistency Model | Exactly-once sync via idempotent K-05 events |
-| Security | Bundles signed via Ed25519 |
-| Data Residency | Strict sync boundaries per T1 config |
-| Data Retention | N/A |
-| Auditability | All deployments logged |
-| Observability | Metrics: `sync.lag`, `deployment.duration` |
-| Extensibility | N/A |
-| Upgrade / Compatibility | Core capability of this module |
-| On-Prem Constraints | Full support |
-| Ledger Integrity | N/A |
-| Dual-Calendar Correctness | N/A |
+| NFR Category              | Required Targets                             |
+| ------------------------- | -------------------------------------------- |
+| Latency / Throughput      | Hybrid sync latency < 500ms                  |
+| Scalability               | Sync workers scale horizontally              |
+| Availability              | 99.999% uptime                               |
+| Consistency Model         | Exactly-once sync via idempotent K-05 events |
+| Security                  | Bundles signed via Ed25519                   |
+| Data Residency            | Strict sync boundaries per T1 config         |
+| Data Retention            | N/A                                          |
+| Auditability              | All deployments logged                       |
+| Observability             | Metrics: `sync.lag`, `deployment.duration`   |
+| Extensibility             | N/A                                          |
+| Upgrade / Compatibility   | Core capability of this module               |
+| On-Prem Constraints       | Full support                                 |
+| Ledger Integrity          | N/A                                          |
+| Dual-Calendar Correctness | N/A                                          |
 
 ---
 
-#### Section 9 — Acceptance Criteria
+#### Section 10 — Acceptance Criteria
 
 1. **Given** an air-gapped on-prem environment, **When** an operator uploads a modified/unsigned deployment bundle, **Then** the installation aborts immediately with a signature verification error.
 2. **Given** a Hybrid deployment, **When** a trade occurs on-prem, **Then** it is synced to the cloud analytics database within 500ms, respecting jurisdiction masking rules.
@@ -149,44 +149,56 @@ Deliver the K-10 Deployment Abstraction module to provide a unified deployment m
 
 ---
 
-#### Section 10 — Failure Modes & Resilience
+#### Section 11 — Failure Modes & Resilience
 
 - **Sync Partition:** On-prem buffers data locally until connectivity is restored, then resumes exactly-once delivery.
 - **Upgrade Failure:** Automated rollback to previous known-good deployment manifest.
 
 ---
 
-#### Section 11 — Observability & Audit
+#### Section 12 — Observability & Audit
 
-| Telemetry Type | Required Details |
-|---|---|
-| Metrics | `sync.lag.ms`, `feature_flag.eval.latency` |
-| Logs | Deployment steps |
-| Traces | N/A |
-| Audit Events | `DeploymentCompleted`, `FeatureFlagChanged` |
+| Telemetry Type      | Required Details                                    |
+| ------------------- | --------------------------------------------------- |
+| Metrics             | `sync.lag.ms`, `feature_flag.eval.latency`          |
+| Logs                | Deployment steps                                    |
+| Traces              | N/A                                                 |
+| Audit Events        | `DeploymentCompleted`, `FeatureFlagChanged`         |
 | Regulatory Evidence | Infrastructure change control logs [LCA-AUDIT-001]. |
 
 ---
 
-#### Section 12 — Compliance & Regulatory Traceability
+#### Section 13 — Compliance & Regulatory Traceability
 
 - Change management and release control [LCA-AUDIT-001]
-- Data localization in Hybrid mode [LCA-RES-001]
+- Data localization in Hybrid mode [ASR-DATA-001]
 
 ---
 
-#### Section 13 — Extension Points & Contracts
+#### Section 14 — Extension Points & Contracts
 
 - **SDK Contract:** `FeatureFlagClient.isEnabled(flagKey, context)`.
 - **Jurisdiction Plugin Extension Points:** Sync filters via Config Pack.
 
 ---
 
-#### Section 14 — Future-Safe Architecture Evaluation
+#### Section 15 — Future-Safe Architecture Evaluation
 
-| Question | Expected Answer |
-|---|---|
-| Can this module support India/Bangladesh via plugin? | Yes. |
-| Can this run in an air-gapped deployment? | Yes, natively designed for it. |
+| Question                                                              | Expected Answer                                                                                                |
+| --------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------- |
+| Can this module support India/Bangladesh via plugin?                  | Yes.                                                                                                           |
+| Can this run in an air-gapped deployment?                             | Yes, natively designed for it.                                                                                 |
 | Can this module handle digital assets (tokenized securities, crypto)? | Yes. Blockchain node sidecars and HSM-backed signing containers are deployable via the same abstraction layer. |
-| Is the design ready for CBDC integration or T+0 settlement? | Yes. Hot-deploy and zero-downtime rolling updates support instant cutover to T+0 settlement pipelines. |
+| Is the design ready for CBDC integration or T+0 settlement?           | Yes. Hot-deploy and zero-downtime rolling updates support instant cutover to T+0 settlement pipelines.         |
+
+---
+
+## Changelog
+
+### Version 1.0.1 (2026-03-10)
+
+**Type:** PATCH  
+**Changes:**
+
+- Standardized section numbering to the sequential 16-section format.
+- Corrected the hybrid deployment residency compliance reference.

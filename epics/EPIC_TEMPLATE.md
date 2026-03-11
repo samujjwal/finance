@@ -1,8 +1,8 @@
-EPIC-ID:    EPIC-{LAYER}-{NUMBER}
-EPIC NAME:  {Descriptive Name}
-LAYER:      {KERNEL|DOMAIN|WORKFLOW|OPERATIONS|PACKS|REGULATORY|TESTING|PLATFORM-UNITY}
-MODULE:     {Layer}-{Number} {Module Name}
-VERSION:    1.0.0
+EPIC-ID: EPIC-{LAYER}-{NUMBER}
+EPIC NAME: {Descriptive Name}
+LAYER: {KERNEL|DOMAIN|WORKFLOW|OPERATIONS|PACKS|REGULATORY|TESTING|PLATFORM-UNITY}
+MODULE: {Layer}-{Number} {Module Name}
+VERSION: 1.0.0
 
 ---
 
@@ -21,12 +21,10 @@ Example:
   1. {List specific capabilities, features, and responsibilities this module handles}
   2. {Be explicit about what IS included}
   3. {Typically 5-8 items}
-  
 - **Out-of-Scope:**
   1. {List what this module explicitly does NOT handle}
   2. {Clarify boundaries with other modules}
   3. {Prevent scope creep}
-  
 - **Dependencies:** {List all epic dependencies, e.g., EPIC-K-01 (IAM), EPIC-K-05 (Event Bus)}
 - **Kernel Readiness Gates:** {List kernel modules that must be stable before implementing this epic, or N/A for kernel epics}
 - **Module Classification:** {Generic Core | Domain Subsystem | Cross-Cutting Layer}
@@ -64,16 +62,16 @@ Example:
 - **New Entities:**
   - `EntityName`: `{ field1: Type, field2: Type, field3: Type, ... }`
   - `AnotherEntity`: `{ field1: Type, field2: Type, ... }`
-  
 - **Dual-Calendar Fields:** {List which fields use DualDate (e.g., created_at, updated_at, executed_at)}
 - **Event Schema Changes:** {List new event types introduced by this epic}
 
 Example:
+
 ```
 - **New Entities:**
   - `Order`: `{ order_id: UUID, client_id: UUID, instrument_id: String, side: Enum, qty: Int, type: Enum, status: Enum, submitted_at: DualDate, updated_at: DualDate }`
   - `Position`: `{ client_id: UUID, instrument_id: String, available_qty: Int, locked_qty: Int }`
-  
+
 - **Dual-Calendar Fields:** `submitted_at` and `updated_at` use `DualDate`.
 - **Event Schema Changes:** `OrderPlaced`, `OrderModified`, `OrderCancelled`, `OrderStateChanged`.
 ```
@@ -82,38 +80,38 @@ Example:
 
 #### Section 6 — Event Model Definition
 
-| Field | Description |
-|---|---|
-| Event Name | `{EventName}` (use past tense, e.g., OrderPlaced, TradeExecuted) |
-| Schema Version | `v1.0.0` |
-| Trigger Condition | {When is this event emitted? Be specific.} |
-| Payload | `{ "field1": "...", "field2": "...", "timestamp_bs": "..." }` (include dual-calendar) |
-| Consumers | {Which modules/services consume this event?} |
-| Idempotency Key | `hash(field1 + field2 + timestamp)` |
-| Replay Behavior | {What happens when this event is replayed? Suppress side-effects or rebuild projections?} |
-| Retention Policy | {How long is this event retained? Permanent, 10 years, etc.} |
+| Field             | Description                                                                               |
+| ----------------- | ----------------------------------------------------------------------------------------- |
+| Event Name        | `{EventName}` (use past tense, e.g., OrderPlaced, TradeExecuted)                          |
+| Schema Version    | `v1.0.0`                                                                                  |
+| Trigger Condition | {When is this event emitted? Be specific.}                                                |
+| Payload           | `{ "field1": "...", "field2": "...", "timestamp_bs": "..." }` (include dual-calendar)     |
+| Consumers         | {Which modules/services consume this event?}                                              |
+| Idempotency Key   | `hash(field1 + field2 + timestamp)`                                                       |
+| Replay Behavior   | {What happens when this event is replayed? Suppress side-effects or rebuild projections?} |
+| Retention Policy  | {How long is this event retained? Permanent, 10 years, etc.}                              |
 
 {Add additional event definitions as needed. Most epics have 3-5 event types.}
 
 ---
 
-#### Section 6.5 — Command Model Definition
+#### Section 7 — Command Model Definition
 
-| Field | Description |
-|---|---|
-| Command Name | `{CommandName}Command` (use imperative verb, e.g., PlaceOrderCommand) |
-| Schema Version | `v1.0.0` |
-| Validation Rules | {What validations are performed before executing this command?} |
-| Handler | `{HandlerName}` in {Module Name} |
-| Success Event | `{EventName}` |
-| Failure Event | `{EventName}Failed` |
-| Idempotency | {How are duplicate commands handled?} |
+| Field            | Description                                                           |
+| ---------------- | --------------------------------------------------------------------- |
+| Command Name     | `{CommandName}Command` (use imperative verb, e.g., PlaceOrderCommand) |
+| Schema Version   | `v1.0.0`                                                              |
+| Validation Rules | {What validations are performed before executing this command?}       |
+| Handler          | `{HandlerName}` in {Module Name}                                      |
+| Success Event    | `{EventName}`                                                         |
+| Failure Event    | `{EventName}Failed`                                                   |
+| Idempotency      | {How are duplicate commands handled?}                                 |
 
 {Add additional command definitions as needed. Most epics have 3-5 command types.}
 
 ---
 
-#### Section 7 — AI Integration Requirements
+#### Section 8 — AI Integration Requirements
 
 - **AI Hook Type:** {Copilot Assist | Anomaly Detection | Predictive Analytics | Code Generation | N/A}
 - **Workflow Steps Exposed:** {Which workflow steps have AI integration?}
@@ -127,28 +125,28 @@ Example:
 
 ---
 
-#### Section 8 — NFRs
+#### Section 9 — NFRs
 
-| NFR Category | Required Targets |
-|---|---|
-| Latency / Throughput | {P99 < Xms; Y TPS} |
-| Scalability | {Horizontal scaling approach, auto-scaling triggers} |
-| Availability | {99.9% | 99.99% | 99.999% uptime target} |
-| Consistency Model | {Strong | Eventual | Read-your-writes consistency} |
-| Security | {Authentication, authorization, encryption requirements} |
-| Data Residency | {Jurisdiction-specific data storage requirements} |
-| Data Retention | {Minimum retention periods per data type} |
-| Auditability | {Audit logging requirements, compliance codes} |
-| Observability | {Metrics, logs, traces, dimensions} |
-| Extensibility | {Plugin support, extension points} |
-| Upgrade / Compatibility | {Backward compatibility guarantees, versioning} |
-| On-Prem Constraints | {Air-gapped deployment support, local dependencies} |
-| Ledger Integrity | {Integration with K-16 Ledger Framework} |
-| Dual-Calendar Correctness | {Dual-calendar handling accuracy} |
+| NFR Category              | Required Targets                                                 |
+| ------------------------- | ---------------------------------------------------------------- |
+| Latency / Throughput      | {P99 < Xms; Y TPS}                                               |
+| Scalability               | {Horizontal scaling approach, auto-scaling triggers}             |
+| Availability              | {99.9% / 99.99% / 99.999% uptime target as applicable}           |
+| Consistency Model         | {Strong / Eventual / Read-your-writes consistency as applicable} |
+| Security                  | {Authentication, authorization, encryption requirements}         |
+| Data Residency            | {Jurisdiction-specific data storage requirements}                |
+| Data Retention            | {Minimum retention periods per data type}                        |
+| Auditability              | {Audit logging requirements, compliance codes}                   |
+| Observability             | {Metrics, logs, traces, dimensions}                              |
+| Extensibility             | {Plugin support, extension points}                               |
+| Upgrade / Compatibility   | {Backward compatibility guarantees, versioning}                  |
+| On-Prem Constraints       | {Air-gapped deployment support, local dependencies}              |
+| Ledger Integrity          | {Integration with K-16 Ledger Framework}                         |
+| Dual-Calendar Correctness | {Dual-calendar handling accuracy}                                |
 
 ---
 
-#### Section 9 — Acceptance Criteria
+#### Section 10 — Acceptance Criteria
 
 1. **Given** {precondition}, **When** {action}, **Then** {expected outcome}.
 2. **Given** {precondition}, **When** {action}, **Then** {expected outcome}.
@@ -162,7 +160,7 @@ Example:
 
 ---
 
-#### Section 10 — Failure Modes & Resilience
+#### Section 11 — Failure Modes & Resilience
 
 - **{Failure Scenario}:** {Description of how the system handles this failure. Include retry logic, circuit breakers, fallback behavior, etc.}
 - **{Failure Scenario}:** {Be specific about error handling, timeouts, and recovery mechanisms.}
@@ -170,6 +168,7 @@ Example:
 - **{Failure Scenario}:** {Typically 3-5 failure modes per epic.}
 
 Example:
+
 ```
 - **Rules Engine Down:** Reject all new orders safely; circuit breaker opens after 5 failures.
 - **Event Bus Partition:** Disconnect client and return 503 rather than accepting an order that cannot be persisted.
@@ -178,19 +177,19 @@ Example:
 
 ---
 
-#### Section 11 — Observability & Audit
+#### Section 12 — Observability & Audit
 
-| Telemetry Type | Required Details |
-|---|---|
-| Metrics | `metric.name`, `metric.name.count`, dimensions: `dimension1`, `dimension2` |
-| Logs | Structured logs with: `trace_id`, `field1`, `field2`, `duration_ms` |
-| Traces | Span `ModuleName.operation` with parent/child relationships |
-| Audit Events | Action: `ActionName`, `before_state`, `after_state` [LCA-AUDIT-001] |
-| Regulatory Evidence | {What evidence is captured for regulatory compliance?} |
+| Telemetry Type      | Required Details                                                           |
+| ------------------- | -------------------------------------------------------------------------- |
+| Metrics             | `metric.name`, `metric.name.count`, dimensions: `dimension1`, `dimension2` |
+| Logs                | Structured logs with: `trace_id`, `field1`, `field2`, `duration_ms`        |
+| Traces              | Span `ModuleName.operation` with parent/child relationships                |
+| Audit Events        | Action: `ActionName`, `before_state`, `after_state` [LCA-AUDIT-001]        |
+| Regulatory Evidence | {What evidence is captured for regulatory compliance?}                     |
 
 ---
 
-#### Section 12 — Compliance & Regulatory Traceability
+#### Section 13 — Compliance & Regulatory Traceability
 
 - {Compliance requirement description} [LCA-XXX-###]
 - {Compliance requirement description} [ASR-XXX-###]
@@ -199,6 +198,7 @@ Example:
 {Reference specific compliance codes from COMPLIANCE_CODE_REGISTRY.md. Typically 2-5 compliance requirements per epic.}
 
 Example:
+
 ```
 - Maker-checker controls for sensitive operations [LCA-SOD-001]
 - Comprehensive audit trail for all state changes [LCA-AUDIT-001]
@@ -207,7 +207,7 @@ Example:
 
 ---
 
-#### Section 13 — Extension Points & Contracts
+#### Section 14 — Extension Points & Contracts
 
 - **SDK Contract:** {Describe the SDK/API contract this module exposes. Include method signatures.}
 - **Jurisdiction Plugin Extension Points:** {Describe T1/T2/T3 extension points. Give examples.}
@@ -216,6 +216,7 @@ Example:
 - **Webhook Extension Points:** {List HTTP callback extension points for external integrations}
 
 Example:
+
 ```
 - **SDK Contract:** `AuthZClient.hasPermission(userId, resource, action)` returns boolean
 - **Jurisdiction Plugin Extension Points:** `NationalIdValidator` interface for T3 Adapters
@@ -228,20 +229,20 @@ Example:
 
 ---
 
-#### Section 14 — Future-Safe Architecture Evaluation
+#### Section 15 — Future-Safe Architecture Evaluation
 
-| Question | Expected Answer |
-|---|---|
+| Question                                             | Expected Answer           |
+| ---------------------------------------------------- | ------------------------- |
 | Can this module support India/Bangladesh via plugin? | {Yes/No with explanation} |
-| Can a new regulator be added? | {Yes/No with explanation} |
-| Can tax rules change without redeploy? | {Yes/No with explanation} |
-| Can this run in an air-gapped deployment? | {Yes/No with explanation} |
+| Can a new regulator be added?                        | {Yes/No with explanation} |
+| Can tax rules change without redeploy?               | {Yes/No with explanation} |
+| Can this run in an air-gapped deployment?            | {Yes/No with explanation} |
 
 {Add module-specific questions. Typically 4-6 questions. All answers should demonstrate plugin-based extensibility.}
 
 ---
 
-#### Section 14.5 — Threat Model
+#### Section 16 — Threat Model
 
 **Attack Vectors & Mitigations:**
 
@@ -263,6 +264,7 @@ Example:
 {Typically 5-8 threat scenarios. Cover authentication, authorization, data integrity, availability, confidentiality.}
 
 **Security Controls:**
+
 - {List of security controls implemented}
 - {Authentication mechanisms}
 - {Authorization mechanisms}
@@ -281,10 +283,12 @@ Example:
 ## Changelog
 
 ### Version 1.0.0 (YYYY-MM-DD)
+
 **Type:** MAJOR  
 **Author:** {Your Name}  
 **Reviewer:** {Reviewer Name}  
 **Changes:**
+
 - Initial release
 
 ---
@@ -316,85 +320,101 @@ Example:
 ### Section-Specific Guidance
 
 **Section 1 (Objective):**
+
 - 2-3 sentences maximum
 - Reference architectural principles
 - Explain module's role in platform
 
 **Section 2 (Scope):**
+
 - Be explicit about boundaries
 - List 5-8 in-scope items
 - List 2-4 out-of-scope items
 - Validate dependencies exist
 
 **Section 3 (Functional Requirements):**
+
 - Use "must" for mandatory, "should" for recommended
 - Number sequentially (FR1, FR2, ...)
 - Make each requirement independently testable
 - Typically 6-10 requirements
 
 **Section 4 (Jurisdiction Isolation):**
+
 - Demonstrate plugin architecture
 - Give concrete examples
 - Show how new jurisdictions are added
 
 **Section 5 (Data Model):**
+
 - Define all new entities
 - Specify field types
 - Identify dual-calendar fields
 
 **Section 6 (Event Model):**
+
 - Use past tense for event names
 - Include dual-calendar timestamps
 - Define idempotency strategy
 - Specify retention policy
 
-**Section 6.5 (Command Model):**
+**Section 7 (Command Model):**
+
 - Use imperative verb for command names
 - Define validation rules
 - Map to success/failure events
 
-**Section 7 (AI Integration):**
+**Section 8 (AI Integration):**
+
 - Mark N/A if no AI integration
 - Reference K-09 AI Governance
 - Define explainability requirements
 
-**Section 8 (NFRs):**
+**Section 9 (NFRs):**
+
 - Quantify all targets (numbers, not vague terms)
 - Use P99 for latency, TPS for throughput
 - Specify availability percentage
 - Reference compliance codes
 
-**Section 9 (Acceptance Criteria):**
+**Section 10 (Acceptance Criteria):**
+
 - Use Given/When/Then format
 - Make testable and specific
 - Cover happy paths and edge cases
 - Typically 5-10 criteria
 
-**Section 10 (Failure Modes):**
+**Section 11 (Failure Modes):**
+
 - Consider all failure scenarios
 - Define retry/fallback behavior
 - Specify circuit breaker logic
 
-**Section 11 (Observability):**
+**Section 12 (Observability):**
+
 - Define specific metric names
 - Specify log structure
 - Define trace spans
 - Reference audit requirements
 
-**Section 12 (Compliance):**
+**Section 13 (Compliance):**
+
 - Reference codes from COMPLIANCE_CODE_REGISTRY.md
 - Typically 2-5 compliance requirements
 
-**Section 13 (Extension Points):**
+**Section 14 (Extension Points):**
+
 - Define SDK contracts with signatures
 - Specify plugin interfaces
 - List events emitted/consumed
 
-**Section 14 (Future-Safe):**
+**Section 15 (Future-Safe):**
+
 - Ask jurisdiction extensibility questions
 - All answers should demonstrate plugin architecture
 
-**Section 14.5 (Threat Model):**
+**Section 16 (Threat Model):**
+
 - Required for security-critical modules
 - **Strongly recommended for all modules** — financial platforms are high-value targets
 - Typically 5-8 threat scenarios
@@ -405,8 +425,9 @@ Example:
 ### Cross-Document Traceability
 
 Every epic must be traceable to:
-- **Architecture Spec**: Section number in ARCHITECTURE_SPEC_PART_*.md
-- **LLD**: Corresponding LLD_*.md file (if exists)
+
+- **Architecture Spec**: Section number in ARCHITECTURE*SPEC_PART*\*.md
+- **LLD**: Corresponding LLD\_\*.md file (if exists)
 - **C4 Diagrams**: Component in C4_C3_COMPONENT_SIDDHANTA.md
 - **Dependency Matrix**: Row in DEPENDENCY_MATRIX.md
 - **Compliance Codes**: Entries in COMPLIANCE_CODE_REGISTRY.md
@@ -435,7 +456,7 @@ Before submitting an epic for review:
 
 ---
 
-**Template Version:** 1.0.0  
-**Last Updated:** March 2, 2026  
+**Template Version:** 1.1.0  
+**Last Updated:** March 10, 2026  
 **Owner:** Platform Architecture Team  
 **Approver:** Chief Technology Officer

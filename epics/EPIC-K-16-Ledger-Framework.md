@@ -1,8 +1,8 @@
-EPIC-ID:    EPIC-K-16
-EPIC NAME:  Ledger Framework
-LAYER:      KERNEL
-MODULE:     K-16 Ledger Framework
-VERSION:    1.1.0
+EPIC-ID: EPIC-K-16
+EPIC NAME: Ledger Framework
+LAYER: KERNEL
+MODULE: K-16 Ledger Framework
+VERSION: 1.1.1
 
 ---
 
@@ -21,7 +21,7 @@ Deliver the K-16 Ledger Framework, an immutable, double-entry ledger primitive s
   4. Jurisdiction-configurable chart of accounts and currency handling.
   5. API for temporal balance queries (`getBalance(accountId, asOf)`).
 - **Out-of-Scope:**
-  1. Business rules governing *why* a posting occurs (handled by domain modules and K-03 Rules Engine).
+  1. Business rules governing _why_ a posting occurs (handled by domain modules and K-03 Rules Engine).
 - **Dependencies:** EPIC-K-02 (Config Engine), EPIC-K-05 (Event Bus), EPIC-K-15 (Dual-Calendar)
 - **Kernel Readiness Gates:** N/A
 - **Module Classification:** Generic Core
@@ -66,54 +66,54 @@ Deliver the K-16 Ledger Framework, an immutable, double-entry ledger primitive s
 
 #### Section 6 — Event Model Definition
 
-| Field | Description |
-|---|---|
-| Event Name | `LedgerPostedEvent` |
-| Schema Version | `v1.0.0` |
-| Trigger Condition | A balanced transaction is successfully committed to the ledger. |
-| Payload | `{ "transaction_id": "...", "posting_date_bs": "...", "entries": [...] }` |
-| Consumers | Regulatory Reporting (D-10), Trade Surveillance (D-08), Audit Framework |
-| Idempotency Key | `hash(source_event_id)` (The ID of the event that triggered the posting) |
-| Replay Behavior | Suppressed for side-effects; rebuilds read-model balances. |
-| Retention Policy | Permanent. |
+| Field             | Description                                                               |
+| ----------------- | ------------------------------------------------------------------------- |
+| Event Name        | `LedgerPostedEvent`                                                       |
+| Schema Version    | `v1.0.0`                                                                  |
+| Trigger Condition | A balanced transaction is successfully committed to the ledger.           |
+| Payload           | `{ "transaction_id": "...", "posting_date_bs": "...", "entries": [...] }` |
+| Consumers         | Regulatory Reporting (D-10), Trade Surveillance (D-08), Audit Framework   |
+| Idempotency Key   | `hash(source_event_id)` (The ID of the event that triggered the posting)  |
+| Replay Behavior   | Suppressed for side-effects; rebuilds read-model balances.                |
+| Retention Policy  | Permanent.                                                                |
 
 ---
 
-#### Section 6.5 — Command Model Definition
+#### Section 7 — Command Model Definition
 
-| Field | Description |
-|---|---|
-| Command Name | `PostTransactionCommand` |
-| Schema Version | `v1.0.0` |
-| Validation Rules | Transaction balanced (debits = credits), accounts exist, requester authorized |
-| Handler | `LedgerCommandHandler` in K-16 Ledger Framework |
-| Success Event | `LedgerPostedEvent` |
-| Failure Event | `LedgerPostFailed` |
-| Idempotency | Transaction ID must be unique; duplicate commands with matching payload return original result; duplicate commands with different payload are rejected with security event [ARB D.4] |
+| Field            | Description                                                                                                                                                                          |
+| ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Command Name     | `PostTransactionCommand`                                                                                                                                                             |
+| Schema Version   | `v1.0.0`                                                                                                                                                                             |
+| Validation Rules | Transaction balanced (debits = credits), accounts exist, requester authorized                                                                                                        |
+| Handler          | `LedgerCommandHandler` in K-16 Ledger Framework                                                                                                                                      |
+| Success Event    | `LedgerPostedEvent`                                                                                                                                                                  |
+| Failure Event    | `LedgerPostFailed`                                                                                                                                                                   |
+| Idempotency      | Transaction ID must be unique; duplicate commands with matching payload return original result; duplicate commands with different payload are rejected with security event [ARB D.4] |
 
-| Field | Description |
-|---|---|
-| Command Name | `ReconcileCommand` |
-| Schema Version | `v1.0.0` |
-| Validation Rules | Account exists, external source specified, requester authorized |
-| Handler | `ReconciliationHandler` in K-16 Ledger Framework |
-| Success Event | `ReconciliationCompleted` |
-| Failure Event | `ReconciliationFailed` |
-| Idempotency | Command ID must be unique; duplicate commands return original result |
+| Field            | Description                                                          |
+| ---------------- | -------------------------------------------------------------------- |
+| Command Name     | `ReconcileCommand`                                                   |
+| Schema Version   | `v1.0.0`                                                             |
+| Validation Rules | Account exists, external source specified, requester authorized      |
+| Handler          | `ReconciliationHandler` in K-16 Ledger Framework                     |
+| Success Event    | `ReconciliationCompleted`                                            |
+| Failure Event    | `ReconciliationFailed`                                               |
+| Idempotency      | Command ID must be unique; duplicate commands return original result |
 
-| Field | Description |
-|---|---|
-| Command Name | `CreateAccountCommand` |
-| Schema Version | `v1.0.0` |
-| Validation Rules | Account number unique, CoA entry exists, requester authorized |
-| Handler | `AccountCommandHandler` in K-16 Ledger Framework |
-| Success Event | `AccountCreated` |
-| Failure Event | `AccountCreationFailed` |
-| Idempotency | Command ID must be unique; duplicate commands return original result |
+| Field            | Description                                                          |
+| ---------------- | -------------------------------------------------------------------- |
+| Command Name     | `CreateAccountCommand`                                               |
+| Schema Version   | `v1.0.0`                                                             |
+| Validation Rules | Account number unique, CoA entry exists, requester authorized        |
+| Handler          | `AccountCommandHandler` in K-16 Ledger Framework                     |
+| Success Event    | `AccountCreated`                                                     |
+| Failure Event    | `AccountCreationFailed`                                              |
+| Idempotency      | Command ID must be unique; duplicate commands return original result |
 
 ---
 
-#### Section 7 — AI Integration Requirements
+#### Section 8 — AI Integration Requirements
 
 - **AI Hook Type:** Anomaly Detection
 - **Workflow Steps Exposed:** Reconciliation break management.
@@ -125,28 +125,28 @@ Deliver the K-16 Ledger Framework, an immutable, double-entry ledger primitive s
 
 ---
 
-#### Section 8 — NFRs
+#### Section 9 — NFRs
 
-| NFR Category | Required Targets |
-|---|---|
-| Latency / Throughput | Posting commit < 5ms; 10,000 TPS |
-| Scalability | Partitioned by `tenant_id` and `account_id` |
-| Availability | 99.999% uptime |
-| Consistency Model | Strong consistency for posting transactions |
-| Security | Row-level security per tenant |
-| Data Residency | Ledger data stored strictly in-jurisdiction |
-| Data Retention | Permanent |
-| Auditability | Immutable by design |
-| Observability | Metrics: `ledger.post.latency`, `recon.break.count` |
-| Extensibility | Custom assets and currencies via Config |
-| Upgrade / Compatibility | Precision changes handled carefully |
-| On-Prem Constraints | Backed by local relational/event-store DB |
-| Ledger Integrity | Guaranteed mathematically on every write |
-| Dual-Calendar Correctness | Queries can use `asOfBsDate` directly |
+| NFR Category              | Required Targets                                    |
+| ------------------------- | --------------------------------------------------- |
+| Latency / Throughput      | Posting commit < 5ms; 10,000 TPS                    |
+| Scalability               | Partitioned by `tenant_id` and `account_id`         |
+| Availability              | 99.999% uptime                                      |
+| Consistency Model         | Strong consistency for posting transactions         |
+| Security                  | Row-level security per tenant                       |
+| Data Residency            | Ledger data stored strictly in-jurisdiction         |
+| Data Retention            | Permanent                                           |
+| Auditability              | Immutable by design                                 |
+| Observability             | Metrics: `ledger.post.latency`, `recon.break.count` |
+| Extensibility             | Custom assets and currencies via Config             |
+| Upgrade / Compatibility   | Precision changes handled carefully                 |
+| On-Prem Constraints       | Backed by local relational/event-store DB           |
+| Ledger Integrity          | Guaranteed mathematically on every write            |
+| Dual-Calendar Correctness | Queries can use `asOfBsDate` directly               |
 
 ---
 
-#### Section 9 — Acceptance Criteria
+#### Section 10 — Acceptance Criteria
 
 1. **Given** a posting request with $100 Debit and $99 Credit, **When** submitted to the Ledger SDK, **Then** it is synchronously rejected with an `UnbalancedTransactionError`.
 2. **Given** a historical BS date inquiry, **When** `getBalance(account, "2081-04-15")` is called, **Then** the engine reconstructs and returns the exact balance as of that specific dual-calendar date.
@@ -154,7 +154,7 @@ Deliver the K-16 Ledger Framework, an immutable, double-entry ledger primitive s
 
 ---
 
-#### Section 10 — Failure Modes & Resilience
+#### Section 11 — Failure Modes & Resilience
 
 - **Concurrent Modification:** Optimistic concurrency control (OCC) handles rapid writes to the same account; SDK auto-retries on OCC failure.
 - **Event Bus Outage:** Write to local DB succeeds; outbox pattern ensures eventual emission of `LedgerPostedEvent`.
@@ -163,29 +163,29 @@ Deliver the K-16 Ledger Framework, an immutable, double-entry ledger primitive s
 
 ---
 
-#### Section 11 — Observability & Audit
+#### Section 12 — Observability & Audit
 
-| Telemetry Type | Required Details |
-|---|---|
-| Metrics | `ledger.transaction.volume`, `recon.match.rate` |
-| Logs | Exceptions on unbalanced postings |
-| Traces | Span `LedgerClient.post` |
-| Audit Events | Financial source of truth |
+| Telemetry Type      | Required Details                                    |
+| ------------------- | --------------------------------------------------- |
+| Metrics             | `ledger.transaction.volume`, `recon.match.rate`     |
+| Logs                | Exceptions on unbalanced postings                   |
+| Traces              | Span `LedgerClient.post`                            |
+| Audit Events        | Financial source of truth                           |
 | Regulatory Evidence | Core data for all financial audits [LCA-AUDIT-001]. |
 
 ---
 
-#### Section 12 — Compliance & Regulatory Traceability
+#### Section 13 — Compliance & Regulatory Traceability
 
 - Client asset segregation [LCA-SEG-001]
 - Audit trails [LCA-AUDIT-001]
 
 ---
 
-#### Section 13 — Extension Points & Contracts
+#### Section 14 — Extension Points & Contracts
 
 - **SDK Contract:** `LedgerClient.post(transaction)` → `LedgerPostedEvent`, `LedgerClient.getBalance(accountId, asOf)` → `BalanceResponse`, `LedgerClient.reconcile(source, file)` → `ReconciliationResult`
-- **Jurisdiction Plugin Extension Points:** 
+- **Jurisdiction Plugin Extension Points:**
   - Chart of Accounts structure via T1 Config Pack
   - Reconciliation format adapters (e.g., CDSC, CCIL) via T3 Executable Pack
   - Rounding rules and precision per currency via T1 Config Pack
@@ -196,20 +196,20 @@ Deliver the K-16 Ledger Framework, an immutable, double-entry ledger primitive s
 
 ---
 
-#### Section 14 — Future-Safe Architecture Evaluation
+#### Section 15 — Future-Safe Architecture Evaluation
 
-| Question | Expected Answer |
-|---|---|
-| Can this module support India/Bangladesh via plugin? | Yes — CoA is T1-configurable; reconciliation adapters are T3 plugins; zero core changes |
-| Can a new instrument type be added? | Yes — `asset_id` is generic; precision rules configurable per asset type via T1 |
-| Can this run in an air-gapped deployment? | Yes — backed by local relational/event-store DB; no external dependencies |
-| Can digital assets/tokenized securities be supported? | Yes — asset model is generic; crypto precision (8 decimals) already configurable |
-| Can CBDC settlement be integrated? | Yes — new settlement adapter (T3) and currency config (T1); core ledger unchanged |
-| Can multi-currency cross-border settlement be handled? | Yes — ledger supports multiple currencies with FX rates via T1 config |
+| Question                                               | Expected Answer                                                                         |
+| ------------------------------------------------------ | --------------------------------------------------------------------------------------- |
+| Can this module support India/Bangladesh via plugin?   | Yes — CoA is T1-configurable; reconciliation adapters are T3 plugins; zero core changes |
+| Can a new instrument type be added?                    | Yes — `asset_id` is generic; precision rules configurable per asset type via T1         |
+| Can this run in an air-gapped deployment?              | Yes — backed by local relational/event-store DB; no external dependencies               |
+| Can digital assets/tokenized securities be supported?  | Yes — asset model is generic; crypto precision (8 decimals) already configurable        |
+| Can CBDC settlement be integrated?                     | Yes — new settlement adapter (T3) and currency config (T1); core ledger unchanged       |
+| Can multi-currency cross-border settlement be handled? | Yes — ledger supports multiple currencies with FX rates via T1 config                   |
 
 ---
 
-#### Section 14.5 — Threat Model
+#### Section 16 — Threat Model
 
 **Attack Vectors & Mitigations:**
 
@@ -249,6 +249,7 @@ Deliver the K-16 Ledger Framework, an immutable, double-entry ledger primitive s
    - **Residual Risk:** Legitimate high-volume clients during market events; mitigated by auto-scaling and priority queues
 
 **Security Controls:**
+
 - Append-only event store — no UPDATE/DELETE at any layer
 - Cryptographic hash chain for ledger integrity verification
 - Row-level security (RLS) per tenant
@@ -259,3 +260,15 @@ Deliver the K-16 Ledger Framework, an immutable, double-entry ledger primitive s
 - Comprehensive audit logging via K-07
 - Nightly balance verification with CRITICAL alerting
 - Rate limiting and circuit breakers
+
+---
+
+## Changelog
+
+### Version 1.1.1 (2026-03-10)
+
+**Type:** PATCH  
+**Changes:**
+
+- Standardized section numbering to the sequential 16-section format.
+- Added changelog metadata for future epic maintenance.

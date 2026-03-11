@@ -1,8 +1,8 @@
 # ASR Monthly Refresh Checklist
 
-Version: 1.0  
-Status: Operating checklist for maintaining the Authoritative Source Register (`ASR`)  
-Last revised: March 1, 2026
+Version: 1.0.1
+Status: Operating checklist for maintaining the Authoritative Source Register (`ASR`)
+Last revised: March 10, 2026
 
 ---
 

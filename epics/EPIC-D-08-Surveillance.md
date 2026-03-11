@@ -1,8 +1,8 @@
-EPIC-ID:    EPIC-D-08
-EPIC NAME:  Trade Surveillance
-LAYER:      DOMAIN
-MODULE:     D-08 Trade Surveillance
-VERSION:    1.1.0
+EPIC-ID: EPIC-D-08
+EPIC NAME: Trade Surveillance
+LAYER: DOMAIN
+MODULE: D-08 Trade Surveillance
+VERSION: 1.1.1
 
 ---
 
@@ -63,54 +63,54 @@ Deliver the D-08 Trade Surveillance module, responsible for detecting market abu
 
 #### Section 6 — Event Model Definition
 
-| Field | Description |
-|---|---|
-| Event Name | `SurveillanceAlertGenerated` |
-| Schema Version | `v1.0.0` |
-| Trigger Condition | A pattern matching a surveillance rule or AI model threshold is detected. |
-| Payload | `{ "alert_id": "...", "pattern": "WASH_TRADE", "confidence": 0.95, "timestamp_bs": "..." }` |
-| Consumers | Case Management UI, K-07 Audit |
-| Idempotency Key | `hash(rule_ref + entity_id + time_window)` |
-| Replay Behavior | Updates the case dashboard. |
-| Retention Policy | Permanent. |
+| Field             | Description                                                                                 |
+| ----------------- | ------------------------------------------------------------------------------------------- |
+| Event Name        | `SurveillanceAlertGenerated`                                                                |
+| Schema Version    | `v1.0.0`                                                                                    |
+| Trigger Condition | A pattern matching a surveillance rule or AI model threshold is detected.                   |
+| Payload           | `{ "alert_id": "...", "pattern": "WASH_TRADE", "confidence": 0.95, "timestamp_bs": "..." }` |
+| Consumers         | Case Management UI, K-07 Audit                                                              |
+| Idempotency Key   | `hash(rule_ref + entity_id + time_window)`                                                  |
+| Replay Behavior   | Updates the case dashboard.                                                                 |
+| Retention Policy  | Permanent.                                                                                  |
 
 ---
 
-#### Section 6.5 — Command Model Definition
+#### Section 7 — Command Model Definition
 
-| Field | Description |
-|---|---|
-| Command Name | `CreateAlertCommand` |
-| Schema Version | `v1.0.0` |
-| Validation Rules | Scenario triggered, evidence collected, severity assigned |
-| Handler | `AlertCommandHandler` in D-08 Surveillance |
-| Success Event | `SurveillanceAlertGenerated` |
-| Failure Event | `AlertCreationFailed` |
-| Idempotency | Command ID must be unique; duplicate commands return original result |
+| Field            | Description                                                          |
+| ---------------- | -------------------------------------------------------------------- |
+| Command Name     | `CreateAlertCommand`                                                 |
+| Schema Version   | `v1.0.0`                                                             |
+| Validation Rules | Scenario triggered, evidence collected, severity assigned            |
+| Handler          | `AlertCommandHandler` in D-08 Surveillance                           |
+| Success Event    | `SurveillanceAlertGenerated`                                         |
+| Failure Event    | `AlertCreationFailed`                                                |
+| Idempotency      | Command ID must be unique; duplicate commands return original result |
 
-| Field | Description |
-|---|---|
-| Command Name | `UpdateCaseCommand` |
-| Schema Version | `v1.0.0` |
-| Validation Rules | Case exists, status transition valid, requester authorized |
-| Handler | `CaseCommandHandler` in D-08 Surveillance |
-| Success Event | `CaseUpdated` |
-| Failure Event | `CaseUpdateFailed` |
-| Idempotency | Command ID must be unique; duplicate commands return original result |
+| Field            | Description                                                          |
+| ---------------- | -------------------------------------------------------------------- |
+| Command Name     | `UpdateCaseCommand`                                                  |
+| Schema Version   | `v1.0.0`                                                             |
+| Validation Rules | Case exists, status transition valid, requester authorized           |
+| Handler          | `CaseCommandHandler` in D-08 Surveillance                            |
+| Success Event    | `CaseUpdated`                                                        |
+| Failure Event    | `CaseUpdateFailed`                                                   |
+| Idempotency      | Command ID must be unique; duplicate commands return original result |
 
-| Field | Description |
-|---|---|
-| Command Name | `EscalateCaseCommand` |
-| Schema Version | `v1.0.0` |
-| Validation Rules | Case exists, escalation reason provided, target reviewer assigned |
-| Handler | `CaseCommandHandler` in D-08 Surveillance |
-| Success Event | `CaseEscalated` |
-| Failure Event | `CaseEscalationFailed` |
-| Idempotency | Command ID must be unique; duplicate commands return original result |
+| Field            | Description                                                          |
+| ---------------- | -------------------------------------------------------------------- |
+| Command Name     | `EscalateCaseCommand`                                                |
+| Schema Version   | `v1.0.0`                                                             |
+| Validation Rules | Case exists, escalation reason provided, target reviewer assigned    |
+| Handler          | `CaseCommandHandler` in D-08 Surveillance                            |
+| Success Event    | `CaseEscalated`                                                      |
+| Failure Event    | `CaseEscalationFailed`                                               |
+| Idempotency      | Command ID must be unique; duplicate commands return original result |
 
 ---
 
-#### Section 7 — AI Integration Requirements
+#### Section 8 — AI Integration Requirements
 
 - **AI Hook Type:** Autonomous Agent / Pattern Recognition
 - **Workflow Steps Exposed:** Order book and trade feed analysis.
@@ -122,62 +122,63 @@ Deliver the D-08 Trade Surveillance module, responsible for detecting market abu
 
 ---
 
-#### Section 8 — NFRs
+#### Section 9 — NFRs
 
-| NFR Category | Required Targets |
-|---|---|
-| Latency / Throughput | Analyze events < 50ms behind live feed |
-| Scalability | Stream processing (e.g., Flink/Spark semantics) |
-| Availability | 99.99% |
-| Consistency Model | Eventual consistency |
-| Security | Highly restricted access to case data |
-| Data Residency | Enforced via K-08 |
-| Data Retention | 10 years minimum |
-| Auditability | All case actions logged |
-| Observability | Metrics: `alert.generation.rate`, `false_positive.ratio` |
-| Extensibility | New patterns via T2 Packs or T3 AI Models |
-| Upgrade / Compatibility | N/A |
-| On-Prem Constraints | Can run locally |
-| Ledger Integrity | N/A |
-| Dual-Calendar Correctness | Case timestamps |
+| NFR Category              | Required Targets                                         |
+| ------------------------- | -------------------------------------------------------- |
+| Latency / Throughput      | Analyze events < 50ms behind live feed                   |
+| Scalability               | Stream processing (e.g., Flink/Spark semantics)          |
+| Availability              | 99.99%                                                   |
+| Consistency Model         | Eventual consistency                                     |
+| Security                  | Highly restricted access to case data                    |
+| Data Residency            | Enforced via K-08                                        |
+| Data Retention            | 10 years minimum                                         |
+| Auditability              | All case actions logged                                  |
+| Observability             | Metrics: `alert.generation.rate`, `false_positive.ratio` |
+| Extensibility             | New patterns via T2 Packs or T3 AI Models                |
+| Upgrade / Compatibility   | N/A                                                      |
+| On-Prem Constraints       | Can run locally                                          |
+| Ledger Integrity          | N/A                                                      |
+| Dual-Calendar Correctness | Case timestamps                                          |
 
 ---
 
-#### Section 9 — Acceptance Criteria
+#### Section 10 — Acceptance Criteria
 
 1. **Given** a SEBON T2 Wash Trade rule, **When** Client A buys and sells the same ISIN at the same price within 5 seconds, **Then** D-08 generates a `SurveillanceAlertGenerated` event.
 2. **Given** an open case, **When** a compliance officer marks it as `Escalated`, **Then** the action is logged in K-07 and the case status updates.
 
 ---
 
-#### Section 10 — Failure Modes & Resilience
+#### Section 11 — Failure Modes & Resilience
 
 - **Event Bus Lag:** D-08 processes events based on their embedded timestamps, not arrival time, ensuring accurate pattern matching even during network lag.
 
 ---
 
-#### Section 11 — Observability & Audit
+#### Section 12 — Observability & Audit
 
-| Telemetry Type | Required Details |
-|---|---|
-| Metrics | `surveillance.lag.ms`, `alerts.active` |
-| Logs | Processing errors |
-| Traces | N/A (Stream processing) |
-| Audit Events | Action: `CloseCase`, `EscalateCase` |
+| Telemetry Type      | Required Details                                   |
+| ------------------- | -------------------------------------------------- |
+| Metrics             | `surveillance.lag.ms`, `alerts.active`             |
+| Logs                | Processing errors                                  |
+| Traces              | N/A (Stream processing)                            |
+| Audit Events        | Action: `CloseCase`, `EscalateCase`                |
 | Regulatory Evidence | Surveillance logs for SEBON audits [ASR-SURV-001]. |
 
 ---
 
-#### Section 12 — Compliance & Regulatory Traceability
+#### Section 13 — Compliance & Regulatory Traceability
 
 - Market abuse detection [ASR-SURV-001]
 - Audit trails [LCA-AUDIT-001]
 
 ---
 
-#### Section 13 — Extension Points & Contracts
+#### Section 14 — Extension Points & Contracts
 
 **SDK Methods (Platform SDK):**
+
 ```
 SurveillanceClient.evaluateAlert(alertId: string): AlertDecision
 SurveillanceClient.getAlertsByStatus(status: AlertStatus, page: Pagination): AlertPage
@@ -205,17 +206,17 @@ SurveillanceClient.submitSAR(caseId: string, reportPayload: SARReport): SARSubmi
 
 ---
 
-#### Section 14 — Future-Safe Architecture Evaluation
+#### Section 15 — Future-Safe Architecture Evaluation
 
-| Question | Expected Answer |
-|---|---|
-| Can this module support India/Bangladesh via plugin? | Yes. |
-| Can new AI models be swapped? | Yes, via K-09. |
-| Can this run in an air-gapped deployment? | Yes, with local surveillance rules. |
+| Question                                             | Expected Answer                     |
+| ---------------------------------------------------- | ----------------------------------- |
+| Can this module support India/Bangladesh via plugin? | Yes.                                |
+| Can new AI models be swapped?                        | Yes, via K-09.                      |
+| Can this run in an air-gapped deployment?            | Yes, with local surveillance rules. |
 
 ---
 
-#### Section 14.5 — Threat Model
+#### Section 16 — Threat Model
 
 **Attack Vectors & Mitigations:**
 
@@ -245,6 +246,7 @@ SurveillanceClient.submitSAR(caseId: string, reportPayload: SARReport): SARSubmi
    - **Residual Risk:** Insider threat with legitimate access.
 
 **Security Controls:**
+
 - Immutable audit trail (K-07)
 - Maker-checker for case closure
 - Segregation of duties
@@ -252,3 +254,16 @@ SurveillanceClient.submitSAR(caseId: string, reportPayload: SARReport): SARSubmi
 - Encryption of surveillance rules
 - Regular external audits
 - Alert prioritization and triage
+
+---
+
+## Changelog
+
+### Version 1.1.1 (2026-03-10)
+
+**Type:** PATCH  
+**Changes:**
+
+- Standardized section numbering to the sequential 16-section format.
+- Registered surveillance traceability under the compliance code registry.
+- Added changelog metadata for future epic maintenance.

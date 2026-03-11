@@ -1,8 +1,8 @@
-EPIC-ID:    EPIC-K-04
-EPIC NAME:  Plugin Runtime & SDK
-LAYER:      KERNEL
-MODULE:     K-04 Plugin Runtime & SDK
-VERSION:    1.1.0
+EPIC-ID: EPIC-K-04
+EPIC NAME: Plugin Runtime & SDK
+LAYER: KERNEL
+MODULE: K-04 Plugin Runtime & SDK
+VERSION: 1.1.1
 
 ---
 
@@ -47,7 +47,7 @@ Deliver the K-04 Plugin Runtime, responsible for the registration, lifecycle man
 #### Section 4 — Jurisdiction Isolation Requirements
 
 1. **Generic Core:** The runtime itself contains zero jurisdiction logic.
-2. **Jurisdiction Plugin:** All jurisdiction-specific code runs *inside* the sandbox managed by this runtime.
+2. **Jurisdiction Plugin:** All jurisdiction-specific code runs _inside_ the sandbox managed by this runtime.
 3. **Resolution Flow:** Config Engine dictates which version of a plugin is active for a given tenant/jurisdiction; the runtime enforces that state.
 4. **Hot Reload:** Supported for T1/T2.
 5. **Backward Compatibility:** Deprecated APIs are supported for a minimum of 2 major platform versions.
@@ -66,54 +66,54 @@ Deliver the K-04 Plugin Runtime, responsible for the registration, lifecycle man
 
 #### Section 6 — Event Model Definition
 
-| Field | Description |
-|---|---|
-| Event Name | `PluginStateChangedEvent` |
-| Schema Version | `v1.0.0` |
-| Trigger Condition | A plugin is installed, upgraded, or disabled. |
-| Payload | `{ "plugin_id": "...", "version": "...", "previous_version": "...", "action": "UPGRADE" }` |
-| Consumers | API Gateway (routing updates), Admin Portal |
-| Idempotency Key | `hash(plugin_id + version + action)` |
-| Replay Behavior | Updates the materialized view of active plugins. |
-| Retention Policy | Permanent. |
+| Field             | Description                                                                                |
+| ----------------- | ------------------------------------------------------------------------------------------ |
+| Event Name        | `PluginStateChangedEvent`                                                                  |
+| Schema Version    | `v1.0.0`                                                                                   |
+| Trigger Condition | A plugin is installed, upgraded, or disabled.                                              |
+| Payload           | `{ "plugin_id": "...", "version": "...", "previous_version": "...", "action": "UPGRADE" }` |
+| Consumers         | API Gateway (routing updates), Admin Portal                                                |
+| Idempotency Key   | `hash(plugin_id + version + action)`                                                       |
+| Replay Behavior   | Updates the materialized view of active plugins.                                           |
+| Retention Policy  | Permanent.                                                                                 |
 
 ---
 
-#### Section 6.5 — Command Model Definition
+#### Section 7 — Command Model Definition
 
-| Field | Description |
-|---|---|
-| Command Name | `RegisterPluginCommand` |
-| Schema Version | `v1.0.0` |
+| Field            | Description                                                                     |
+| ---------------- | ------------------------------------------------------------------------------- |
+| Command Name     | `RegisterPluginCommand`                                                         |
+| Schema Version   | `v1.0.0`                                                                        |
 | Validation Rules | Plugin signed, signature valid, compatibility matrix satisfied, benchmarks pass |
-| Handler | `PluginCommandHandler` in K-04 Plugin Runtime |
-| Success Event | `PluginRegistered` |
-| Failure Event | `PluginRegistrationFailed` |
-| Idempotency | Command ID must be unique; duplicate commands return original result |
+| Handler          | `PluginCommandHandler` in K-04 Plugin Runtime                                   |
+| Success Event    | `PluginRegistered`                                                              |
+| Failure Event    | `PluginRegistrationFailed`                                                      |
+| Idempotency      | Command ID must be unique; duplicate commands return original result            |
 
-| Field | Description |
-|---|---|
-| Command Name | `UnregisterPluginCommand` |
-| Schema Version | `v1.0.0` |
-| Validation Rules | Plugin exists, no active dependencies, requester authorized |
-| Handler | `PluginCommandHandler` in K-04 Plugin Runtime |
-| Success Event | `PluginUnregistered` |
-| Failure Event | `PluginUnregistrationFailed` |
-| Idempotency | Command ID must be unique; duplicate commands return original result |
+| Field            | Description                                                          |
+| ---------------- | -------------------------------------------------------------------- |
+| Command Name     | `UnregisterPluginCommand`                                            |
+| Schema Version   | `v1.0.0`                                                             |
+| Validation Rules | Plugin exists, no active dependencies, requester authorized          |
+| Handler          | `PluginCommandHandler` in K-04 Plugin Runtime                        |
+| Success Event    | `PluginUnregistered`                                                 |
+| Failure Event    | `PluginUnregistrationFailed`                                         |
+| Idempotency      | Command ID must be unique; duplicate commands return original result |
 
-| Field | Description |
-|---|---|
-| Command Name | `InvokePluginCommand` |
-| Schema Version | `v1.0.0` |
+| Field            | Description                                                                        |
+| ---------------- | ---------------------------------------------------------------------------------- |
+| Command Name     | `InvokePluginCommand`                                                              |
+| Schema Version   | `v1.0.0`                                                                           |
 | Validation Rules | Plugin registered and active, input parameters valid, resource quotas not exceeded |
-| Handler | `PluginInvocationHandler` in K-04 Plugin Runtime |
-| Success Event | `PluginInvoked` |
-| Failure Event | `PluginInvocationFailed` |
-| Idempotency | Command ID must be unique; duplicate commands return cached result |
+| Handler          | `PluginInvocationHandler` in K-04 Plugin Runtime                                   |
+| Success Event    | `PluginInvoked`                                                                    |
+| Failure Event    | `PluginInvocationFailed`                                                           |
+| Idempotency      | Command ID must be unique; duplicate commands return cached result                 |
 
 ---
 
-#### Section 7 — AI Integration Requirements
+#### Section 8 — AI Integration Requirements
 
 - **AI Hook Type:** Anomaly Detection
 - **Workflow Steps Exposed:** T3 plugin execution monitoring.
@@ -125,28 +125,28 @@ Deliver the K-04 Plugin Runtime, responsible for the registration, lifecycle man
 
 ---
 
-#### Section 8 — NFRs
+#### Section 9 — NFRs
 
-| NFR Category | Required Targets |
-|---|---|
-| Latency / Throughput | Sandbox IPC overhead < 2ms |
-| Scalability | N/A (runs alongside platform nodes) |
-| Availability | 99.999% uptime for the runtime host |
-| Consistency Model | Strong consistency on plugin state |
-| Security | T3 execution fully isolated; no host filesystem access; cgroup-based resource limits enforced |
-| Data Residency | N/A (code binaries) |
-| Data Retention | Retain manifest history indefinitely |
-| Auditability | All plugin state changes logged [LCA-AUDIT-001] |
-| Observability | Metrics: `plugin.crash.count`, `plugin.ipc.latency` |
-| Extensibility | N/A |
-| Upgrade / Compatibility | Strict enforcement of `platform_min_version` |
-| On-Prem Constraints | Able to load plugins from offline signed bundle |
-| Ledger Integrity | N/A |
-| Dual-Calendar Correctness | Correct processing of plugin validity dates |
+| NFR Category              | Required Targets                                                                              |
+| ------------------------- | --------------------------------------------------------------------------------------------- |
+| Latency / Throughput      | Sandbox IPC overhead < 2ms                                                                    |
+| Scalability               | N/A (runs alongside platform nodes)                                                           |
+| Availability              | 99.999% uptime for the runtime host                                                           |
+| Consistency Model         | Strong consistency on plugin state                                                            |
+| Security                  | T3 execution fully isolated; no host filesystem access; cgroup-based resource limits enforced |
+| Data Residency            | N/A (code binaries)                                                                           |
+| Data Retention            | Retain manifest history indefinitely                                                          |
+| Auditability              | All plugin state changes logged [LCA-AUDIT-001]                                               |
+| Observability             | Metrics: `plugin.crash.count`, `plugin.ipc.latency`                                           |
+| Extensibility             | N/A                                                                                           |
+| Upgrade / Compatibility   | Strict enforcement of `platform_min_version`                                                  |
+| On-Prem Constraints       | Able to load plugins from offline signed bundle                                               |
+| Ledger Integrity          | N/A                                                                                           |
+| Dual-Calendar Correctness | Correct processing of plugin validity dates                                                   |
 
 ---
 
-#### Section 9 — Acceptance Criteria
+#### Section 10 — Acceptance Criteria
 
 1. **Given** an unsigned T3 plugin bundle, **When** deployment is attempted, **Then** the runtime rejects it synchronously and logs a security event.
 2. **Given** a valid plugin requiring platform version 3.0, **When** deployed on platform version 2.5, **Then** it is rejected due to compatibility matrix violation.
@@ -155,7 +155,7 @@ Deliver the K-04 Plugin Runtime, responsible for the registration, lifecycle man
 
 ---
 
-#### Section 10 — Failure Modes & Resilience
+#### Section 11 — Failure Modes & Resilience
 
 - **T3 Sandbox Crash:** Auto-restart with exponential backoff.
 - **Signature Verification Failure:** Permanent rejection.
@@ -165,25 +165,25 @@ Deliver the K-04 Plugin Runtime, responsible for the registration, lifecycle man
 
 ---
 
-#### Section 11 — Observability & Audit
+#### Section 12 — Observability & Audit
 
-| Telemetry Type | Required Details |
-|---|---|
-| Metrics | `plugin.load.time`, `sandbox.memory.usage`, `sandbox.cpu.usage` |
-| Logs | Structured: `plugin_id`, `action`, `status` |
-| Traces | Span `PluginRuntime.invokeHook` |
-| Audit Events | Action: `InstallPlugin`, `DisablePlugin` |
-| Regulatory Evidence | Verified cryptographic hash of running code for audits. |
+| Telemetry Type      | Required Details                                                |
+| ------------------- | --------------------------------------------------------------- |
+| Metrics             | `plugin.load.time`, `sandbox.memory.usage`, `sandbox.cpu.usage` |
+| Logs                | Structured: `plugin_id`, `action`, `status`                     |
+| Traces              | Span `PluginRuntime.invokeHook`                                 |
+| Audit Events        | Action: `InstallPlugin`, `DisablePlugin`                        |
+| Regulatory Evidence | Verified cryptographic hash of running code for audits.         |
 
 ---
 
-#### Section 12 — Compliance & Regulatory Traceability
+#### Section 13 — Compliance & Regulatory Traceability
 
 - System integrity and change control [LCA-AUDIT-001]
 
 ---
 
-#### Section 13 — Extension Points & Contracts
+#### Section 14 — Extension Points & Contracts
 
 - **SDK Contract:**
   - `PluginHost.register(RegisterPluginCommand)` → `PluginRegistered`
@@ -200,13 +200,25 @@ Deliver the K-04 Plugin Runtime, responsible for the registration, lifecycle man
 
 ---
 
-#### Section 14 — Future-Safe Architecture Evaluation
+#### Section 15 — Future-Safe Architecture Evaluation
 
-| Question | Expected Answer |
-|---|---|
-| Can this module support India/Bangladesh via plugin? | Yes — natively designed to host jurisdiction packs; new market = new T1/T2/T3 packs, zero core changes |
-| Can a new exchange be connected? | Yes — new T3 Adapter Pack with FIX/proprietary protocol support |
-| Can this run in an air-gapped deployment? | Yes — offline signed bundles verified against embedded public keys from K-14 |
-| Can WebAssembly (WASM) be used for plugin sandboxing? | Yes — T3 isolation model is abstracted; WASM runtime can replace cgroups in future without API changes |
-| Can a plugin marketplace be added? | Yes — P-01 Pack Certification provides certification; runtime supports versioned package registry |
-| Can plugin dependencies be managed across packs? | Yes — `getDependencyGraph()` provides cycle detection; compatibility matrix enforces version constraints |
+| Question                                              | Expected Answer                                                                                          |
+| ----------------------------------------------------- | -------------------------------------------------------------------------------------------------------- |
+| Can this module support India/Bangladesh via plugin?  | Yes — natively designed to host jurisdiction packs; new market = new T1/T2/T3 packs, zero core changes   |
+| Can a new exchange be connected?                      | Yes — new T3 Adapter Pack with FIX/proprietary protocol support                                          |
+| Can this run in an air-gapped deployment?             | Yes — offline signed bundles verified against embedded public keys from K-14                             |
+| Can WebAssembly (WASM) be used for plugin sandboxing? | Yes — T3 isolation model is abstracted; WASM runtime can replace cgroups in future without API changes   |
+| Can a plugin marketplace be added?                    | Yes — P-01 Pack Certification provides certification; runtime supports versioned package registry        |
+| Can plugin dependencies be managed across packs?      | Yes — `getDependencyGraph()` provides cycle detection; compatibility matrix enforces version constraints |
+
+---
+
+## Changelog
+
+### Version 1.1.1 (2026-03-10)
+
+**Type:** PATCH  
+**Changes:**
+
+- Standardized section numbering to the sequential 16-section format.
+- Added changelog metadata for future epic maintenance.

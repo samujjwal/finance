@@ -1,8 +1,8 @@
-EPIC-ID:    EPIC-D-06
-EPIC NAME:  Risk Engine
-LAYER:      DOMAIN
-MODULE:     D-06 Risk Engine
-VERSION:    1.1.0
+EPIC-ID: EPIC-D-06
+EPIC NAME: Risk Engine
+LAYER: DOMAIN
+MODULE: D-06 Risk Engine
+VERSION: 1.1.1
 
 ---
 
@@ -40,7 +40,7 @@ Deliver the D-06 Risk Engine, providing pre-trade, post-trade, and real-time ris
 
 #### Section 4 — Jurisdiction Isolation Requirements
 
-1. **Generic Core:** The calculation orchestration (Value = Qty * Price * Haircut) is generic.
+1. **Generic Core:** The calculation orchestration (Value = Qty _ Price _ Haircut) is generic.
 2. **Jurisdiction Plugin:** Jurisdiction-specific margin rules (e.g., initial margin percentages, maintenance thresholds) are defined exclusively in T1 Config Packs. No jurisdiction-specific values (margin rates, regulatory references) are hardcoded in this epic or its implementation. [ARB D.5]
 3. **Resolution Flow:** Config Engine maps `jurisdiction` to the correct margin rate tables.
 4. **Hot Reload:** Changes to margin rates take effect instantly.
@@ -61,54 +61,54 @@ Deliver the D-06 Risk Engine, providing pre-trade, post-trade, and real-time ris
 
 #### Section 6 — Event Model Definition
 
-| Field | Description |
-|---|---|
-| Event Name | `MarginCallIssued` |
-| Schema Version | `v1.0.0` |
-| Trigger Condition | Account margin ratio falls below maintenance margin threshold. |
-| Payload | `{ "account_id": "...", "shortfall": 50000, "deadline_bs": "...", "status": "ISSUED" }` |
-| Consumers | Notification Service, Client Portal, OMS (to block new buys) |
-| Idempotency Key | `hash(account_id + calculation_timestamp)` |
-| Replay Behavior | Updates read model. |
-| Retention Policy | 10 years. |
+| Field             | Description                                                                             |
+| ----------------- | --------------------------------------------------------------------------------------- |
+| Event Name        | `MarginCallIssued`                                                                      |
+| Schema Version    | `v1.0.0`                                                                                |
+| Trigger Condition | Account margin ratio falls below maintenance margin threshold.                          |
+| Payload           | `{ "account_id": "...", "shortfall": 50000, "deadline_bs": "...", "status": "ISSUED" }` |
+| Consumers         | Notification Service, Client Portal, OMS (to block new buys)                            |
+| Idempotency Key   | `hash(account_id + calculation_timestamp)`                                              |
+| Replay Behavior   | Updates read model.                                                                     |
+| Retention Policy  | 10 years.                                                                               |
 
 ---
 
-#### Section 6.5 — Command Model Definition
+#### Section 7 — Command Model Definition
 
-| Field | Description |
-|---|---|
-| Command Name | `EvaluateRiskCommand` |
-| Schema Version | `v1.0.0` |
+| Field            | Description                                                 |
+| ---------------- | ----------------------------------------------------------- |
+| Command Name     | `EvaluateRiskCommand`                                       |
+| Schema Version   | `v1.0.0`                                                    |
 | Validation Rules | Order exists, risk rules configured, pricing data available |
-| Handler | `RiskCommandHandler` in D-06 Risk Engine |
-| Success Event | `RiskEvaluated` |
-| Failure Event | `RiskEvaluationFailed` |
-| Idempotency | Same order context returns cached evaluation |
+| Handler          | `RiskCommandHandler` in D-06 Risk Engine                    |
+| Success Event    | `RiskEvaluated`                                             |
+| Failure Event    | `RiskEvaluationFailed`                                      |
+| Idempotency      | Same order context returns cached evaluation                |
 
-| Field | Description |
-|---|---|
-| Command Name | `IssueMarginCallCommand` |
-| Schema Version | `v1.0.0` |
-| Validation Rules | Account exists, margin shortfall calculated, deadline valid |
-| Handler | `MarginCommandHandler` in D-06 Risk Engine |
-| Success Event | `MarginCallIssued` |
-| Failure Event | `MarginCallIssueFailed` |
-| Idempotency | Command ID must be unique; duplicate commands return original result |
+| Field            | Description                                                          |
+| ---------------- | -------------------------------------------------------------------- |
+| Command Name     | `IssueMarginCallCommand`                                             |
+| Schema Version   | `v1.0.0`                                                             |
+| Validation Rules | Account exists, margin shortfall calculated, deadline valid          |
+| Handler          | `MarginCommandHandler` in D-06 Risk Engine                           |
+| Success Event    | `MarginCallIssued`                                                   |
+| Failure Event    | `MarginCallIssueFailed`                                              |
+| Idempotency      | Command ID must be unique; duplicate commands return original result |
 
-| Field | Description |
-|---|---|
-| Command Name | `ForceLiquidationCommand` |
-| Schema Version | `v1.0.0` |
-| Validation Rules | Margin call expired, positions exist, requester authorized |
-| Handler | `LiquidationHandler` in D-06 Risk Engine |
-| Success Event | `ForcedLiquidationInstruction` |
-| Failure Event | `ForcedLiquidationFailed` |
-| Idempotency | Command ID must be unique; duplicate commands return original result |
+| Field            | Description                                                          |
+| ---------------- | -------------------------------------------------------------------- |
+| Command Name     | `ForceLiquidationCommand`                                            |
+| Schema Version   | `v1.0.0`                                                             |
+| Validation Rules | Margin call expired, positions exist, requester authorized           |
+| Handler          | `LiquidationHandler` in D-06 Risk Engine                             |
+| Success Event    | `ForcedLiquidationInstruction`                                       |
+| Failure Event    | `ForcedLiquidationFailed`                                            |
+| Idempotency      | Command ID must be unique; duplicate commands return original result |
 
 ---
 
-#### Section 7 — AI Integration Requirements
+#### Section 8 — AI Integration Requirements
 
 - **AI Hook Type:** Predictive Model
 - **Workflow Steps Exposed:** Real-time risk exposure monitoring.
@@ -120,28 +120,28 @@ Deliver the D-06 Risk Engine, providing pre-trade, post-trade, and real-time ris
 
 ---
 
-#### Section 8 — NFRs
+#### Section 9 — NFRs
 
-| NFR Category | Required Targets |
-|---|---|
-| Latency / Throughput | Pre-trade risk check < 2ms |
-| Scalability | Horizontally scalable based on active accounts |
-| Availability | 99.999% during market hours |
-| Consistency Model | Strong consistency for pre-trade blocks |
-| Security | Row-level tenant isolation |
-| Data Residency | Enforced via K-08 |
-| Data Retention | Retain margin call history 10 years |
-| Auditability | Manual overrides logged |
-| Observability | Metrics: `risk.check.latency`, `margin.call.count` |
-| Extensibility | Custom risk models via T3 |
-| Upgrade / Compatibility | N/A |
-| On-Prem Constraints | Fully functional locally |
-| Ledger Integrity | Relies on K-16 for cash/collateral balances |
-| Dual-Calendar Correctness | Margin call deadlines accurate |
+| NFR Category              | Required Targets                                   |
+| ------------------------- | -------------------------------------------------- |
+| Latency / Throughput      | Pre-trade risk check < 2ms                         |
+| Scalability               | Horizontally scalable based on active accounts     |
+| Availability              | 99.999% during market hours                        |
+| Consistency Model         | Strong consistency for pre-trade blocks            |
+| Security                  | Row-level tenant isolation                         |
+| Data Residency            | Enforced via K-08                                  |
+| Data Retention            | Retain margin call history 10 years                |
+| Auditability              | Manual overrides logged                            |
+| Observability             | Metrics: `risk.check.latency`, `margin.call.count` |
+| Extensibility             | Custom risk models via T3                          |
+| Upgrade / Compatibility   | N/A                                                |
+| On-Prem Constraints       | Fully functional locally                           |
+| Ledger Integrity          | Relies on K-16 for cash/collateral balances        |
+| Dual-Calendar Correctness | Margin call deadlines accurate                     |
 
 ---
 
-#### Section 9 — Acceptance Criteria
+#### Section 10 — Acceptance Criteria
 
 1. **Given** an account with 25% margin ratio, **When** evaluated against a SEBON T1 Config requiring 20% maintenance, **Then** no margin call is issued.
 2. **Given** the market drops and the ratio hits 18%, **When** evaluated, **Then** a `MarginCallIssued` event is fired with a dual-calendar deadline.
@@ -149,36 +149,36 @@ Deliver the D-06 Risk Engine, providing pre-trade, post-trade, and real-time ris
 
 ---
 
-#### Section 10 — Failure Modes & Resilience
+#### Section 11 — Failure Modes & Resilience
 
 - **Pricing Feed Stale:** Risk Engine assumes worst-case historical volatility penalty until prices refresh.
 - **Rules Engine Down:** Fails closed (blocks new orders) to prevent uncovered exposure.
 
 ---
 
-#### Section 11 — Observability & Audit
+#### Section 12 — Observability & Audit
 
-| Telemetry Type | Required Details |
-|---|---|
-| Metrics | `risk.margin.breach_rate`, `risk.eval.latency` |
-| Logs | Rejection reasons |
-| Traces | Span `RiskEngine.evaluateOrder` |
-| Audit Events | Action: `IssueMarginCall`, `ForceLiquidation` |
+| Telemetry Type      | Required Details                                        |
+| ------------------- | ------------------------------------------------------- |
+| Metrics             | `risk.margin.breach_rate`, `risk.eval.latency`          |
+| Logs                | Rejection reasons                                       |
+| Traces              | Span `RiskEngine.evaluateOrder`                         |
+| Audit Events        | Action: `IssueMarginCall`, `ForceLiquidation`           |
 | Regulatory Evidence | SEBON Directive 2082 compliance reports [ASR-MARG-001]. |
 
 ---
 
-#### Section 12 — Compliance & Regulatory Traceability
+#### Section 13 — Compliance & Regulatory Traceability
 
 - Margin trading regulations [LCA-011]
 - Systemic risk controls [ASR-MARG-001]
 
 ---
 
-#### Section 13 — Extension Points & Contracts
+#### Section 14 — Extension Points & Contracts
 
 - **SDK Contract:** `RiskClient.evaluatePreTrade(order)`, `RiskClient.getExposure(clientId)`, `RiskClient.calculateMargin(portfolioId)`.
-- **Jurisdiction Plugin Extension Points:** T2 Rule Packs for margin eligibility (e.g., SEBON 30% initial margin, NRB capital adequacy).
+- **Jurisdiction Plugin Extension Points:** T2 Rule Packs for margin eligibility and supervisory thresholds (e.g., SEBON margin directives, NRB capital adequacy).
 
 **K-05 Events Emitted (standard envelope compliant):**
 | Event Type | Trigger | Key Payload Fields |
@@ -198,17 +198,17 @@ Deliver the D-06 Risk Engine, providing pre-trade, post-trade, and real-time ris
 
 ---
 
-#### Section 14 — Future-Safe Architecture Evaluation
+#### Section 15 — Future-Safe Architecture Evaluation
 
-| Question | Expected Answer |
-|---|---|
-| Can this module support India/Bangladesh via plugin? | Yes. |
-| Can margin rates change without redeploy? | Yes. |
-| Can this run in an air-gapped deployment? | Yes, with local pricing feeds. |
+| Question                                             | Expected Answer                |
+| ---------------------------------------------------- | ------------------------------ |
+| Can this module support India/Bangladesh via plugin? | Yes.                           |
+| Can margin rates change without redeploy?            | Yes.                           |
+| Can this run in an air-gapped deployment?            | Yes, with local pricing feeds. |
 
 ---
 
-#### Section 14.5 — Threat Model
+#### Section 16 — Threat Model
 
 **Attack Vectors & Mitigations:**
 
@@ -238,6 +238,7 @@ Deliver the D-06 Risk Engine, providing pre-trade, post-trade, and real-time ris
    - **Residual Risk:** Sophisticated identity obfuscation.
 
 **Security Controls:**
+
 - Immutable ledger integration (K-16)
 - Maker-checker for critical operations
 - Real-time risk monitoring
@@ -245,3 +246,16 @@ Deliver the D-06 Risk Engine, providing pre-trade, post-trade, and real-time ris
 - Cross-account aggregation
 - Audit logging of all risk operations
 - AI-based anomaly detection
+
+---
+
+## Changelog
+
+### Version 1.1.1 (2026-03-10)
+
+**Type:** PATCH  
+**Changes:**
+
+- Standardized section numbering to the sequential 16-section format.
+- Registered margin-operation traceability codes and aligned risk evidence references.
+- Added changelog metadata for future epic maintenance.

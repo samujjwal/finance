@@ -1,9 +1,9 @@
-EPIC-ID:    EPIC-D-13
-EPIC NAME:  Client Money Reconciliation
-LAYER:      DOMAIN
-MODULE:     D-13 Client Money Reconciliation
-VERSION:    1.0.0
-ARB-REF:    P1-11
+EPIC-ID: EPIC-D-13
+EPIC NAME: Client Money Reconciliation
+LAYER: DOMAIN
+MODULE: D-13 Client Money Reconciliation
+VERSION: 1.0.1
+ARB-REF: P1-11
 
 ---
 
@@ -69,44 +69,44 @@ Deliver the D-13 Client Money Reconciliation module to ensure that client funds 
 
 #### Section 6 — Event Model Definition
 
-| Field | Description |
-|---|---|
-| Event Name | `ClientMoneySegregationBreachEvent` |
-| Schema Version | `v1.0.0` |
-| Trigger Condition | Daily segregation check detects client money shortfall. |
-| Payload | `{ "recon_date": "...", "total_obligation": "1000000.00", "total_held": "990000.00", "shortfall": "10000.00", "severity": "CRITICAL" }` |
-| Consumers | K-06 Alerting (CRITICAL), R-02 Incident Notification, Compliance Officers, Senior Management |
-| Idempotency Key | `hash(recon_date + operator_id)` |
-| Replay Behavior | N/A (alert event). |
-| Retention Policy | Permanent. |
+| Field             | Description                                                                                                                             |
+| ----------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
+| Event Name        | `ClientMoneySegregationBreachEvent`                                                                                                     |
+| Schema Version    | `v1.0.0`                                                                                                                                |
+| Trigger Condition | Daily segregation check detects client money shortfall.                                                                                 |
+| Payload           | `{ "recon_date": "...", "total_obligation": "1000000.00", "total_held": "990000.00", "shortfall": "10000.00", "severity": "CRITICAL" }` |
+| Consumers         | K-06 Alerting (CRITICAL), R-02 Incident Response & Escalation, Compliance Officers, Senior Management                                   |
+| Idempotency Key   | `hash(recon_date + operator_id)`                                                                                                        |
+| Replay Behavior   | N/A (alert event).                                                                                                                      |
+| Retention Policy  | Permanent.                                                                                                                              |
 
 ---
 
-#### Section 6.5 — Command Model Definition
+#### Section 7 — Command Model Definition
 
-| Field | Description |
-|---|---|
-| Command Name | `RunReconciliationCommand` |
-| Schema Version | `v1.0.0` |
+| Field            | Description                                                |
+| ---------------- | ---------------------------------------------------------- |
+| Command Name     | `RunReconciliationCommand`                                 |
+| Schema Version   | `v1.0.0`                                                   |
 | Validation Rules | Recon date valid, statement ingested, requester authorized |
-| Handler | `ReconciliationCommandHandler` in D-13 |
-| Success Event | `ReconciliationCompleted` |
-| Failure Event | `ReconciliationFailed` |
-| Idempotency | Run ID must be unique per recon_date + operator |
+| Handler          | `ReconciliationCommandHandler` in D-13                     |
+| Success Event    | `ReconciliationCompleted`                                  |
+| Failure Event    | `ReconciliationFailed`                                     |
+| Idempotency      | Run ID must be unique per recon_date + operator            |
 
-| Field | Description |
-|---|---|
-| Command Name | `ResolveBreakCommand` |
-| Schema Version | `v1.0.0` |
+| Field            | Description                                                                     |
+| ---------------- | ------------------------------------------------------------------------------- |
+| Command Name     | `ResolveBreakCommand`                                                           |
+| Schema Version   | `v1.0.0`                                                                        |
 | Validation Rules | Break exists, resolution reason provided, maker-checker for amounts > threshold |
-| Handler | `BreakResolutionHandler` in D-13 |
-| Success Event | `BreakResolved` |
-| Failure Event | `BreakResolutionFailed` |
-| Idempotency | Command ID must be unique |
+| Handler          | `BreakResolutionHandler` in D-13                                                |
+| Success Event    | `BreakResolved`                                                                 |
+| Failure Event    | `BreakResolutionFailed`                                                         |
+| Idempotency      | Command ID must be unique                                                       |
 
 ---
 
-#### Section 7 — AI Integration Requirements
+#### Section 8 — AI Integration Requirements
 
 - **AI Hook Type:** Pattern Recognition / Anomaly Detection
 - **Workflow Steps Exposed:** Break classification and matching.
@@ -118,28 +118,28 @@ Deliver the D-13 Client Money Reconciliation module to ensure that client funds 
 
 ---
 
-#### Section 8 — NFRs
+#### Section 9 — NFRs
 
-| NFR Category | Required Targets |
-|---|---|
-| Latency / Throughput | Daily recon for 100K transactions completes in < 30 minutes |
-| Scalability | Parallel matching workers; scales with transaction volume |
-| Availability | 99.99% uptime |
-| Consistency Model | Strong consistency for break state |
-| Security | Statement data encrypted at rest; access restricted to operations/compliance roles |
-| Data Residency | Reconciliation data follows K-08 residency rules |
-| Data Retention | Reconciliation records retained per audit policy (minimum 10 years) |
-| Auditability | All break resolutions and escalations logged to K-07 |
-| Observability | Metrics: `recon.match.rate`, `recon.break.count`, `recon.segregation.status`, `recon.duration` |
-| Extensibility | New statement formats via T3 Adapter Packs |
-| Upgrade / Compatibility | Backward compatible API |
-| On-Prem Constraints | Operates with local statement file ingestion |
-| Ledger Integrity | Validates against K-16 ledger balances |
-| Dual-Calendar Correctness | Reconciliation dates correctly mapped to BS fiscal periods |
+| NFR Category              | Required Targets                                                                               |
+| ------------------------- | ---------------------------------------------------------------------------------------------- |
+| Latency / Throughput      | Daily recon for 100K transactions completes in < 30 minutes                                    |
+| Scalability               | Parallel matching workers; scales with transaction volume                                      |
+| Availability              | 99.99% uptime                                                                                  |
+| Consistency Model         | Strong consistency for break state                                                             |
+| Security                  | Statement data encrypted at rest; access restricted to operations/compliance roles             |
+| Data Residency            | Reconciliation data follows K-08 residency rules                                               |
+| Data Retention            | Reconciliation records retained per audit policy (minimum 10 years)                            |
+| Auditability              | All break resolutions and escalations logged to K-07                                           |
+| Observability             | Metrics: `recon.match.rate`, `recon.break.count`, `recon.segregation.status`, `recon.duration` |
+| Extensibility             | New statement formats via T3 Adapter Packs                                                     |
+| Upgrade / Compatibility   | Backward compatible API                                                                        |
+| On-Prem Constraints       | Operates with local statement file ingestion                                                   |
+| Ledger Integrity          | Validates against K-16 ledger balances                                                         |
+| Dual-Calendar Correctness | Reconciliation dates correctly mapped to BS fiscal periods                                     |
 
 ---
 
-#### Section 9 — Acceptance Criteria
+#### Section 10 — Acceptance Criteria
 
 1. **Given** end of trading day, **When** the daily recon job runs, **Then** it matches internal ledger positions against the bank statement and produces a reconciliation report within 30 minutes.
 2. **Given** a $10,000 break detected, **When** unresolved for 3 business days, **Then** it auto-escalates to compliance officer with full audit trail.
@@ -149,7 +149,7 @@ Deliver the D-13 Client Money Reconciliation module to ensure that client funds 
 
 ---
 
-#### Section 10 — Failure Modes & Resilience
+#### Section 11 — Failure Modes & Resilience
 
 - **Statement Ingestion Failure:** Recon job retries ingestion 3 times with backoff; if all fail, recon is marked FAILED and alert raised. Recon can be re-triggered manually once statement is available.
 - **K-16 Ledger Unavailable:** Recon job pauses; retries after K-16 recovery; alert raised.
@@ -157,38 +157,97 @@ Deliver the D-13 Client Money Reconciliation module to ensure that client funds 
 
 ---
 
-#### Section 11 — Observability & Audit
+#### Section 12 — Observability & Audit
 
-| Telemetry Type | Required Details |
-|---|---|
-| Metrics | `recon.run.duration`, `recon.match.count`, `recon.break.count`, `recon.segregation.status` |
-| Logs | Structured: `run_id`, `recon_date`, `status`, `break_count` |
-| Traces | Span per reconciliation run |
-| Audit Events | `ReconciliationCompleted`, `BreakResolved`, `BreakEscalated` [LCA-AUDIT-001] |
-| Regulatory Evidence | Daily reconciliation reports and segregation verification [LCA-RECON-001] |
+| Telemetry Type      | Required Details                                                                           |
+| ------------------- | ------------------------------------------------------------------------------------------ |
+| Metrics             | `recon.run.duration`, `recon.match.count`, `recon.break.count`, `recon.segregation.status` |
+| Logs                | Structured: `run_id`, `recon_date`, `status`, `break_count`                                |
+| Traces              | Span per reconciliation run                                                                |
+| Audit Events        | `ReconciliationCompleted`, `BreakResolved`, `BreakEscalated` [LCA-AUDIT-001]               |
+| Regulatory Evidence | Daily reconciliation reports and segregation verification [LCA-RECON-001]                  |
 
 ---
 
-#### Section 12 — Compliance & Regulatory Traceability
+#### Section 13 — Compliance & Regulatory Traceability
 
-- Client money segregation [LCA-SEGREG-001]
+- Client money segregation [LCA-SEG-001]
 - Daily reconciliation requirement [LCA-RECON-001]
 - Audit trails [LCA-AUDIT-001]
 - Break escalation and resolution [LCA-OPS-001]
 
 ---
 
-#### Section 13 — Extension Points & Contracts
+#### Section 14 — Extension Points & Contracts
 
 - **SDK Contract:** `ReconClient.runRecon(date)`, `ReconClient.getBreaks(runId)`, `ReconClient.resolveBreak(breakId, resolution)`.
 - **Jurisdiction Plugin Extension Points:** T3 Bank Adapter Packs for statement ingestion; T2 Rule Packs for matching rules.
 
 ---
 
-#### Section 14 — Future-Safe Architecture Evaluation
+#### Section 15 — Future-Safe Architecture Evaluation
 
-| Question | Expected Answer |
-|---|---|
+| Question                                             | Expected Answer                                    |
+| ---------------------------------------------------- | -------------------------------------------------- |
 | Can this module support India/Bangladesh via plugin? | Yes, via new bank adapter and matching rule packs. |
-| Can new bank formats be added? | Yes, via T3 Adapter Packs. |
-| Can this run in an air-gapped deployment? | Yes, with local file-based statement ingestion. |
+| Can new bank formats be added?                       | Yes, via T3 Adapter Packs.                         |
+| Can this run in an air-gapped deployment?            | Yes, with local file-based statement ingestion.    |
+
+---
+
+#### Section 16 — Threat Model
+
+**Attack Vectors & Mitigations:**
+
+1. **Statement Tampering**
+
+- **Threat:** Attacker alters inbound bank or custodian statements to hide breaks or segregation breaches.
+- **Mitigation:** Signed or checksum-verified statement ingestion; source-level integrity checks; immutable storage of original statement artifacts; reconciliation reruns preserved for audit.
+- **Residual Risk:** Compromised upstream banking source.
+
+2. **Break Resolution Fraud**
+
+- **Threat:** Operator resolves breaks incorrectly to conceal misappropriation or operational errors.
+- **Mitigation:** Maker-checker for material resolutions; all resolutions and escalations logged to K-07; aging and repeat-break analytics; supervisory review for unresolved critical breaks.
+- **Residual Risk:** Collusion between multiple reviewers.
+
+3. **Segregation Breach Suppression**
+
+- **Threat:** Critical shortfalls are detected but alerts are suppressed or delayed.
+- **Mitigation:** CRITICAL breach events emitted via K-05/K-06; immutable evidence retained; escalation timers enforced independently of operator action; regulator-notification path through R-02.
+- **Residual Risk:** Coordinated failure across alerting and escalation channels.
+
+4. **Historical Recon Manipulation**
+
+- **Threat:** Historical reconciliation reruns are altered to misrepresent prior control effectiveness.
+- **Mitigation:** Point-in-time ledger and statement snapshots retained; rerun metadata versioned; prior outputs preserved; audit trail records who initiated reruns and why.
+- **Residual Risk:** Corruption of historical snapshots before retention controls apply.
+
+5. **Sensitive Financial Data Exposure**
+
+- **Threat:** Reconciliation data leaks client balances, bank references, or break details.
+- **Mitigation:** Encryption at rest; strict RBAC for operations and compliance; masked exports; access auditing; network segmentation for statement-ingestion endpoints.
+- **Residual Risk:** Insider misuse with legitimate access.
+
+**Security Controls:**
+
+- Integrity validation for inbound statements
+- Maker-checker for material break resolutions
+- Immutable reconciliation evidence retention
+- Escalation automation with audit trails
+- Encryption of reconciliation and statement data
+- RBAC for operations and compliance roles
+- Historical snapshot preservation for reruns
+
+---
+
+## Changelog
+
+### Version 1.0.1 (2026-03-10)
+
+**Type:** PATCH  
+**Changes:**
+
+- Standardized section numbering to the sequential 16-section format.
+- Normalized client-money segregation traceability to the shared segregation control code.
+- Added changelog metadata for future epic maintenance.

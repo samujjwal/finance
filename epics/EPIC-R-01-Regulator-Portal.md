@@ -1,8 +1,8 @@
-EPIC-ID:    EPIC-R-01
-EPIC NAME:  Regulator Portal & Evidence Export
-LAYER:      REGULATORY
-MODULE:     R-01 Regulator Interface
-VERSION:    1.0.0
+EPIC-ID: EPIC-R-01
+EPIC NAME: Regulator Portal & Evidence Export
+LAYER: REGULATORY
+MODULE: R-01 Regulator Interface
+VERSION: 1.0.1
 
 ---
 
@@ -70,54 +70,54 @@ Deliver the R-01 Regulator Portal & Evidence Export module, providing a secure, 
 
 #### Section 6 — Event Model Definition
 
-| Field | Description |
-|---|---|
-| Event Name | `EvidencePackageGenerated` |
-| Schema Version | `v1.0.0` |
-| Trigger Condition | A regulator requests an evidence package and it is successfully generated. |
-| Payload | `{ "package_id": "...", "regulator_id": "SEBON", "query_params": {...}, "file_size_mb": 125, "signature": "...", "timestamp_bs": "..." }` |
-| Consumers | Audit Framework, Notification Service, Observability |
-| Idempotency Key | `hash(package_id)` |
-| Replay Behavior | Updates the materialized view of generated packages. |
-| Retention Policy | Permanent. |
+| Field             | Description                                                                                                                               |
+| ----------------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
+| Event Name        | `EvidencePackageGenerated`                                                                                                                |
+| Schema Version    | `v1.0.0`                                                                                                                                  |
+| Trigger Condition | A regulator requests an evidence package and it is successfully generated.                                                                |
+| Payload           | `{ "package_id": "...", "regulator_id": "SEBON", "query_params": {...}, "file_size_mb": 125, "signature": "...", "timestamp_bs": "..." }` |
+| Consumers         | Audit Framework, Notification Service, Observability                                                                                      |
+| Idempotency Key   | `hash(package_id)`                                                                                                                        |
+| Replay Behavior   | Updates the materialized view of generated packages.                                                                                      |
+| Retention Policy  | Permanent.                                                                                                                                |
 
 ---
 
-#### Section 6.5 — Command Model Definition
+#### Section 7 — Command Model Definition
 
-| Field | Description |
-|---|---|
-| Command Name | `ExecuteQueryCommand` |
-| Schema Version | `v1.0.0` |
+| Field            | Description                                                            |
+| ---------------- | ---------------------------------------------------------------------- |
+| Command Name     | `ExecuteQueryCommand`                                                  |
+| Schema Version   | `v1.0.0`                                                               |
 | Validation Rules | Query syntax valid, requester authorized, jurisdiction access verified |
-| Handler | `QueryCommandHandler` in R-01 Regulator Portal |
-| Success Event | `QueryExecuted` |
-| Failure Event | `QueryExecutionFailed` |
-| Idempotency | Same query parameters return cached result |
+| Handler          | `QueryCommandHandler` in R-01 Regulator Portal                         |
+| Success Event    | `QueryExecuted`                                                        |
+| Failure Event    | `QueryExecutionFailed`                                                 |
+| Idempotency      | Same query parameters return cached result                             |
 
-| Field | Description |
-|---|---|
-| Command Name | `GenerateEvidencePackageCommand` |
-| Schema Version | `v1.0.0` |
+| Field            | Description                                                           |
+| ---------------- | --------------------------------------------------------------------- |
+| Command Name     | `GenerateEvidencePackageCommand`                                      |
+| Schema Version   | `v1.0.0`                                                              |
 | Validation Rules | Query parameters valid, requester authorized, export format supported |
-| Handler | `EvidenceCommandHandler` in R-01 Regulator Portal |
-| Success Event | `EvidencePackageGenerated` |
-| Failure Event | `EvidencePackageGenerationFailed` |
-| Idempotency | Command ID must be unique; duplicate commands return cached package |
+| Handler          | `EvidenceCommandHandler` in R-01 Regulator Portal                     |
+| Success Event    | `EvidencePackageGenerated`                                            |
+| Failure Event    | `EvidencePackageGenerationFailed`                                     |
+| Idempotency      | Command ID must be unique; duplicate commands return cached package   |
 
-| Field | Description |
-|---|---|
-| Command Name | `SubmitAttestationCommand` |
-| Schema Version | `v1.0.0` |
-| Validation Rules | Attestation type valid, period valid, requester authorized |
-| Handler | `AttestationCommandHandler` in R-01 Regulator Portal |
-| Success Event | `AttestationSubmitted` |
-| Failure Event | `AttestationSubmissionFailed` |
-| Idempotency | Command ID must be unique; duplicate commands return original result |
+| Field            | Description                                                          |
+| ---------------- | -------------------------------------------------------------------- |
+| Command Name     | `SubmitAttestationCommand`                                           |
+| Schema Version   | `v1.0.0`                                                             |
+| Validation Rules | Attestation type valid, period valid, requester authorized           |
+| Handler          | `AttestationCommandHandler` in R-01 Regulator Portal                 |
+| Success Event    | `AttestationSubmitted`                                               |
+| Failure Event    | `AttestationSubmissionFailed`                                        |
+| Idempotency      | Command ID must be unique; duplicate commands return original result |
 
 ---
 
-#### Section 7 — AI Integration Requirements
+#### Section 8 — AI Integration Requirements
 
 - **AI Hook Type:** Query Assistance / Anomaly Detection
 - **Workflow Steps Exposed:** Query builder assistance, suspicious access detection.
@@ -129,28 +129,28 @@ Deliver the R-01 Regulator Portal & Evidence Export module, providing a secure, 
 
 ---
 
-#### Section 8 — NFRs
+#### Section 9 — NFRs
 
-| NFR Category | Required Targets |
-|---|---|
-| Latency / Throughput | Query execution P99 < 5 seconds for 1M records; evidence package generation < 2 minutes for 100MB |
-| Scalability | Support 100 concurrent regulator sessions |
-| Availability | 99.9% uptime |
-| Consistency Model | Strong consistency for audit trail queries |
-| Security | MFA required for regulator login; all access logged; data encrypted in transit and at rest |
-| Data Residency | Enforced via K-08; regulators can only access their jurisdiction data |
-| Data Retention | Evidence packages retained 10 years |
-| Auditability | All regulator actions logged [LCA-AUDIT-001] |
-| Observability | Metrics: `regulator.query.count`, `evidence.generation.duration`, `regulator.login.count` |
-| Extensibility | New export formats via plugin |
-| Upgrade / Compatibility | Portal versioned independently |
-| On-Prem Constraints | Portal can run locally for on-prem deployments |
-| Ledger Integrity | Queries K-16 for transaction data |
-| Dual-Calendar Correctness | Date filters accurate |
+| NFR Category              | Required Targets                                                                                  |
+| ------------------------- | ------------------------------------------------------------------------------------------------- |
+| Latency / Throughput      | Query execution P99 < 5 seconds for 1M records; evidence package generation < 2 minutes for 100MB |
+| Scalability               | Support 100 concurrent regulator sessions                                                         |
+| Availability              | 99.9% uptime                                                                                      |
+| Consistency Model         | Strong consistency for audit trail queries                                                        |
+| Security                  | MFA required for regulator login; all access logged; data encrypted in transit and at rest        |
+| Data Residency            | Enforced via K-08; regulators can only access their jurisdiction data                             |
+| Data Retention            | Evidence packages retained 10 years                                                               |
+| Auditability              | All regulator actions logged [LCA-AUDIT-001]                                                      |
+| Observability             | Metrics: `regulator.query.count`, `evidence.generation.duration`, `regulator.login.count`         |
+| Extensibility             | New export formats via plugin                                                                     |
+| Upgrade / Compatibility   | Portal versioned independently                                                                    |
+| On-Prem Constraints       | Portal can run locally for on-prem deployments                                                    |
+| Ledger Integrity          | Queries K-16 for transaction data                                                                 |
+| Dual-Calendar Correctness | Date filters accurate                                                                             |
 
 ---
 
-#### Section 9 — Acceptance Criteria
+#### Section 10 — Acceptance Criteria
 
 1. **Given** a SEBON regulator, **When** they log in to the portal, **Then** they can only access Nepal jurisdiction data and all other jurisdictions are hidden.
 2. **Given** a regulator query for all trades by Client X in BS Q1 2082, **When** executed, **Then** the system returns matching records in < 5 seconds with pagination.
@@ -162,7 +162,7 @@ Deliver the R-01 Regulator Portal & Evidence Export module, providing a secure, 
 
 ---
 
-#### Section 10 — Failure Modes & Resilience
+#### Section 11 — Failure Modes & Resilience
 
 - **Query Timeout:** Query aborted after 30 seconds; regulator notified to refine query.
 - **Evidence Generation Failure:** Retry with exponential backoff; if persistent failure, alert operations and provide manual export option.
@@ -171,19 +171,19 @@ Deliver the R-01 Regulator Portal & Evidence Export module, providing a secure, 
 
 ---
 
-#### Section 11 — Observability & Audit
+#### Section 12 — Observability & Audit
 
-| Telemetry Type | Required Details |
-|---|---|
-| Metrics | `regulator.query.latency`, `evidence.package.size`, `regulator.session.duration`, dimensions: `regulator_id`, `jurisdiction` |
-| Logs | Structured: `regulator_id`, `query`, `result_count`, `duration_ms` |
-| Traces | Span `RegulatorPortal.executeQuery` |
-| Audit Events | Action: `RegulatorLogin`, `ExecuteQuery`, `DownloadEvidence` [LCA-AUDIT-001] |
-| Regulatory Evidence | Portal access logs for compliance audits |
+| Telemetry Type      | Required Details                                                                                                             |
+| ------------------- | ---------------------------------------------------------------------------------------------------------------------------- |
+| Metrics             | `regulator.query.latency`, `evidence.package.size`, `regulator.session.duration`, dimensions: `regulator_id`, `jurisdiction` |
+| Logs                | Structured: `regulator_id`, `query`, `result_count`, `duration_ms`                                                           |
+| Traces              | Span `RegulatorPortal.executeQuery`                                                                                          |
+| Audit Events        | Action: `RegulatorLogin`, `ExecuteQuery`, `DownloadEvidence` [LCA-AUDIT-001]                                                 |
+| Regulatory Evidence | Portal access logs for compliance audits                                                                                     |
 
 ---
 
-#### Section 12 — Compliance & Regulatory Traceability
+#### Section 13 — Compliance & Regulatory Traceability
 
 - Regulator access control and audit [LCA-AUDIT-001]
 - Data residency enforcement [ASR-DATA-001]
@@ -191,7 +191,7 @@ Deliver the R-01 Regulator Portal & Evidence Export module, providing a secure, 
 
 ---
 
-#### Section 13 — Extension Points & Contracts
+#### Section 14 — Extension Points & Contracts
 
 - **SDK Contract:** `RegulatorPortalClient.executeQuery(query)`, `RegulatorPortalClient.generateEvidencePackage(params)`, `RegulatorPortalClient.submitAttestation(data)`.
 - **Export Format Interface:** `ExportFormatter` interface for adding new export formats.
@@ -199,18 +199,18 @@ Deliver the R-01 Regulator Portal & Evidence Export module, providing a secure, 
 
 ---
 
-#### Section 14 — Future-Safe Architecture Evaluation
+#### Section 15 — Future-Safe Architecture Evaluation
 
-| Question | Expected Answer |
-|---|---|
-| Can this module support India/Bangladesh via plugin? | Yes, via K-01 RBAC policies for new regulators. |
-| Can new export formats be added? | Yes, via ExportFormatter interface. |
-| Can this run in an air-gapped deployment? | Yes, portal runs locally; evidence packages exported manually. |
-| Can regulators access historical data? | Yes, full audit trail history accessible. |
+| Question                                             | Expected Answer                                                |
+| ---------------------------------------------------- | -------------------------------------------------------------- |
+| Can this module support India/Bangladesh via plugin? | Yes, via K-01 RBAC policies for new regulators.                |
+| Can new export formats be added?                     | Yes, via ExportFormatter interface.                            |
+| Can this run in an air-gapped deployment?            | Yes, portal runs locally; evidence packages exported manually. |
+| Can regulators access historical data?               | Yes, full audit trail history accessible.                      |
 
 ---
 
-#### Section 14.5 — Threat Model
+#### Section 16 — Threat Model
 
 **Attack Vectors & Mitigations:**
 
@@ -255,6 +255,7 @@ Deliver the R-01 Regulator Portal & Evidence Export module, providing a secure, 
    - **Residual Risk:** Compromised regulator endpoint.
 
 **Security Controls:**
+
 - MFA required for all regulator authentication
 - Jurisdiction-based RBAC via K-01 IAM
 - Row-level data residency enforcement
@@ -269,3 +270,15 @@ Deliver the R-01 Regulator Portal & Evidence Export module, providing a secure, 
 - Regular security assessments and penetration testing
 - Secure file transfer with expiring links
 - Query complexity and timeout limits
+
+---
+
+## Changelog
+
+### Version 1.0.1 (2026-03-10)
+
+**Type:** PATCH  
+**Changes:**
+
+- Standardized section numbering to the sequential 16-section format.
+- Added changelog metadata for future epic maintenance.

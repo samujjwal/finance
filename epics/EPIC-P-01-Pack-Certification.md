@@ -1,8 +1,8 @@
-EPIC-ID:    EPIC-P-01
-EPIC NAME:  Pack Certification & Marketplace
-LAYER:      PACKS
-MODULE:     P-01 Pack Governance
-VERSION:    1.0.0
+EPIC-ID: EPIC-P-01
+EPIC NAME: Pack Certification & Marketplace
+LAYER: PACKS
+MODULE: P-01 Pack Governance
+VERSION: 1.0.1
 
 ---
 
@@ -71,64 +71,64 @@ Deliver the P-01 Pack Certification & Marketplace module, providing a comprehens
 
 #### Section 6 — Event Model Definition
 
-| Field | Description |
-|---|---|
-| Event Name | `PackCertified` |
-| Schema Version | `v1.0.0` |
-| Trigger Condition | A pack successfully passes all certification tests and is approved. |
-| Payload | `{ "pack_id": "...", "version": "...", "type": "T3", "author": "...", "certified_by": "...", "timestamp_bs": "..." }` |
-| Consumers | Pack Registry, Plugin Runtime (K-04), Platform Manifest (PU-004), Audit Framework |
-| Idempotency Key | `hash(pack_id + version)` |
-| Replay Behavior | Updates the materialized view of certified packs. |
-| Retention Policy | Permanent. |
+| Field             | Description                                                                                                           |
+| ----------------- | --------------------------------------------------------------------------------------------------------------------- |
+| Event Name        | `PackCertified`                                                                                                       |
+| Schema Version    | `v1.0.0`                                                                                                              |
+| Trigger Condition | A pack successfully passes all certification tests and is approved.                                                   |
+| Payload           | `{ "pack_id": "...", "version": "...", "type": "T3", "author": "...", "certified_by": "...", "timestamp_bs": "..." }` |
+| Consumers         | Pack Registry, Plugin Runtime (K-04), Platform Manifest (PU-004), Audit Framework                                     |
+| Idempotency Key   | `hash(pack_id + version)`                                                                                             |
+| Replay Behavior   | Updates the materialized view of certified packs.                                                                     |
+| Retention Policy  | Permanent.                                                                                                            |
 
 ---
 
-#### Section 6.5 — Command Model Definition
+#### Section 7 — Command Model Definition
 
-| Field | Description |
-|---|---|
-| Command Name | `SubmitPackCommand` |
-| Schema Version | `v1.0.0` |
-| Validation Rules | Pack metadata valid, binary uploaded, author identity verified |
-| Handler | `PackCommandHandler` in P-01 Pack Certification |
-| Success Event | `PackSubmitted` |
-| Failure Event | `PackSubmissionFailed` |
-| Idempotency | Command ID must be unique; duplicate commands return original result |
+| Field            | Description                                                          |
+| ---------------- | -------------------------------------------------------------------- |
+| Command Name     | `SubmitPackCommand`                                                  |
+| Schema Version   | `v1.0.0`                                                             |
+| Validation Rules | Pack metadata valid, binary uploaded, author identity verified       |
+| Handler          | `PackCommandHandler` in P-01 Pack Certification                      |
+| Success Event    | `PackSubmitted`                                                      |
+| Failure Event    | `PackSubmissionFailed`                                               |
+| Idempotency      | Command ID must be unique; duplicate commands return original result |
 
-| Field | Description |
-|---|---|
-| Command Name | `CertifyPackCommand` |
-| Schema Version | `v1.0.0` |
+| Field            | Description                                                                                 |
+| ---------------- | ------------------------------------------------------------------------------------------- |
+| Command Name     | `CertifyPackCommand`                                                                        |
+| Schema Version   | `v1.0.0`                                                                                    |
 | Validation Rules | Pack tests passed, security scan passed, benchmarks passed, maker-checker approval obtained |
-| Handler | `CertificationCommandHandler` in P-01 Pack Certification |
-| Success Event | `PackCertified` |
-| Failure Event | `PackCertificationFailed` |
-| Idempotency | Command ID must be unique; duplicate commands return original result |
+| Handler          | `CertificationCommandHandler` in P-01 Pack Certification                                    |
+| Success Event    | `PackCertified`                                                                             |
+| Failure Event    | `PackCertificationFailed`                                                                   |
+| Idempotency      | Command ID must be unique; duplicate commands return original result                        |
 
-| Field | Description |
-|---|---|
-| Command Name | `PublishPackCommand` |
-| Schema Version | `v1.0.0` |
-| Validation Rules | Pack certified, signature generated, requester authorized |
-| Handler | `PublishCommandHandler` in P-01 Pack Certification |
-| Success Event | `PackPublished` |
-| Failure Event | `PackPublishFailed` |
-| Idempotency | Command ID must be unique; duplicate commands return original result |
+| Field            | Description                                                          |
+| ---------------- | -------------------------------------------------------------------- |
+| Command Name     | `PublishPackCommand`                                                 |
+| Schema Version   | `v1.0.0`                                                             |
+| Validation Rules | Pack certified, signature generated, requester authorized            |
+| Handler          | `PublishCommandHandler` in P-01 Pack Certification                   |
+| Success Event    | `PackPublished`                                                      |
+| Failure Event    | `PackPublishFailed`                                                  |
+| Idempotency      | Command ID must be unique; duplicate commands return original result |
 
-| Field | Description |
-|---|---|
-| Command Name | `DeprecatePackCommand` |
-| Schema Version | `v1.0.0` |
-| Validation Rules | Pack exists, sunset timeline valid, migration guide provided |
-| Handler | `PackCommandHandler` in P-01 Pack Certification |
-| Success Event | `PackDeprecated` |
-| Failure Event | `PackDeprecationFailed` |
-| Idempotency | Command ID must be unique; duplicate commands return original result |
+| Field            | Description                                                          |
+| ---------------- | -------------------------------------------------------------------- |
+| Command Name     | `DeprecatePackCommand`                                               |
+| Schema Version   | `v1.0.0`                                                             |
+| Validation Rules | Pack exists, sunset timeline valid, migration guide provided         |
+| Handler          | `PackCommandHandler` in P-01 Pack Certification                      |
+| Success Event    | `PackDeprecated`                                                     |
+| Failure Event    | `PackDeprecationFailed`                                              |
+| Idempotency      | Command ID must be unique; duplicate commands return original result |
 
 ---
 
-#### Section 7 — AI Integration Requirements
+#### Section 8 — AI Integration Requirements
 
 - **AI Hook Type:** Code Analysis / Vulnerability Detection
 - **Workflow Steps Exposed:** Security scanning, code quality analysis.
@@ -140,28 +140,28 @@ Deliver the P-01 Pack Certification & Marketplace module, providing a comprehens
 
 ---
 
-#### Section 8 — NFRs
+#### Section 9 — NFRs
 
-| NFR Category | Required Targets |
-|---|---|
-| Latency / Throughput | Pack certification pipeline < 10 minutes for typical pack |
-| Scalability | Parallel testing of multiple packs |
-| Availability | 99.9% uptime |
-| Consistency Model | Strong consistency for pack registry |
-| Security | Pack signing with Ed25519; signature verification mandatory |
-| Data Residency | Pack binaries stored globally with CDN distribution |
-| Data Retention | All pack versions retained permanently |
-| Auditability | All certification decisions logged [LCA-AUDIT-001] |
-| Observability | Metrics: `pack.certification.duration`, `pack.test.failure_rate`, `pack.download.count` |
-| Extensibility | New test types via plugin framework |
-| Upgrade / Compatibility | Compatibility matrix enforced strictly |
-| On-Prem Constraints | Pack registry can be mirrored locally |
-| Ledger Integrity | N/A |
-| Dual-Calendar Correctness | Certification dates accurate |
+| NFR Category              | Required Targets                                                                        |
+| ------------------------- | --------------------------------------------------------------------------------------- |
+| Latency / Throughput      | Pack certification pipeline < 10 minutes for typical pack                               |
+| Scalability               | Parallel testing of multiple packs                                                      |
+| Availability              | 99.9% uptime                                                                            |
+| Consistency Model         | Strong consistency for pack registry                                                    |
+| Security                  | Pack signing with Ed25519; signature verification mandatory                             |
+| Data Residency            | Pack binaries stored globally with CDN distribution                                     |
+| Data Retention            | All pack versions retained permanently                                                  |
+| Auditability              | All certification decisions logged [LCA-AUDIT-001]                                      |
+| Observability             | Metrics: `pack.certification.duration`, `pack.test.failure_rate`, `pack.download.count` |
+| Extensibility             | New test types via plugin framework                                                     |
+| Upgrade / Compatibility   | Compatibility matrix enforced strictly                                                  |
+| On-Prem Constraints       | Pack registry can be mirrored locally                                                   |
+| Ledger Integrity          | N/A                                                                                     |
+| Dual-Calendar Correctness | Certification dates accurate                                                            |
 
 ---
 
-#### Section 9 — Acceptance Criteria
+#### Section 10 — Acceptance Criteria
 
 1. **Given** a pack author submits a T3 Executable Pack, **When** the certification pipeline runs, **Then** it executes unit tests, integration tests, security scans, and performance benchmarks, and generates a certification report.
 2. **Given** a pack that fails security scanning (CVE detected), **When** reviewed, **Then** the certification is rejected with detailed vulnerability report and remediation guidance.
@@ -173,7 +173,7 @@ Deliver the P-01 Pack Certification & Marketplace module, providing a comprehens
 
 ---
 
-#### Section 10 — Failure Modes & Resilience
+#### Section 11 — Failure Modes & Resilience
 
 - **Test Infrastructure Failure:** Certification pipeline retries failed tests; if infrastructure issue persists, alerts operations and queues pack for manual review.
 - **Pack Registry Unavailable:** K-04 Plugin Runtime uses locally cached pack metadata; alerts operations if cache is stale.
@@ -182,26 +182,26 @@ Deliver the P-01 Pack Certification & Marketplace module, providing a comprehens
 
 ---
 
-#### Section 11 — Observability & Audit
+#### Section 12 — Observability & Audit
 
-| Telemetry Type | Required Details |
-|---|---|
-| Metrics | `pack.test.pass_rate`, `pack.certification.queue_depth`, `pack.download.bandwidth`, dimensions: `pack_type`, `author` |
-| Logs | Structured: `pack_id`, `version`, `test_stage`, `result` |
-| Traces | Span `PackCertification.runTests` |
-| Audit Events | Action: `SubmitPack`, `ApprovePack`, `RejectPack`, `DeprecatePack` [LCA-AUDIT-001] |
-| Regulatory Evidence | Pack certification audit trail for compliance |
+| Telemetry Type      | Required Details                                                                                                      |
+| ------------------- | --------------------------------------------------------------------------------------------------------------------- |
+| Metrics             | `pack.test.pass_rate`, `pack.certification.queue_depth`, `pack.download.bandwidth`, dimensions: `pack_type`, `author` |
+| Logs                | Structured: `pack_id`, `version`, `test_stage`, `result`                                                              |
+| Traces              | Span `PackCertification.runTests`                                                                                     |
+| Audit Events        | Action: `SubmitPack`, `ApprovePack`, `RejectPack`, `DeprecatePack` [LCA-AUDIT-001]                                    |
+| Regulatory Evidence | Pack certification audit trail for compliance                                                                         |
 
 ---
 
-#### Section 12 — Compliance & Regulatory Traceability
+#### Section 13 — Compliance & Regulatory Traceability
 
 - Software change control and integrity [LCA-AUDIT-001]
 - Third-party code governance [ASR-SEC-001]
 
 ---
 
-#### Section 13 — Extension Points & Contracts
+#### Section 14 — Extension Points & Contracts
 
 - **SDK Contract:** `PackRegistryClient.searchPacks(query)`, `PackRegistryClient.downloadPack(packId, version)`, `PackRegistryClient.submitPack(metadata, binary)`.
 - **Test Framework Interface:** `PackTest` interface for custom test types.
@@ -209,11 +209,69 @@ Deliver the P-01 Pack Certification & Marketplace module, providing a comprehens
 
 ---
 
-#### Section 14 — Future-Safe Architecture Evaluation
+#### Section 15 — Future-Safe Architecture Evaluation
 
-| Question | Expected Answer |
-|---|---|
+| Question                                             | Expected Answer                                                |
+| ---------------------------------------------------- | -------------------------------------------------------------- |
 | Can this module support India/Bangladesh via plugin? | Yes, packs for any jurisdiction go through same certification. |
-| Can a new test type be added? | Yes, via test framework plugin. |
-| Can this run in an air-gapped deployment? | Yes, pack registry can be mirrored locally. |
-| Can pack authors be third-party vendors? | Yes, designed for ecosystem enablement. |
+| Can a new test type be added?                        | Yes, via test framework plugin.                                |
+| Can this run in an air-gapped deployment?            | Yes, pack registry can be mirrored locally.                    |
+| Can pack authors be third-party vendors?             | Yes, designed for ecosystem enablement.                        |
+
+---
+
+#### Section 16 — Threat Model
+
+**Attack Vectors & Mitigations:**
+
+1. **Malicious Pack Submission**
+
+- **Threat:** A pack contains malware, hidden exfiltration logic, or unsafe runtime behavior.
+- **Mitigation:** Multi-stage testing, security scanning, sandbox execution, signature verification, and certification review gates.
+- **Residual Risk:** Novel malicious behavior evading static and dynamic checks.
+
+2. **Certification Process Abuse**
+
+- **Threat:** A reviewer or attacker bypasses failed test results and certifies an unsafe pack.
+- **Mitigation:** Maker-checker controls, immutable certification evidence, separation of duties, and audit logs of overrides and approvals.
+- **Residual Risk:** Collusion among authorized reviewers.
+
+3. **Marketplace Artifact Tampering**
+
+- **Threat:** Published pack binaries or metadata are altered after certification.
+- **Mitigation:** Cryptographic signing, hash validation, append-only registry history, and client-side signature verification during installation.
+- **Residual Risk:** Compromise of signing infrastructure.
+
+4. **Dependency Poisoning**
+
+- **Threat:** A certified pack depends on a compromised or incompatible dependency that introduces risk indirectly.
+- **Mitigation:** Dependency resolution checks, compatibility enforcement, transitive scan coverage where possible, and deprecation/sunset warnings.
+- **Residual Risk:** Newly disclosed vulnerability in an already certified dependency.
+
+5. **Registry Availability Attack**
+
+- **Threat:** Registry unavailability blocks certification, distribution, or validation workflows.
+- **Mitigation:** Local mirrors, cached metadata, retry/queue behavior, and integrity-preserving offline distribution for on-prem deployments.
+- **Residual Risk:** Extended outage affecting both central and mirrored registries.
+
+**Security Controls:**
+
+- Security scanning and sandbox execution for submitted packs
+- Maker-checker certification workflow
+- Cryptographic signing and verification of published artifacts
+- Dependency and compatibility validation
+- Immutable registry and audit history
+- Local mirror support for resilience
+
+---
+
+## Changelog
+
+### Version 1.0.1 (2026-03-10)
+
+**Type:** PATCH  
+**Changes:**
+
+- Standardized section numbering to the sequential 16-section format.
+- Added a threat-model section for certification, registry, and dependency risks.
+- Added changelog metadata for future epic maintenance.

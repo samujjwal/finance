@@ -6,7 +6,7 @@
 **Status**: Implementation-Ready  
 **Owner**: Platform Core Team
 
-> **Implementation alignment**: Per [ADR-011_STACK_STANDARDIZATION_AND_GHATANA_PLATFORM_ALIGNMENT.md](ADR-011_STACK_STANDARDIZATION_AND_GHATANA_PLATFORM_ALIGNMENT.md), Siddhanta reuses Ghatana `ai-registry`, `ai-inference-service`, `feature-store-ingest`, and `platform/java/ai-integration` as the baseline AI platform components.
+> **Implementation alignment**: Per [../adr/ADR-011_STACK_STANDARDIZATION_AND_GHATANA_PLATFORM_ALIGNMENT.md](../adr/ADR-011_STACK_STANDARDIZATION_AND_GHATANA_PLATFORM_ALIGNMENT.md), Siddhanta reuses Ghatana `ai-registry`, `ai-inference-service`, `feature-store-ingest`, and `platform/java/ai-integration` as the baseline AI platform components.
 
 ---
 
@@ -17,6 +17,7 @@
 The AI Governance module provides **centralized model registry, prompt versioning, explainability, and human-in-the-loop (HITL) controls** for all AI/ML capabilities across Project Siddhanta.
 
 **Core Responsibilities**:
+
 - Model registry with versioning and metadata
 - Prompt template versioning and management
 - Explainability tracking for AI decisions
@@ -28,6 +29,7 @@ The AI Governance module provides **centralized model registry, prompt versionin
 - Bias detection and fairness metrics
 
 **Invariants**:
+
 1. All AI models MUST be registered before use
 2. All AI decisions MUST be explainable and auditable
 3. HITL overrides MUST take precedence over AI decisions
@@ -42,12 +44,12 @@ The AI Governance module provides **centralized model registry, prompt versionin
 
 ### 1.3 Dependencies
 
-| Dependency | Purpose | Readiness Gate |
-|------------|---------|----------------|
-| K-02 Config Engine | Model configuration storage | K-02 stable |
-| K-05 Event Bus | AI decision events | K-05 stable |
-| K-07 Audit Framework | AI decision audit trail | K-07 stable |
-| Ghatana AI Platform | Registry, inference, and feature integration baseline | AI platform available |
+| Dependency           | Purpose                                               | Readiness Gate        |
+| -------------------- | ----------------------------------------------------- | --------------------- |
+| K-02 Config Engine   | Model configuration storage                           | K-02 stable           |
+| K-05 Event Bus       | AI decision events                                    | K-05 stable           |
+| K-07 Audit Framework | AI decision audit trail                               | K-07 stable           |
+| Ghatana AI Platform  | Registry, inference, and feature integration baseline | AI platform available |
 
 ---
 
@@ -251,7 +253,7 @@ interface AIGovernanceClient {
   predict<I, O>(
     modelId: string,
     input: I,
-    options?: PredictOptions
+    options?: PredictOptions,
   ): Promise<PredictionResult<O>>;
 
   /**
@@ -259,7 +261,7 @@ interface AIGovernanceClient {
    */
   overrideDecision(
     decisionId: string,
-    override: DecisionOverride
+    override: DecisionOverride,
   ): Promise<void>;
 
   /**
@@ -282,18 +284,23 @@ interface AIGovernanceClient {
    */
   executePrompt<T>(
     promptId: string,
-    variables: Record<string, unknown>
+    variables: Record<string, unknown>,
   ): Promise<PromptResult<T>>;
 }
 
 interface ModelRegistration {
   modelId: string;
-  modelType: 'CLASSIFICATION' | 'REGRESSION' | 'CLUSTERING' | 'NLP' | 'RECOMMENDATION';
+  modelType:
+    | "CLASSIFICATION"
+    | "REGRESSION"
+    | "CLUSTERING"
+    | "NLP"
+    | "RECOMMENDATION";
   framework: string;
   version: string;
   artifactUrl: string;
   metadata: ModelMetadata;
-  explainabilityMethod: 'SHAP' | 'LIME' | 'ATTENTION' | 'RULE_BASED';
+  explainabilityMethod: "SHAP" | "LIME" | "ATTENTION" | "RULE_BASED";
   registeredBy: string;
 }
 
@@ -323,22 +330,22 @@ interface DriftReport {
   driftDetected: boolean;
   driftScore: number;
   driftedFeatures: string[];
-  recommendation: 'RETRAIN' | 'MONITOR' | 'OK';
+  recommendation: "RETRAIN" | "MONITOR" | "OK";
 }
 ```
 
 ### 2.4 Error Model
 
-| Error Code | HTTP Status | Retryable | Description |
-|------------|-------------|-----------|-------------|
-| AI_E001 | 404 | No | Model not found |
-| AI_E002 | 400 | No | Invalid input schema |
-| AI_E003 | 500 | Yes | Model inference timeout |
-| AI_E004 | 500 | Yes | Model inference failed |
-| AI_E005 | 409 | No | Model version conflict |
-| AI_E006 | 400 | No | Explainability not available |
-| AI_E007 | 403 | No | HITL override not authorized |
-| AI_E008 | 500 | No | Drift detection failed |
+| Error Code | HTTP Status | Retryable | Description                  |
+| ---------- | ----------- | --------- | ---------------------------- |
+| AI_E001    | 404         | No        | Model not found              |
+| AI_E002    | 400         | No        | Invalid input schema         |
+| AI_E003    | 500         | Yes       | Model inference timeout      |
+| AI_E004    | 500         | Yes       | Model inference failed       |
+| AI_E005    | 409         | No        | Model version conflict       |
+| AI_E006    | 400         | No        | Explainability not available |
+| AI_E007    | 403         | No        | HITL override not authorized |
+| AI_E008    | 500         | No        | Drift detection failed       |
 
 ---
 
@@ -607,32 +614,32 @@ class SHAPExplainer:
     """
     Generate SHAP explanations for model predictions.
     """
-    
+
     def __init__(self, model, background_data):
         self.model = model
         self.explainer = shap.Explainer(model, background_data)
-    
+
     def explain(self, input_data: dict) -> dict:
         """
         Generate SHAP explanation for prediction.
         """
         # Convert input to array
         input_array = self.dict_to_array(input_data)
-        
+
         # Calculate SHAP values
         shap_values = self.explainer(input_array)
-        
+
         # Extract feature importance
         feature_importance = {}
         for feature, shap_value in zip(input_data.keys(), shap_values.values[0]):
             feature_importance[feature] = abs(float(shap_value))
-        
+
         # Normalize to sum to 1
         total = sum(feature_importance.values())
         feature_importance = {
             k: v / total for k, v in feature_importance.items()
         }
-        
+
         return {
             'method': 'SHAP',
             'feature_importance': feature_importance
@@ -648,7 +655,7 @@ class DriftDetector:
     """
     Detect model drift using Population Stability Index (PSI).
     """
-    
+
     @staticmethod
     def calculate_psi(
         reference_dist: np.ndarray,
@@ -657,7 +664,7 @@ class DriftDetector:
     ) -> float:
         """
         Calculate PSI between reference and current distributions.
-        
+
         PSI < 0.1: No significant drift
         0.1 <= PSI < 0.2: Moderate drift
         PSI >= 0.2: Significant drift
@@ -666,24 +673,24 @@ class DriftDetector:
         min_val = min(reference_dist.min(), current_dist.min())
         max_val = max(reference_dist.max(), current_dist.max())
         bin_edges = np.linspace(min_val, max_val, bins + 1)
-        
+
         # Calculate distributions
         ref_hist, _ = np.histogram(reference_dist, bins=bin_edges)
         cur_hist, _ = np.histogram(current_dist, bins=bin_edges)
-        
+
         # Normalize
         ref_pct = ref_hist / len(reference_dist)
         cur_pct = cur_hist / len(current_dist)
-        
+
         # Avoid division by zero
         ref_pct = np.where(ref_pct == 0, 0.0001, ref_pct)
         cur_pct = np.where(cur_pct == 0, 0.0001, cur_pct)
-        
+
         # Calculate PSI
         psi = np.sum((cur_pct - ref_pct) * np.log(cur_pct / ref_pct))
-        
+
         return float(psi)
-    
+
     def detect_drift(
         self,
         model_id: str,
@@ -695,26 +702,26 @@ class DriftDetector:
         """
         drifted_features = []
         feature_drift_scores = {}
-        
+
         # Get feature names
         features = reference_data[0].keys()
-        
+
         for feature in features:
             # Extract feature values
             ref_values = np.array([d[feature] for d in reference_data])
             cur_values = np.array([d[feature] for d in current_data])
-            
+
             # Calculate PSI
             psi = self.calculate_psi(ref_values, cur_values)
             feature_drift_scores[feature] = psi
-            
+
             # Check threshold
             if psi >= 0.2:
                 drifted_features.append(feature)
-        
+
         # Overall drift score (max PSI)
         drift_score = max(feature_drift_scores.values())
-        
+
         # Recommendation
         if drift_score >= 0.2:
             recommendation = 'RETRAIN'
@@ -722,7 +729,7 @@ class DriftDetector:
             recommendation = 'MONITOR'
         else:
             recommendation = 'OK'
-        
+
         return DriftReport(
             model_id=model_id,
             drift_detected=len(drifted_features) > 0,
@@ -739,7 +746,7 @@ class ModelRollback:
     """
     Rollback model to previous version.
     """
-    
+
     async def rollback(self, model_id: str, target_version: str):
         """
         Rollback model to target version.
@@ -748,24 +755,24 @@ class ModelRollback:
         target_model = await self.get_model(model_id, target_version)
         if not target_model:
             raise ModelNotFoundError(f"Model {model_id} v{target_version} not found")
-        
+
         # Get current active version
         current_model = await self.get_active_model(model_id)
-        
+
         # Deactivate current version
         await self.update_model_status(
             model_id,
             current_model.version,
             'DEPRECATED'
         )
-        
+
         # Activate target version
         await self.update_model_status(
             model_id,
             target_version,
             'ACTIVE'
         )
-        
+
         # Publish event
         await self.publish_event(ModelRolledBackEvent(
             model_id=model_id,
@@ -773,7 +780,7 @@ class ModelRollback:
             to_version=target_version,
             rolled_back_at=datetime.now()
         ))
-        
+
         logger.info(f"Rolled back {model_id} from v{current_model.version} to v{target_version}")
 ```
 
@@ -786,7 +793,7 @@ class PromptRenderer:
     """
     Render prompt templates with variables.
     """
-    
+
     def render(self, template: str, variables: dict) -> str:
         """
         Render Jinja2 template with variables.
@@ -794,7 +801,7 @@ class PromptRenderer:
         jinja_template = Template(template)
         rendered = jinja_template.render(**variables)
         return rendered
-    
+
     async def execute_prompt(
         self,
         prompt_id: str,
@@ -805,17 +812,17 @@ class PromptRenderer:
         """
         # Load active prompt version
         prompt = await self.get_active_prompt(prompt_id)
-        
+
         # Render template
         rendered = self.render(prompt.template, variables)
-        
+
         # Call LLM
         response = await self.call_llm(
             model_id=prompt.model_id,
             prompt=rendered,
             parameters=prompt.parameters
         )
-        
+
         # Audit
         await self.audit_prompt_execution(
             prompt_id=prompt_id,
@@ -823,7 +830,7 @@ class PromptRenderer:
             variables=variables,
             response=response
         )
-        
+
         return response
 ```
 
@@ -833,28 +840,30 @@ class PromptRenderer:
 
 ### 6.1 Latency Budgets
 
-| Operation | P50 | P95 | P99 | Timeout |
-|-----------|-----|-----|-----|---------|
-| predict() - without explanation | 50ms | 200ms | 500ms | 5000ms |
-| predict() - with explanation | 200ms | 1000ms | 2000ms | 10000ms |
-| overrideDecision() | 10ms | 50ms | 100ms | 1000ms |
-| detectDrift() | 1s | 5s | 10s | 60000ms |
+| Operation                       | P50   | P95    | P99    | Timeout |
+| ------------------------------- | ----- | ------ | ------ | ------- |
+| predict() - without explanation | 50ms  | 200ms  | 500ms  | 5000ms  |
+| predict() - with explanation    | 200ms | 1000ms | 2000ms | 10000ms |
+| overrideDecision()              | 10ms  | 50ms   | 100ms  | 1000ms  |
+| detectDrift()                   | 1s    | 5s     | 10s    | 60000ms |
 
 ### 6.2 Throughput Targets
 
-| Operation | Target TPS | Peak TPS |
-|-----------|------------|----------|
-| predict() | 1,000 | 5,000 |
-| overrideDecision() | 100 | 500 |
+| Operation          | Target TPS | Peak TPS |
+| ------------------ | ---------- | -------- |
+| predict()          | 1,000      | 5,000    |
+| overrideDecision() | 100        | 500      |
 
 ### 6.3 Model Performance Thresholds
 
 **Classification Models**:
+
 - Minimum accuracy: 0.85
 - Minimum precision: 0.80
 - Minimum recall: 0.80
 
 **Drift Thresholds**:
+
 - PSI < 0.1: No action
 - 0.1 <= PSI < 0.2: Monitor
 - PSI >= 0.2: Retrain
@@ -872,16 +881,16 @@ class ModelArtifactEncryption:
     """
     Encrypt model artifacts at rest.
     """
-    
+
     def __init__(self, encryption_key: bytes):
         self.cipher = Fernet(encryption_key)
-    
+
     def encrypt_artifact(self, artifact: bytes) -> bytes:
         """
         Encrypt model artifact.
         """
         return self.cipher.encrypt(artifact)
-    
+
     def decrypt_artifact(self, encrypted_artifact: bytes) -> bytes:
         """
         Decrypt model artifact.
@@ -899,11 +908,15 @@ interface HITLPermissions {
 class HITLAccessControl implements HITLPermissions {
   canOverride(userId: string, modelId: string, tenantId: string): boolean {
     // Only specific roles can override AI decisions
-    const allowedRoles = ['COMPLIANCE_OFFICER', 'SENIOR_TRADER', 'RISK_MANAGER'];
-    
+    const allowedRoles = [
+      "COMPLIANCE_OFFICER",
+      "SENIOR_TRADER",
+      "RISK_MANAGER",
+    ];
+
     const userRoles = this.getUserRoles(userId, tenantId);
-    
-    return userRoles.some(role => allowedRoles.includes(role));
+
+    return userRoles.some((role) => allowedRoles.includes(role));
   }
 
   private getUserRoles(userId: string, tenantId: string): string[] {
@@ -920,7 +933,7 @@ class ModelPoisoningDetector:
     """
     Detect potential model poisoning attacks.
     """
-    
+
     def detect_anomalous_predictions(
         self,
         model_id: str,
@@ -931,20 +944,20 @@ class ModelPoisoningDetector:
         Detect anomalous prediction patterns using z-score.
         """
         confidences = [p['confidence'] for p in predictions]
-        
+
         mean_confidence = np.mean(confidences)
         std_confidence = np.std(confidences)
-        
+
         # Calculate z-scores
         z_scores = [(c - mean_confidence) / std_confidence for c in confidences]
-        
+
         # Check for outliers
         anomalies = [z for z in z_scores if abs(z) > threshold]
-        
+
         if len(anomalies) > len(predictions) * 0.1:  # > 10% anomalies
             logger.warning(f"Potential model poisoning detected for {model_id}")
             return True
-        
+
         return False
 ```
 
@@ -959,25 +972,25 @@ metrics:
   - name: ai_predictions_total
     type: counter
     labels: [model_id, model_version, prediction_class]
-  
+
   - name: ai_prediction_latency_seconds
     type: histogram
     labels: [model_id, with_explanation]
     buckets: [0.05, 0.1, 0.5, 1.0, 2.0, 5.0]
-  
+
   - name: ai_prediction_confidence
     type: histogram
     labels: [model_id, prediction_class]
     buckets: [0.5, 0.6, 0.7, 0.8, 0.9, 0.95, 0.99]
-  
+
   - name: ai_decisions_overridden_total
     type: counter
     labels: [model_id, original_prediction, override_value]
-  
+
   - name: ai_model_drift_score
     type: gauge
     labels: [model_id, model_version]
-  
+
   - name: ai_model_accuracy
     type: gauge
     labels: [model_id, model_version]
@@ -1009,12 +1022,12 @@ alerts:
     condition: ai_model_drift_score > 0.2
     severity: HIGH
     description: Model drift detected, retraining recommended
-  
+
   - name: LowPredictionConfidence
     condition: histogram_quantile(0.5, ai_prediction_confidence) < 0.7
     severity: MEDIUM
     description: Median prediction confidence below 70%
-  
+
   - name: HighOverrideRate
     condition: rate(ai_decisions_overridden_total[1h]) / rate(ai_predictions_total[1h]) > 0.1
     severity: HIGH
@@ -1034,16 +1047,16 @@ interface ExplainabilityProvider {
 }
 
 class AttentionExplainer implements ExplainabilityProvider {
-  name = 'ATTENTION';
+  name = "ATTENTION";
 
   async explain(model: Model, input: unknown): Promise<Explanation> {
     // Extract attention weights from transformer model
     const attentionWeights = await model.getAttentionWeights(input);
 
     return {
-      method: 'ATTENTION',
+      method: "ATTENTION",
       feature_importance: this.normalizeAttention(attentionWeights),
-      reasoning_steps: this.generateReasoningSteps(attentionWeights)
+      reasoning_steps: this.generateReasoningSteps(attentionWeights),
     };
   }
 
@@ -1092,13 +1105,13 @@ class ABTestRunner {
 
   async analyzeTest(testId: string): Promise<ABTestResults> {
     // Compare metrics between models
-    const metricsA = await this.getMetrics(testId, 'modelA');
-    const metricsB = await this.getMetrics(testId, 'modelB');
+    const metricsA = await this.getMetrics(testId, "modelA");
+    const metricsB = await this.getMetrics(testId, "modelB");
 
     return {
       winner: this.determineWinner(metricsA, metricsB),
       confidence: this.calculateConfidence(metricsA, metricsB),
-      metrics: { modelA: metricsA, modelB: metricsB }
+      metrics: { modelA: metricsA, modelB: metricsB },
     };
   }
 }
@@ -1111,7 +1124,7 @@ class FairnessMetrics:
     """
     Calculate fairness metrics for model predictions.
     """
-    
+
     @staticmethod
     def demographic_parity(
         predictions: list[dict],
@@ -1119,23 +1132,23 @@ class FairnessMetrics:
     ) -> float:
         """
         Calculate demographic parity difference.
-        
+
         Measures difference in positive prediction rates
         between protected and unprotected groups.
         """
         protected_group = [p for p in predictions if p[protected_attribute]]
         unprotected_group = [p for p in predictions if not p[protected_attribute]]
-        
+
         protected_positive_rate = sum(
             1 for p in protected_group if p['prediction'] == 'POSITIVE'
         ) / len(protected_group)
-        
+
         unprotected_positive_rate = sum(
             1 for p in unprotected_group if p['prediction'] == 'POSITIVE'
         ) / len(unprotected_group)
-        
+
         return abs(protected_positive_rate - unprotected_positive_rate)
-    
+
     @staticmethod
     def equal_opportunity(
         predictions: list[dict],
@@ -1143,7 +1156,7 @@ class FairnessMetrics:
     ) -> float:
         """
         Calculate equal opportunity difference.
-        
+
         Measures difference in true positive rates
         between protected and unprotected groups.
         """
@@ -1158,50 +1171,54 @@ class FairnessMetrics:
 ### 10.1 Unit Tests
 
 ```typescript
-describe('AIGovernance', () => {
-  it('should register model successfully', async () => {
+describe("AIGovernance", () => {
+  it("should register model successfully", async () => {
     const model: ModelRegistration = {
-      modelId: 'test_model',
-      modelType: 'CLASSIFICATION',
-      framework: 'SKLEARN',
-      version: '1.0.0',
-      artifactUrl: 's3://models/test_model.pkl',
+      modelId: "test_model",
+      modelType: "CLASSIFICATION",
+      framework: "SKLEARN",
+      version: "1.0.0",
+      artifactUrl: "s3://models/test_model.pkl",
       metadata: { accuracy: 0.95 },
-      explainabilityMethod: 'SHAP',
-      registeredBy: 'ml_engineer_1'
+      explainabilityMethod: "SHAP",
+      registeredBy: "ml_engineer_1",
     };
 
     const info = await aiClient.registerModel(model);
 
-    expect(info.modelId).toBe('test_model');
-    expect(info.version).toBe('1.0.0');
-    expect(info.status).toBe('REGISTERED');
+    expect(info.modelId).toBe("test_model");
+    expect(info.version).toBe("1.0.0");
+    expect(info.status).toBe("REGISTERED");
   });
 
-  it('should make prediction with explanation', async () => {
-    const result = await aiClient.predict('fraud_detection_v2', {
-      transaction_amount: 50000,
-      merchant_category: 'ELECTRONICS'
-    }, { requireExplanation: true });
+  it("should make prediction with explanation", async () => {
+    const result = await aiClient.predict(
+      "fraud_detection_v2",
+      {
+        transaction_amount: 50000,
+        merchant_category: "ELECTRONICS",
+      },
+      { requireExplanation: true },
+    );
 
     expect(result.prediction).toBeDefined();
     expect(result.explanation).toBeDefined();
-    expect(result.explanation.method).toBe('SHAP');
+    expect(result.explanation.method).toBe("SHAP");
     expect(result.explanation.feature_importance).toBeDefined();
   });
 
-  it('should override AI decision', async () => {
-    const decisionId = 'dec_test_1';
-    
+  it("should override AI decision", async () => {
+    const decisionId = "dec_test_1";
+
     await aiClient.overrideDecision(decisionId, {
-      overrideValue: 'NOT_FRAUD',
-      reason: 'Customer verified',
-      overriddenBy: 'user_456'
+      overrideValue: "NOT_FRAUD",
+      reason: "Customer verified",
+      overriddenBy: "user_456",
     });
 
     const decision = await getDecision(decisionId);
     expect(decision.overridden).toBe(true);
-    expect(decision.override_value).toBe('NOT_FRAUD');
+    expect(decision.override_value).toBe("NOT_FRAUD");
   });
 });
 ```
@@ -1209,30 +1226,30 @@ describe('AIGovernance', () => {
 ### 10.2 Integration Tests
 
 ```typescript
-describe('Drift Detection', () => {
-  it('should detect significant drift', async () => {
+describe("Drift Detection", () => {
+  it("should detect significant drift", async () => {
     // Create reference data
     const referenceData = generateNormalData(1000, { mean: 100, std: 10 });
 
     // Create drifted data
     const currentData = generateNormalData(1000, { mean: 150, std: 10 });
 
-    const report = await aiClient.detectDrift('test_model', referenceData);
+    const report = await aiClient.detectDrift("test_model", referenceData);
 
     expect(report.driftDetected).toBe(true);
     expect(report.driftScore).toBeGreaterThan(0.2);
-    expect(report.recommendation).toBe('RETRAIN');
+    expect(report.recommendation).toBe("RETRAIN");
   });
 
-  it('should not detect drift for similar distributions', async () => {
+  it("should not detect drift for similar distributions", async () => {
     const referenceData = generateNormalData(1000, { mean: 100, std: 10 });
     const currentData = generateNormalData(1000, { mean: 101, std: 10 });
 
-    const report = await aiClient.detectDrift('test_model', referenceData);
+    const report = await aiClient.detectDrift("test_model", referenceData);
 
     expect(report.driftDetected).toBe(false);
     expect(report.driftScore).toBeLessThan(0.1);
-    expect(report.recommendation).toBe('OK');
+    expect(report.recommendation).toBe("OK");
   });
 });
 ```
@@ -1240,21 +1257,22 @@ describe('Drift Detection', () => {
 ### 10.3 Security Tests
 
 ```typescript
-describe('AI Security', () => {
-  it('should prevent unauthorized HITL override', async () => {
-    const regularUser = { userId: 'user_1', role: 'TRADER' };
+describe("AI Security", () => {
+  it("should prevent unauthorized HITL override", async () => {
+    const regularUser = { userId: "user_1", role: "TRADER" };
 
     await expect(
-      aiClient.overrideDecision(
-        'dec_test_1',
-        { overrideValue: 'NOT_FRAUD', reason: 'Test', overriddenBy: regularUser.userId }
-      )
+      aiClient.overrideDecision("dec_test_1", {
+        overrideValue: "NOT_FRAUD",
+        reason: "Test",
+        overriddenBy: regularUser.userId,
+      }),
     ).rejects.toThrow(UnauthorizedError);
   });
 
-  it('should encrypt model artifacts', async () => {
-    const artifact = Buffer.from('model data');
-    
+  it("should encrypt model artifacts", async () => {
+    const artifact = Buffer.from("model data");
+
     const encrypted = encryptArtifact(artifact);
     expect(encrypted).not.toEqual(artifact);
 
@@ -1267,20 +1285,24 @@ describe('AI Security', () => {
 ### 10.4 Explainability Tests
 
 ```typescript
-describe('Model Explainability', () => {
-  it('should generate SHAP explanation', async () => {
-    const result = await aiClient.predict('fraud_detection_v2', {
-      transaction_amount: 50000,
-      user_history_score: 0.8,
-      merchant_category: 'ELECTRONICS'
-    }, { requireExplanation: true });
+describe("Model Explainability", () => {
+  it("should generate SHAP explanation", async () => {
+    const result = await aiClient.predict(
+      "fraud_detection_v2",
+      {
+        transaction_amount: 50000,
+        user_history_score: 0.8,
+        merchant_category: "ELECTRONICS",
+      },
+      { requireExplanation: true },
+    );
 
-    expect(result.explanation.method).toBe('SHAP');
-    
+    expect(result.explanation.method).toBe("SHAP");
+
     const importance = result.explanation.feature_importance;
-    expect(Object.keys(importance)).toContain('transaction_amount');
-    expect(Object.keys(importance)).toContain('user_history_score');
-    
+    expect(Object.keys(importance)).toContain("transaction_amount");
+    expect(Object.keys(importance)).toContain("user_history_score");
+
     // Sum of importance should be ~1.0
     const sum = Object.values(importance).reduce((a, b) => a + b, 0);
     expect(sum).toBeCloseTo(1.0, 2);

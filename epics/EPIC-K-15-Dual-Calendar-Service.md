@@ -1,8 +1,8 @@
-EPIC-ID:    EPIC-K-15
-EPIC NAME:  Dual-Calendar Service (Bikram Sambat & Gregorian)
-LAYER:      KERNEL
-MODULE:     K-15 Dual-Calendar Service
-VERSION:    1.1.0
+EPIC-ID: EPIC-K-15
+EPIC NAME: Dual-Calendar Service (Bikram Sambat & Gregorian)
+LAYER: KERNEL
+MODULE: K-15 Dual-Calendar Service
+VERSION: 1.1.1
 
 ---
 
@@ -66,54 +66,54 @@ Establish the K-15 Dual-Calendar Service as a first-class Platform Kernel capabi
 
 #### Section 6 — Event Model Definition
 
-| Field | Description |
-|---|---|
-| Event Name | `CalendarMismatchEvent` |
-| Schema Version | `v1.0.0` |
-| Trigger Condition | When a domain module submits a dual date pair that violates the current conversion mapping. |
-| Payload | `{ "submitted_gregorian": "2025-10-22", "submitted_local": "2082-07-06", "expected_local": "2082-07-05", "calendar_type": "BS" }` |
-| Consumers | Audit Framework, Compliance Module, Operator Dashboard |
-| Idempotency Key | `hash(submitted_gregorian + submitted_local + timestamp)` |
-| Replay Behavior | Side-effects suppressed on replay; logged for observability. |
-| Retention Policy | 10 years (jurisdiction config) |
+| Field             | Description                                                                                                                       |
+| ----------------- | --------------------------------------------------------------------------------------------------------------------------------- |
+| Event Name        | `CalendarMismatchEvent`                                                                                                           |
+| Schema Version    | `v1.0.0`                                                                                                                          |
+| Trigger Condition | When a domain module submits a dual date pair that violates the current conversion mapping.                                       |
+| Payload           | `{ "submitted_gregorian": "2025-10-22", "submitted_local": "2082-07-06", "expected_local": "2082-07-05", "calendar_type": "BS" }` |
+| Consumers         | Audit Framework, Compliance Module, Operator Dashboard                                                                            |
+| Idempotency Key   | `hash(submitted_gregorian + submitted_local + timestamp)`                                                                         |
+| Replay Behavior   | Side-effects suppressed on replay; logged for observability.                                                                      |
+| Retention Policy  | 10 years (jurisdiction config)                                                                                                    |
 
 ---
 
-#### Section 6.5 — Command Model Definition
+#### Section 7 — Command Model Definition
 
-| Field | Description |
-|---|---|
-| Command Name | `UpdateCalendarMappingCommand` |
-| Schema Version | `v1.0.0` |
-| Validation Rules | Mapping data valid, no conflicts, maker-checker approval obtained |
-| Handler | `CalendarCommandHandler` in K-15 Dual-Calendar Service |
-| Success Event | `CalendarMappingUpdated` |
-| Failure Event | `CalendarMappingUpdateFailed` |
-| Idempotency | Command ID must be unique; duplicate commands return original result |
+| Field            | Description                                                          |
+| ---------------- | -------------------------------------------------------------------- |
+| Command Name     | `UpdateCalendarMappingCommand`                                       |
+| Schema Version   | `v1.0.0`                                                             |
+| Validation Rules | Mapping data valid, no conflicts, maker-checker approval obtained    |
+| Handler          | `CalendarCommandHandler` in K-15 Dual-Calendar Service               |
+| Success Event    | `CalendarMappingUpdated`                                             |
+| Failure Event    | `CalendarMappingUpdateFailed`                                        |
+| Idempotency      | Command ID must be unique; duplicate commands return original result |
 
-| Field | Description |
-|---|---|
-| Command Name | `AddHolidayCommand` |
-| Schema Version | `v1.0.0` |
-| Validation Rules | Date valid, jurisdiction specified, requester authorized |
-| Handler | `HolidayCommandHandler` in K-15 Dual-Calendar Service |
-| Success Event | `HolidayAdded` |
-| Failure Event | `HolidayAddFailed` |
-| Idempotency | Command ID must be unique; duplicate commands return original result |
+| Field            | Description                                                          |
+| ---------------- | -------------------------------------------------------------------- |
+| Command Name     | `AddHolidayCommand`                                                  |
+| Schema Version   | `v1.0.0`                                                             |
+| Validation Rules | Date valid, jurisdiction specified, requester authorized             |
+| Handler          | `HolidayCommandHandler` in K-15 Dual-Calendar Service                |
+| Success Event    | `HolidayAdded`                                                       |
+| Failure Event    | `HolidayAddFailed`                                                   |
+| Idempotency      | Command ID must be unique; duplicate commands return original result |
 
-| Field | Description |
-|---|---|
-| Command Name | `ConvertDateCommand` |
-| Schema Version | `v1.0.0` |
-| Validation Rules | Source date valid, target calendar specified |
-| Handler | `DateConversionHandler` in K-15 Dual-Calendar Service |
-| Success Event | `DateConverted` |
-| Failure Event | `DateConversionFailed` |
-| Idempotency | Same input returns cached conversion result |
+| Field            | Description                                           |
+| ---------------- | ----------------------------------------------------- |
+| Command Name     | `ConvertDateCommand`                                  |
+| Schema Version   | `v1.0.0`                                              |
+| Validation Rules | Source date valid, target calendar specified          |
+| Handler          | `DateConversionHandler` in K-15 Dual-Calendar Service |
+| Success Event    | `DateConverted`                                       |
+| Failure Event    | `DateConversionFailed`                                |
+| Idempotency      | Same input returns cached conversion result           |
 
 ---
 
-#### Section 7 — AI Integration Requirements
+#### Section 8 — AI Integration Requirements
 
 - **AI Hook Type:** Anomaly Detection
 - **Workflow Steps Exposed:** Calendar Mapping updates.
@@ -125,28 +125,28 @@ Establish the K-15 Dual-Calendar Service as a first-class Platform Kernel capabi
 
 ---
 
-#### Section 8 — NFRs
+#### Section 9 — NFRs
 
-| NFR Category | Required Targets |
-|---|---|
-| Latency / Throughput | P99 < 2ms for date conversion; 10,000 TPS |
-| Scalability | Stateless service; scales horizontally based on CPU > 70% |
-| Availability | 99.999% uptime |
-| Consistency Model | Strong consistency for mapping updates |
-| Security | mTLS for service-to-service communication |
-| Data Residency | Cacheable globally; mappings are public reference data |
-| Data Retention | Retain mapping history indefinitely |
-| Auditability | All mapping table changes logged via K-07 |
-| Observability | Metrics: `conversion_latency`, `mismatch_count`, dimensions: `calendar_type` |
-| Extensibility | New calendar added via T1 Config Pack < 1 day |
-| Upgrade / Compatibility | Full backward compatibility for historical dates |
-| On-Prem Constraints | Mapping data included in offline deployment bundles |
-| Ledger Integrity | N/A |
-| Dual-Calendar Correctness | 0 mismatches per 1M conversions |
+| NFR Category              | Required Targets                                                             |
+| ------------------------- | ---------------------------------------------------------------------------- |
+| Latency / Throughput      | P99 < 2ms for date conversion; 10,000 TPS                                    |
+| Scalability               | Stateless service; scales horizontally based on CPU > 70%                    |
+| Availability              | 99.999% uptime                                                               |
+| Consistency Model         | Strong consistency for mapping updates                                       |
+| Security                  | mTLS for service-to-service communication                                    |
+| Data Residency            | Cacheable globally; mappings are public reference data                       |
+| Data Retention            | Retain mapping history indefinitely                                          |
+| Auditability              | All mapping table changes logged via K-07                                    |
+| Observability             | Metrics: `conversion_latency`, `mismatch_count`, dimensions: `calendar_type` |
+| Extensibility             | New calendar added via T1 Config Pack < 1 day                                |
+| Upgrade / Compatibility   | Full backward compatibility for historical dates                             |
+| On-Prem Constraints       | Mapping data included in offline deployment bundles                          |
+| Ledger Integrity          | N/A                                                                          |
+| Dual-Calendar Correctness | 0 mismatches per 1M conversions                                              |
 
 ---
 
-#### Section 9 — Acceptance Criteria
+#### Section 10 — Acceptance Criteria
 
 1. **Given** a valid Gregorian date, **When** passed to `toBS()`, **Then** the correct Bikram Sambat date is returned under 2ms.
 2. **Given** an invalid BS/Gregorian pair, **When** validated by the service, **Then** a `CalendarMismatchEvent` is emitted.
@@ -159,7 +159,7 @@ Establish the K-15 Dual-Calendar Service as a first-class Platform Kernel capabi
 
 ---
 
-#### Section 10 — Failure Modes & Resilience
+#### Section 11 — Failure Modes & Resilience
 
 - **Config Engine Unreachable:** Service falls back to locally cached mapping tables; raises alert.
 - **Calendar Mismatch:** `CalendarMismatchEvent` emitted; transaction flagged for manual review; operator alerted.
@@ -168,19 +168,19 @@ Establish the K-15 Dual-Calendar Service as a first-class Platform Kernel capabi
 
 ---
 
-#### Section 11 — Observability & Audit
+#### Section 12 — Observability & Audit
 
-| Telemetry Type | Required Details |
-|---|---|
-| Metrics | `calendar.conversion.latency`, `calendar.mismatch.count`, dimensions: `tenant_id`, `jurisdiction` |
-| Logs | Structured logs with `timestamp_gregorian`, `timestamp_bs`, `operation: convert`, `duration_ms` |
-| Traces | Span `CalendarClient.convert` |
-| Audit Events | Action: `UpdateMapping`, `before_state`, `after_state` [LCA-AUDIT-001] |
-| Regulatory Evidence | Audit trail of calendar mapping changes for market surveillance [ASR-RPT-001] |
+| Telemetry Type      | Required Details                                                                                  |
+| ------------------- | ------------------------------------------------------------------------------------------------- |
+| Metrics             | `calendar.conversion.latency`, `calendar.mismatch.count`, dimensions: `tenant_id`, `jurisdiction` |
+| Logs                | Structured logs with `timestamp_gregorian`, `timestamp_bs`, `operation: convert`, `duration_ms`   |
+| Traces              | Span `CalendarClient.convert`                                                                     |
+| Audit Events        | Action: `UpdateMapping`, `before_state`, `after_state` [LCA-AUDIT-001]                            |
+| Regulatory Evidence | Audit trail of calendar mapping changes for market surveillance [ASR-RPT-001]                     |
 
 ---
 
-#### Section 12 — Compliance & Regulatory Traceability
+#### Section 13 — Compliance & Regulatory Traceability
 
 - Reporting accuracy — dual-calendar timestamp on all regulatory submissions `[ASR-RPT-001]`
 - Record retention — minimum retention periods met `[LCA-RET-001]`
@@ -188,7 +188,7 @@ Establish the K-15 Dual-Calendar Service as a first-class Platform Kernel capabi
 
 ---
 
-#### Section 13 — Extension Points & Contracts
+#### Section 14 — Extension Points & Contracts
 
 - **SDK Contract:** `CalendarClient` provides `toBS(Date)`, `toGregorian(String)`, `isHoliday(DualDate, jurisdiction)`, `nextBusinessDay(DualDate, offset, jurisdiction)`.
 - **Jurisdiction Plugin Extension Points:** T1 Config Pack schema for calendar mappings and holiday definitions.
@@ -196,13 +196,25 @@ Establish the K-15 Dual-Calendar Service as a first-class Platform Kernel capabi
 
 ---
 
-#### Section 14 — Future-Safe Architecture Evaluation
+#### Section 15 — Future-Safe Architecture Evaluation
 
-| Question | Expected Answer |
-|---|---|
-| Can this module support India/Bangladesh via plugin? | Yes, by loading a Saka or Gregorian T1 Config Pack. |
-| Can a new calendar system be added without kernel changes? | Yes, the schema is generic `calendar_type`. |
-| Can tax rules change without redeploy? | N/A |
-| Can this run in an air-gapped deployment? | Yes, mapping data is bundled. |
+| Question                                                              | Expected Answer                                                                                                                             |
+| --------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
+| Can this module support India/Bangladesh via plugin?                  | Yes, by loading a Saka or Gregorian T1 Config Pack.                                                                                         |
+| Can a new calendar system be added without kernel changes?            | Yes, the schema is generic `calendar_type`.                                                                                                 |
+| Can tax rules change without redeploy?                                | N/A                                                                                                                                         |
+| Can this run in an air-gapped deployment?                             | Yes, mapping data is bundled.                                                                                                               |
 | Can this module handle digital assets (tokenized securities, crypto)? | Yes. Blockchain timestamps (Unix epoch) are converted to both Gregorian and Bikram Sambat for dual-calendar compliance on tokenized assets. |
-| Is the design ready for CBDC integration or T+0 settlement? | Yes. Sub-millisecond timestamp resolution and instant calendar conversion support T+0 settlement date computation. |
+| Is the design ready for CBDC integration or T+0 settlement?           | Yes. Sub-millisecond timestamp resolution and instant calendar conversion support T+0 settlement date computation.                          |
+
+---
+
+## Changelog
+
+### Version 1.1.1 (2026-03-10)
+
+**Type:** PATCH  
+**Changes:**
+
+- Standardized section numbering to the sequential 16-section format.
+- Added changelog metadata for future epic maintenance.

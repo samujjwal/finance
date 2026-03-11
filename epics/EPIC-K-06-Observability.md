@@ -1,8 +1,8 @@
-EPIC-ID:    EPIC-K-06
-EPIC NAME:  Observability Stack
-LAYER:      KERNEL
-MODULE:     K-06 Observability
-VERSION:    1.1.0
+EPIC-ID: EPIC-K-06
+EPIC NAME: Observability Stack
+LAYER: KERNEL
+MODULE: K-06 Observability
+VERSION: 1.1.1
 
 ---
 
@@ -64,54 +64,54 @@ Deliver the K-06 Observability stack, providing unified structured logging, dist
 
 #### Section 6 — Event Model Definition
 
-| Field | Description |
-|---|---|
-| Event Name | `SloBreachAlert` |
-| Schema Version | `v1.0.0` |
-| Trigger Condition | A predefined metric breaches its SLO threshold for a sustained duration. |
-| Payload | `{ "metric": "api.latency.p99", "value": 450, "threshold": 200, "tenant_id": "...", "severity": "CRITICAL" }` |
-| Consumers | PagerDuty/OpsGenie integration, Admin Portal |
-| Idempotency Key | `hash(alert_rule_id + time_window)` |
-| Replay Behavior | Ignored. |
-| Retention Policy | 1 year. |
+| Field             | Description                                                                                                   |
+| ----------------- | ------------------------------------------------------------------------------------------------------------- |
+| Event Name        | `SloBreachAlert`                                                                                              |
+| Schema Version    | `v1.0.0`                                                                                                      |
+| Trigger Condition | A predefined metric breaches its SLO threshold for a sustained duration.                                      |
+| Payload           | `{ "metric": "api.latency.p99", "value": 450, "threshold": 200, "tenant_id": "...", "severity": "CRITICAL" }` |
+| Consumers         | PagerDuty/OpsGenie integration, Admin Portal                                                                  |
+| Idempotency Key   | `hash(alert_rule_id + time_window)`                                                                           |
+| Replay Behavior   | Ignored.                                                                                                      |
+| Retention Policy  | 1 year.                                                                                                       |
 
 ---
 
-#### Section 6.5 — Command Model Definition
+#### Section 7 — Command Model Definition
 
-| Field | Description |
-|---|---|
-| Command Name | `ConfigureAlertCommand` |
-| Schema Version | `v1.0.0` |
-| Validation Rules | Metric exists, threshold valid, notification channel configured |
-| Handler | `AlertCommandHandler` in K-06 Observability |
-| Success Event | `AlertConfigured` |
-| Failure Event | `AlertConfigurationFailed` |
-| Idempotency | Command ID must be unique; duplicate commands return original result |
+| Field            | Description                                                          |
+| ---------------- | -------------------------------------------------------------------- |
+| Command Name     | `ConfigureAlertCommand`                                              |
+| Schema Version   | `v1.0.0`                                                             |
+| Validation Rules | Metric exists, threshold valid, notification channel configured      |
+| Handler          | `AlertCommandHandler` in K-06 Observability                          |
+| Success Event    | `AlertConfigured`                                                    |
+| Failure Event    | `AlertConfigurationFailed`                                           |
+| Idempotency      | Command ID must be unique; duplicate commands return original result |
 
-| Field | Description |
-|---|---|
-| Command Name | `AcknowledgeAlertCommand` |
-| Schema Version | `v1.0.0` |
-| Validation Rules | Alert exists, requester authorized |
-| Handler | `AlertCommandHandler` in K-06 Observability |
-| Success Event | `AlertAcknowledged` |
-| Failure Event | `AlertAcknowledgmentFailed` |
-| Idempotency | Command ID must be unique; duplicate commands return original result |
+| Field            | Description                                                          |
+| ---------------- | -------------------------------------------------------------------- |
+| Command Name     | `AcknowledgeAlertCommand`                                            |
+| Schema Version   | `v1.0.0`                                                             |
+| Validation Rules | Alert exists, requester authorized                                   |
+| Handler          | `AlertCommandHandler` in K-06 Observability                          |
+| Success Event    | `AlertAcknowledged`                                                  |
+| Failure Event    | `AlertAcknowledgmentFailed`                                          |
+| Idempotency      | Command ID must be unique; duplicate commands return original result |
 
-| Field | Description |
-|---|---|
-| Command Name | `CreateDashboardCommand` |
-| Schema Version | `v1.0.0` |
-| Validation Rules | Dashboard definition valid, metrics exist |
-| Handler | `DashboardCommandHandler` in K-06 Observability |
-| Success Event | `DashboardCreated` |
-| Failure Event | `DashboardCreationFailed` |
-| Idempotency | Command ID must be unique; duplicate commands return original result |
+| Field            | Description                                                          |
+| ---------------- | -------------------------------------------------------------------- |
+| Command Name     | `CreateDashboardCommand`                                             |
+| Schema Version   | `v1.0.0`                                                             |
+| Validation Rules | Dashboard definition valid, metrics exist                            |
+| Handler          | `DashboardCommandHandler` in K-06 Observability                      |
+| Success Event    | `DashboardCreated`                                                   |
+| Failure Event    | `DashboardCreationFailed`                                            |
+| Idempotency      | Command ID must be unique; duplicate commands return original result |
 
 ---
 
-#### Section 7 — AI Integration Requirements
+#### Section 8 — AI Integration Requirements
 
 - **AI Hook Type:** Anomaly Detection
 - **Workflow Steps Exposed:** Metric and log stream ingestion.
@@ -123,28 +123,28 @@ Deliver the K-06 Observability stack, providing unified structured logging, dist
 
 ---
 
-#### Section 8 — NFRs
+#### Section 9 — NFRs
 
-| NFR Category | Required Targets |
-|---|---|
-| Latency / Throughput | Telemetry emission must not block business threads; async batching < 1ms overhead |
-| Scalability | Horizontally scalable ingestion collectors |
-| Availability | 99.99% uptime |
-| Consistency Model | Eventual consistency for metrics/logs |
-| Security | mTLS for telemetry transit; PII masked |
-| Data Residency | Enforced routing based on jurisdiction tags |
-| Data Retention | Configurable (e.g., 30 days hot, 1 year cold) |
-| Auditability | Changes to alert rules logged |
-| Observability | Meta-observability (metrics on the metrics pipeline) |
-| Extensibility | N/A |
-| Upgrade / Compatibility | OpenTelemetry standard compliance |
-| On-Prem Constraints | Must support local sinks (e.g., local Prometheus/Grafana) |
-| Ledger Integrity | N/A |
-| Dual-Calendar Correctness | Log timestamps reflect accurate conversion |
+| NFR Category              | Required Targets                                                                  |
+| ------------------------- | --------------------------------------------------------------------------------- |
+| Latency / Throughput      | Telemetry emission must not block business threads; async batching < 1ms overhead |
+| Scalability               | Horizontally scalable ingestion collectors                                        |
+| Availability              | 99.99% uptime                                                                     |
+| Consistency Model         | Eventual consistency for metrics/logs                                             |
+| Security                  | mTLS for telemetry transit; PII masked                                            |
+| Data Residency            | Enforced routing based on jurisdiction tags                                       |
+| Data Retention            | Configurable (e.g., 30 days hot, 1 year cold)                                     |
+| Auditability              | Changes to alert rules logged                                                     |
+| Observability             | Meta-observability (metrics on the metrics pipeline)                              |
+| Extensibility             | N/A                                                                               |
+| Upgrade / Compatibility   | OpenTelemetry standard compliance                                                 |
+| On-Prem Constraints       | Must support local sinks (e.g., local Prometheus/Grafana)                         |
+| Ledger Integrity          | N/A                                                                               |
+| Dual-Calendar Correctness | Log timestamps reflect accurate conversion                                        |
 
 ---
 
-#### Section 9 — Acceptance Criteria
+#### Section 10 — Acceptance Criteria
 
 1. **Given** a request traversing API Gateway -> OMS -> Event Bus -> Risk Engine, **When** viewing the trace, **Then** all spans are linked under a single `trace_id` with accurate timing.
 2. **Given** a log entry containing a National ID, **When** processed by the PII masker, **Then** the ID is replaced with `***REDACTED***` before storage.
@@ -155,43 +155,55 @@ Deliver the K-06 Observability stack, providing unified structured logging, dist
 
 ---
 
-#### Section 10 — Failure Modes & Resilience
+#### Section 11 — Failure Modes & Resilience
 
 - **Sink Unreachable:** Agents buffer data locally. If buffer fills, oldest telemetry is dropped to protect application memory.
 - **High Volume Spike:** Agents enforce rate limiting/sampling dynamically to prevent overwhelming the ingestion tier.
 
 ---
 
-#### Section 11 — Observability & Audit
+#### Section 12 — Observability & Audit
 
-| Telemetry Type | Required Details |
-|---|---|
-| Metrics | Stack internal metrics: `log.ingest.rate`, `trace.drop.count` |
-| Logs | Internal collector logs |
-| Traces | N/A |
-| Audit Events | Alert configuration changes |
-| Regulatory Evidence | Uptime and performance SLAs [ASR-OPS-001] |
+| Telemetry Type      | Required Details                                              |
+| ------------------- | ------------------------------------------------------------- |
+| Metrics             | Stack internal metrics: `log.ingest.rate`, `trace.drop.count` |
+| Logs                | Internal collector logs                                       |
+| Traces              | N/A                                                           |
+| Audit Events        | Alert configuration changes                                   |
+| Regulatory Evidence | Uptime and performance SLAs [ASR-OPS-001]                     |
 
 ---
 
-#### Section 12 — Compliance & Regulatory Traceability
+#### Section 13 — Compliance & Regulatory Traceability
 
 - Operational resilience and monitoring [ASR-OPS-001]
 
 ---
 
-#### Section 13 — Extension Points & Contracts
+#### Section 14 — Extension Points & Contracts
 
 - **SDK Contract:** `TelemetryClient` (wrapping OpenTelemetry APIs).
 - **Jurisdiction Plugin Extension Points:** Configurable sink routing and PII regex rules.
 
 ---
 
-#### Section 14 — Future-Safe Architecture Evaluation
+#### Section 15 — Future-Safe Architecture Evaluation
 
-| Question | Expected Answer |
-|---|---|
-| Can this module support India/Bangladesh via plugin? | Yes, via distinct routing rules. |
-| Can this run in an air-gapped deployment? | Yes, using local open-source sinks (Prometheus/Jaeger). |
+| Question                                                              | Expected Answer                                                                                             |
+| --------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------- |
+| Can this module support India/Bangladesh via plugin?                  | Yes, via distinct routing rules.                                                                            |
+| Can this run in an air-gapped deployment?                             | Yes, using local open-source sinks (Prometheus/Jaeger).                                                     |
 | Can this module handle digital assets (tokenized securities, crypto)? | Yes. On-chain transaction tracing and token transfer metrics are captured via standard OpenTelemetry spans. |
-| Is the design ready for CBDC integration or T+0 settlement? | Yes. Sub-millisecond trace granularity and real-time dashboards support T+0 settlement monitoring. |
+| Is the design ready for CBDC integration or T+0 settlement?           | Yes. Sub-millisecond trace granularity and real-time dashboards support T+0 settlement monitoring.          |
+
+---
+
+## Changelog
+
+### Version 1.1.1 (2026-03-10)
+
+**Type:** PATCH  
+**Changes:**
+
+- Standardized section numbering to the sequential 16-section format.
+- Added changelog metadata for future epic maintenance.

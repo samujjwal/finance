@@ -1,8 +1,8 @@
-EPIC-ID:    EPIC-W-02
-EPIC NAME:  Client Onboarding & KYC Workflow
-LAYER:      WORKFLOW
-MODULE:     W-02 Client Onboarding
-VERSION:    1.0.0
+EPIC-ID: EPIC-W-02
+EPIC NAME: Client Onboarding & KYC Workflow
+LAYER: WORKFLOW
+MODULE: W-02 Client Onboarding
+VERSION: 1.0.1
 
 ---
 
@@ -72,54 +72,54 @@ Deliver the W-02 Client Onboarding & KYC Workflow module, providing an end-to-en
 
 #### Section 6 — Event Model Definition
 
-| Field | Description |
-|---|---|
-| Event Name | `OnboardingApplicationSubmitted` |
-| Schema Version | `v1.0.0` |
-| Trigger Condition | A prospective client submits an onboarding application. |
-| Payload | `{ "application_id": "...", "applicant_name": "...", "email": "...", "jurisdiction": "NP", "timestamp_bs": "..." }` |
-| Consumers | Workflow Engine (W-01), Compliance (D-07), Audit Framework, Notification Service |
-| Idempotency Key | `hash(application_id)` |
-| Replay Behavior | Updates the materialized view of pending applications. |
-| Retention Policy | Permanent. |
+| Field             | Description                                                                                                         |
+| ----------------- | ------------------------------------------------------------------------------------------------------------------- |
+| Event Name        | `OnboardingApplicationSubmitted`                                                                                    |
+| Schema Version    | `v1.0.0`                                                                                                            |
+| Trigger Condition | A prospective client submits an onboarding application.                                                             |
+| Payload           | `{ "application_id": "...", "applicant_name": "...", "email": "...", "jurisdiction": "NP", "timestamp_bs": "..." }` |
+| Consumers         | Workflow Orchestration (W-01), Compliance (D-07), Audit Framework, Notification Service                             |
+| Idempotency Key   | `hash(application_id)`                                                                                              |
+| Replay Behavior   | Updates the materialized view of pending applications.                                                              |
+| Retention Policy  | Permanent.                                                                                                          |
 
 ---
 
-#### Section 6.5 — Command Model Definition
+#### Section 7 — Command Model Definition
 
-| Field | Description |
-|---|---|
-| Command Name | `SubmitApplicationCommand` |
-| Schema Version | `v1.0.0` |
+| Field            | Description                                                                |
+| ---------------- | -------------------------------------------------------------------------- |
+| Command Name     | `SubmitApplicationCommand`                                                 |
+| Schema Version   | `v1.0.0`                                                                   |
 | Validation Rules | Application data complete, documents uploaded, requester identity verified |
-| Handler | `OnboardingCommandHandler` in W-02 Client Onboarding |
-| Success Event | `OnboardingApplicationSubmitted` |
-| Failure Event | `ApplicationSubmissionFailed` |
-| Idempotency | Command ID must be unique; duplicate commands return original result |
+| Handler          | `OnboardingCommandHandler` in W-02 Client Onboarding                       |
+| Success Event    | `OnboardingApplicationSubmitted`                                           |
+| Failure Event    | `ApplicationSubmissionFailed`                                              |
+| Idempotency      | Command ID must be unique; duplicate commands return original result       |
 
-| Field | Description |
-|---|---|
-| Command Name | `UploadDocumentCommand` |
-| Schema Version | `v1.0.0` |
-| Validation Rules | Application exists, document type valid, file scanned for viruses |
-| Handler | `DocumentCommandHandler` in W-02 Client Onboarding |
-| Success Event | `DocumentUploaded` |
-| Failure Event | `DocumentUploadFailed` |
-| Idempotency | Command ID must be unique; duplicate commands return original result |
+| Field            | Description                                                          |
+| ---------------- | -------------------------------------------------------------------- |
+| Command Name     | `UploadDocumentCommand`                                              |
+| Schema Version   | `v1.0.0`                                                             |
+| Validation Rules | Application exists, document type valid, file scanned for viruses    |
+| Handler          | `DocumentCommandHandler` in W-02 Client Onboarding                   |
+| Success Event    | `DocumentUploaded`                                                   |
+| Failure Event    | `DocumentUploadFailed`                                               |
+| Idempotency      | Command ID must be unique; duplicate commands return original result |
 
-| Field | Description |
-|---|---|
-| Command Name | `ApproveApplicationCommand` |
-| Schema Version | `v1.0.0` |
+| Field            | Description                                                                                 |
+| ---------------- | ------------------------------------------------------------------------------------------- |
+| Command Name     | `ApproveApplicationCommand`                                                                 |
+| Schema Version   | `v1.0.0`                                                                                    |
 | Validation Rules | Application complete, KYC passed, risk assessment complete, maker-checker approval obtained |
-| Handler | `ApprovalCommandHandler` in W-02 Client Onboarding |
-| Success Event | `ApplicationApproved` |
-| Failure Event | `ApplicationApprovalFailed` |
-| Idempotency | Command ID must be unique; duplicate commands return original result |
+| Handler          | `ApprovalCommandHandler` in W-02 Client Onboarding                                          |
+| Success Event    | `ApplicationApproved`                                                                       |
+| Failure Event    | `ApplicationApprovalFailed`                                                                 |
+| Idempotency      | Command ID must be unique; duplicate commands return original result                        |
 
 ---
 
-#### Section 7 — AI Integration Requirements
+#### Section 8 — AI Integration Requirements
 
 - **AI Hook Type:** Document Verification / Fraud Detection
 - **Workflow Steps Exposed:** Document authenticity verification, identity matching.
@@ -131,28 +131,28 @@ Deliver the W-02 Client Onboarding & KYC Workflow module, providing an end-to-en
 
 ---
 
-#### Section 8 — NFRs
+#### Section 9 — NFRs
 
-| NFR Category | Required Targets |
-|---|---|
-| Latency / Throughput | Application submission < 2 seconds; 1,000 concurrent applications |
-| Scalability | Horizontally scalable workflow workers |
-| Availability | 99.9% uptime (non-critical path) |
-| Consistency Model | Strong consistency for application state transitions |
-| Security | PII encrypted at rest and in transit; document storage in secure vault |
-| Data Residency | Applicant data stored per jurisdiction config |
-| Data Retention | Approved applications retained 10 years; rejected applications 2 years |
-| Auditability | Every workflow step logged [LCA-AUDIT-001] |
-| Observability | Metrics: `onboarding.pending.count`, `onboarding.approval_time.p99`, `onboarding.rejection_rate` |
-| Extensibility | New KYC requirements via T1/T2 packs |
-| Upgrade / Compatibility | Workflow versioning supported |
-| On-Prem Constraints | Fully functional locally |
-| Ledger Integrity | Account creation posts to K-16 |
-| Dual-Calendar Correctness | Application dates accurate |
+| NFR Category              | Required Targets                                                                                 |
+| ------------------------- | ------------------------------------------------------------------------------------------------ |
+| Latency / Throughput      | Application submission < 2 seconds; 1,000 concurrent applications                                |
+| Scalability               | Horizontally scalable workflow workers                                                           |
+| Availability              | 99.9% uptime (non-critical path)                                                                 |
+| Consistency Model         | Strong consistency for application state transitions                                             |
+| Security                  | PII encrypted at rest and in transit; document storage in secure vault                           |
+| Data Residency            | Applicant data stored per jurisdiction config                                                    |
+| Data Retention            | Approved applications retained 10 years; rejected applications 2 years                           |
+| Auditability              | Every workflow step logged [LCA-AUDIT-001]                                                       |
+| Observability             | Metrics: `onboarding.pending.count`, `onboarding.approval_time.p99`, `onboarding.rejection_rate` |
+| Extensibility             | New KYC requirements via T1/T2 packs                                                             |
+| Upgrade / Compatibility   | Workflow versioning supported                                                                    |
+| On-Prem Constraints       | Fully functional locally                                                                         |
+| Ledger Integrity          | Account creation posts to K-16                                                                   |
+| Dual-Calendar Correctness | Application dates accurate                                                                       |
 
 ---
 
-#### Section 9 — Acceptance Criteria
+#### Section 10 — Acceptance Criteria
 
 1. **Given** a prospective client, **When** they submit an onboarding application via the portal, **Then** the system validates the form, uploads documents securely, and emits `OnboardingApplicationSubmitted`.
 2. **Given** an application with uploaded National ID, **When** the KYC step executes, **Then** the system invokes the Nepal National ID verification adapter and updates the application status based on the result.
@@ -164,7 +164,7 @@ Deliver the W-02 Client Onboarding & KYC Workflow module, providing an end-to-en
 
 ---
 
-#### Section 10 — Failure Modes & Resilience
+#### Section 11 — Failure Modes & Resilience
 
 - **National ID Verification Service Down:** Workflow pauses; retries with exponential backoff; if timeout exceeded, escalates to manual verification.
 - **Document Upload Failure:** Client can retry upload; partial uploads are cleaned up automatically.
@@ -173,19 +173,19 @@ Deliver the W-02 Client Onboarding & KYC Workflow module, providing an end-to-en
 
 ---
 
-#### Section 11 — Observability & Audit
+#### Section 12 — Observability & Audit
 
-| Telemetry Type | Required Details |
-|---|---|
-| Metrics | `onboarding.step.duration`, `onboarding.rejection.reasons`, dimensions: `jurisdiction`, `risk_tier` |
-| Logs | Structured: `application_id`, `step`, `status`, `actor` |
-| Traces | Span `Onboarding.executeStep` |
-| Audit Events | Action: `SubmitApplication`, `ApproveApplication`, `RejectApplication` [LCA-AUDIT-001] |
-| Regulatory Evidence | KYC verification records for regulatory audits [LCA-AMLKYC-001] |
+| Telemetry Type      | Required Details                                                                                    |
+| ------------------- | --------------------------------------------------------------------------------------------------- |
+| Metrics             | `onboarding.step.duration`, `onboarding.rejection.reasons`, dimensions: `jurisdiction`, `risk_tier` |
+| Logs                | Structured: `application_id`, `step`, `status`, `actor`                                             |
+| Traces              | Span `Onboarding.executeStep`                                                                       |
+| Audit Events        | Action: `SubmitApplication`, `ApproveApplication`, `RejectApplication` [LCA-AUDIT-001]              |
+| Regulatory Evidence | KYC verification records for regulatory audits [LCA-AMLKYC-001]                                     |
 
 ---
 
-#### Section 12 — Compliance & Regulatory Traceability
+#### Section 13 — Compliance & Regulatory Traceability
 
 - KYC/AML compliance [LCA-AMLKYC-001]
 - Maker-checker for high-risk clients [LCA-SOD-001]
@@ -194,7 +194,7 @@ Deliver the W-02 Client Onboarding & KYC Workflow module, providing an end-to-en
 
 ---
 
-#### Section 13 — Extension Points & Contracts
+#### Section 14 — Extension Points & Contracts
 
 - **SDK Contract:** `OnboardingClient.submitApplication(data)`, `OnboardingClient.uploadDocument(applicationId, docType, file)`, `OnboardingClient.getApplicationStatus(applicationId)`.
 - **Workflow Definition:** Uses W-01 workflow DSL to define onboarding steps.
@@ -202,26 +202,26 @@ Deliver the W-02 Client Onboarding & KYC Workflow module, providing an end-to-en
 
 ---
 
-#### Section 14 — Future-Safe Architecture Evaluation
+#### Section 15 — Future-Safe Architecture Evaluation
 
-| Question | Expected Answer |
-|---|---|
-| Can this module support India/Bangladesh via plugin? | Yes, via jurisdiction-specific KYC config and adapters. |
-| Can KYC requirements change without redeploy? | Yes, via T1 Config Pack updates. |
-| Can this run in an air-gapped deployment? | Partially; National ID verification requires external connectivity. |
-| Can the workflow handle multi-day processing? | Yes, designed for long-running processes with human tasks. |
+| Question                                                              | Expected Answer                                                                                                       |
+| --------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------- |
+| Can this module support India/Bangladesh via plugin?                  | Yes, via jurisdiction-specific KYC config and adapters.                                                               |
+| Can KYC requirements change without redeploy?                         | Yes, via T1 Config Pack updates.                                                                                      |
+| Can this run in an air-gapped deployment?                             | Partially; National ID verification requires external connectivity.                                                   |
+| Can the workflow handle multi-day processing?                         | Yes, designed for long-running processes with human tasks.                                                            |
 | Can this module handle digital assets (tokenized securities, crypto)? | Yes. Wallet provisioning, token suitability assessment, and DeFi risk disclosure steps are pluggable workflow stages. |
-| Is the design ready for CBDC integration or T+0 settlement? | Yes. Instant account activation and real-time KYC verification flows support same-day onboarding for T+0 markets. |
+| Is the design ready for CBDC integration or T+0 settlement?           | Yes. Instant account activation and real-time KYC verification flows support same-day onboarding for T+0 markets.     |
 
 ---
 
-#### Section 14.2 — Workflow Sequence Diagram
+#### Section 16 — Workflow Sequence Diagram
 
 ```mermaid
 sequenceDiagram
     participant Client as Client Portal
     participant W02 as W-02 Onboarding
-    participant W01 as W-01 Workflow Engine
+    participant W01 as W-01 Workflow Orchestration
     participant K01 as K-01 IAM
     participant D07 as D-07 Compliance
     participant D06 as D-06 Risk Engine
@@ -233,35 +233,35 @@ sequenceDiagram
     W02->>W01: Start Onboarding Workflow
     W01->>W02: Workflow Instance Created
     W02->>Client: Application ID + Status Link
-    
+
     Note over W02,W01: Step 1: Document Collection
     Client->>W02: Upload Documents (ID, Address, Bank)
     W02->>W02: Virus Scan + Validation
     W02->>W01: Documents Verified Event
-    
+
     Note over W02,K01: Step 2: Identity Verification
     W01->>K01: Verify National ID
     K01->>K01: Call T3 Adapter (Govt API)
     K01-->>W01: ID Verified / Failed
-    
+
     Note over W02,D07: Step 3: AML/Sanctions Screening
     W01->>D07: Screen Applicant
     D07->>D07: Check OFAC, UN, EU Lists
     D07->>D07: Check PEP Database
     D07-->>W01: Screening Result (Pass/Fail/Review)
-    
+
     Note over W02,D06: Step 4: Risk Profiling
     W01->>D06: Assess Risk Profile
     D06->>D06: Calculate Risk Score
     D06-->>W01: Risk Profile (Low/Medium/High)
-    
+
     alt High Risk Client
         W01->>Officer: Maker-Checker Approval Required
         Officer->>W02: Review Application
         Officer->>W02: Approve/Reject
         W02->>W01: Approval Decision
     end
-    
+
     Note over W02,K16: Step 5: Account Creation
     W01->>K01: Create User Account
     K01-->>W01: User Created
@@ -269,7 +269,7 @@ sequenceDiagram
     K16-->>W01: Accounts Created
     W01->>D01: Create Trading Account
     D01-->>W01: Trading Account Created
-    
+
     Note over W02,Client: Step 6: Activation & Notification
     W01->>W02: Workflow Completed
     W02->>Client: Email/SMS: Account Activated
@@ -280,6 +280,7 @@ sequenceDiagram
 ```
 
 **Workflow States:**
+
 1. **APPLICATION_SUBMITTED** → Document collection pending
 2. **DOCUMENTS_UPLOADED** → Identity verification in progress
 3. **IDENTITY_VERIFIED** → AML screening in progress
@@ -292,6 +293,20 @@ sequenceDiagram
 10. **REJECTED** → Application denied (at any stage)
 
 **Human Tasks:**
+
 - **Maker-Checker Approval:** Required for high-risk clients (AML flags or high risk score)
 - **Document Review:** Manual review if automated verification fails
 - **Exception Handling:** Compliance officer intervention for edge cases
+
+---
+
+## Changelog
+
+### Version 1.0.1 (2026-03-10)
+
+**Type:** PATCH  
+**Changes:**
+
+- Standardized section numbering to the sequential 16-section format.
+- Promoted the workflow sequence diagram into the standard numbered section layout.
+- Added changelog metadata for future epic maintenance.

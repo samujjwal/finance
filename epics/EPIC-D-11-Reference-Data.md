@@ -1,8 +1,8 @@
-EPIC-ID:    EPIC-D-11
-EPIC NAME:  Reference Data
-LAYER:      DOMAIN
-MODULE:     D-11 Reference Data
-VERSION:    1.0.0
+EPIC-ID: EPIC-D-11
+EPIC NAME: Reference Data
+LAYER: DOMAIN
+MODULE: D-11 Reference Data
+VERSION: 1.0.1
 
 ---
 
@@ -61,54 +61,54 @@ Deliver the D-11 Reference Data module, serving as the authoritative source for 
 
 #### Section 6 — Event Model Definition
 
-| Field | Description |
-|---|---|
-| Event Name | `ReferenceDataUpdated` |
-| Schema Version | `v1.0.0` |
-| Trigger Condition | An instrument or entity record is created or modified. |
-| Payload | `{ "entity_type": "INSTRUMENT", "entity_id": "...", "change_type": "UPDATE", "timestamp_bs": "..." }` |
-| Consumers | OMS, PMS, Pricing, Compliance |
-| Idempotency Key | `hash(entity_id + version)` |
-| Replay Behavior | Updates materialized views. |
-| Retention Policy | Permanent. |
+| Field             | Description                                                                                           |
+| ----------------- | ----------------------------------------------------------------------------------------------------- |
+| Event Name        | `ReferenceDataUpdated`                                                                                |
+| Schema Version    | `v1.0.0`                                                                                              |
+| Trigger Condition | An instrument or entity record is created or modified.                                                |
+| Payload           | `{ "entity_type": "INSTRUMENT", "entity_id": "...", "change_type": "UPDATE", "timestamp_bs": "..." }` |
+| Consumers         | OMS, PMS, Pricing, Compliance                                                                         |
+| Idempotency Key   | `hash(entity_id + version)`                                                                           |
+| Replay Behavior   | Updates materialized views.                                                                           |
+| Retention Policy  | Permanent.                                                                                            |
 
 ---
 
-#### Section 6.5 — Command Model Definition
+#### Section 7 — Command Model Definition
 
-| Field | Description |
-|---|---|
-| Command Name | `UpdateInstrumentCommand` |
-| Schema Version | `v1.0.0` |
+| Field            | Description                                                           |
+| ---------------- | --------------------------------------------------------------------- |
+| Command Name     | `UpdateInstrumentCommand`                                             |
+| Schema Version   | `v1.0.0`                                                              |
 | Validation Rules | Instrument exists or new, data valid, maker-checker approval obtained |
-| Handler | `InstrumentCommandHandler` in D-11 Reference Data |
-| Success Event | `ReferenceDataUpdated` |
-| Failure Event | `InstrumentUpdateFailed` |
-| Idempotency | Command ID must be unique; duplicate commands return original result |
+| Handler          | `InstrumentCommandHandler` in D-11 Reference Data                     |
+| Success Event    | `ReferenceDataUpdated`                                                |
+| Failure Event    | `InstrumentUpdateFailed`                                              |
+| Idempotency      | Command ID must be unique; duplicate commands return original result  |
 
-| Field | Description |
-|---|---|
-| Command Name | `CreateEntityCommand` |
-| Schema Version | `v1.0.0` |
-| Validation Rules | Entity identifier unique, entity type valid, requester authorized |
-| Handler | `EntityCommandHandler` in D-11 Reference Data |
-| Success Event | `EntityCreated` |
-| Failure Event | `EntityCreationFailed` |
-| Idempotency | Command ID must be unique; duplicate commands return original result |
+| Field            | Description                                                          |
+| ---------------- | -------------------------------------------------------------------- |
+| Command Name     | `CreateEntityCommand`                                                |
+| Schema Version   | `v1.0.0`                                                             |
+| Validation Rules | Entity identifier unique, entity type valid, requester authorized    |
+| Handler          | `EntityCommandHandler` in D-11 Reference Data                        |
+| Success Event    | `EntityCreated`                                                      |
+| Failure Event    | `EntityCreationFailed`                                               |
+| Idempotency      | Command ID must be unique; duplicate commands return original result |
 
-| Field | Description |
-|---|---|
-| Command Name | `SyncExternalDataCommand` |
-| Schema Version | `v1.0.0` |
+| Field            | Description                                                           |
+| ---------------- | --------------------------------------------------------------------- |
+| Command Name     | `SyncExternalDataCommand`                                             |
+| Schema Version   | `v1.0.0`                                                              |
 | Validation Rules | External source configured, sync schedule valid, requester authorized |
-| Handler | `SyncCommandHandler` in D-11 Reference Data |
-| Success Event | `ExternalDataSynced` |
-| Failure Event | `ExternalDataSyncFailed` |
-| Idempotency | Command ID must be unique; duplicate commands return original result |
+| Handler          | `SyncCommandHandler` in D-11 Reference Data                           |
+| Success Event    | `ExternalDataSynced`                                                  |
+| Failure Event    | `ExternalDataSyncFailed`                                              |
+| Idempotency      | Command ID must be unique; duplicate commands return original result  |
 
 ---
 
-#### Section 7 — AI Integration Requirements
+#### Section 8 — AI Integration Requirements
 
 - **AI Hook Type:** Data Quality / Anomaly Detection
 - **Workflow Steps Exposed:** External feed ingestion.
@@ -120,59 +120,59 @@ Deliver the D-11 Reference Data module, serving as the authoritative source for 
 
 ---
 
-#### Section 8 — NFRs
+#### Section 9 — NFRs
 
-| NFR Category | Required Targets |
-|---|---|
-| Latency / Throughput | Lookup < 1ms; 50,000 TPS |
-| Scalability | Horizontally scalable read replicas |
-| Availability | 99.999% |
-| Consistency Model | Strong consistency for writes |
-| Security | Row-level tenant isolation |
-| Data Residency | Enforced via K-08 |
-| Data Retention | Permanent |
-| Auditability | All changes logged |
-| Observability | Metrics: `refdata.lookup.latency`, `refdata.update.count` |
-| Extensibility | New entity types via schema evolution |
-| Upgrade / Compatibility | N/A |
-| On-Prem Constraints | Fully functional locally |
-| Ledger Integrity | N/A |
-| Dual-Calendar Correctness | Correct date storage |
+| NFR Category              | Required Targets                                          |
+| ------------------------- | --------------------------------------------------------- |
+| Latency / Throughput      | Lookup < 1ms; 50,000 TPS                                  |
+| Scalability               | Horizontally scalable read replicas                       |
+| Availability              | 99.999%                                                   |
+| Consistency Model         | Strong consistency for writes                             |
+| Security                  | Row-level tenant isolation                                |
+| Data Residency            | Enforced via K-08                                         |
+| Data Retention            | Permanent                                                 |
+| Auditability              | All changes logged                                        |
+| Observability             | Metrics: `refdata.lookup.latency`, `refdata.update.count` |
+| Extensibility             | New entity types via schema evolution                     |
+| Upgrade / Compatibility   | N/A                                                       |
+| On-Prem Constraints       | Fully functional locally                                  |
+| Ledger Integrity          | N/A                                                       |
+| Dual-Calendar Correctness | Correct date storage                                      |
 
 ---
 
-#### Section 9 — Acceptance Criteria
+#### Section 10 — Acceptance Criteria
 
 1. **Given** a new instrument listing, **When** created in D-11, **Then** a `ReferenceDataUpdated` event is emitted and all subscribers receive the update.
 2. **Given** an external Bloomberg feed update, **When** ingested via the T3 Adapter, **Then** D-11 reconciles it and flags discrepancies for review.
 
 ---
 
-#### Section 10 — Failure Modes & Resilience
+#### Section 11 — Failure Modes & Resilience
 
 - **External Feed Down:** D-11 continues serving cached data; alerts data operations.
 
 ---
 
-#### Section 11 — Observability & Audit
+#### Section 12 — Observability & Audit
 
-| Telemetry Type | Required Details |
-|---|---|
-| Metrics | `refdata.cache.hit_rate`, `refdata.feed.lag` |
-| Logs | Reconciliation breaks |
-| Traces | Span `RefData.lookup` |
-| Audit Events | Action: `UpdateInstrument` |
-| Regulatory Evidence | Instrument master audit trail. |
+| Telemetry Type      | Required Details                             |
+| ------------------- | -------------------------------------------- |
+| Metrics             | `refdata.cache.hit_rate`, `refdata.feed.lag` |
+| Logs                | Reconciliation breaks                        |
+| Traces              | Span `RefData.lookup`                        |
+| Audit Events        | Action: `UpdateInstrument`                   |
+| Regulatory Evidence | Instrument master audit trail.               |
 
 ---
 
-#### Section 12 — Compliance & Regulatory Traceability
+#### Section 13 — Compliance & Regulatory Traceability
 
 - Data integrity [LCA-AUDIT-001]
 
 ---
 
-#### Section 13 — Extension Points & Contracts
+#### Section 14 — Extension Points & Contracts
 
 - **SDK Contract:** `RefDataClient.getInstrument(isin)`, `RefDataClient.searchInstruments(query)`, `RefDataClient.getExchangeCalendar(exchange, month_bs)`.
 - **Jurisdiction Plugin Extension Points:** T1 Taxonomy Packs (e.g., Nepal instrument classification, GICS sector mapping).
@@ -192,17 +192,17 @@ Deliver the D-11 Reference Data module, serving as the authoritative source for 
 
 ---
 
-#### Section 14 — Future-Safe Architecture Evaluation
+#### Section 15 — Future-Safe Architecture Evaluation
 
-| Question | Expected Answer |
-|---|---|
-| Can this module support India/Bangladesh via plugin? | Yes. |
-| Can a new instrument type be added? | Yes, via schema extension. |
-| Can this run in an air-gapped deployment? | Partially; requires external data provider connectivity. |
+| Question                                             | Expected Answer                                          |
+| ---------------------------------------------------- | -------------------------------------------------------- |
+| Can this module support India/Bangladesh via plugin? | Yes.                                                     |
+| Can a new instrument type be added?                  | Yes, via schema extension.                               |
+| Can this run in an air-gapped deployment?            | Partially; requires external data provider connectivity. |
 
 ---
 
-#### Section 14.5 — Threat Model
+#### Section 16 — Threat Model
 
 **Attack Vectors & Mitigations:**
 
@@ -232,6 +232,7 @@ Deliver the D-11 Reference Data module, serving as the authoritative source for 
    - **Residual Risk:** Sophisticated corporate structure obfuscation.
 
 **Security Controls:**
+
 - Maker-checker for all changes
 - Multi-source validation
 - T3 adapter sandboxing
@@ -239,3 +240,15 @@ Deliver the D-11 Reference Data module, serving as the authoritative source for 
 - AI-based anomaly detection
 - Audit logging of all operations
 - Version control and rollback capability
+
+---
+
+## Changelog
+
+### Version 1.0.1 (2026-03-10)
+
+**Type:** PATCH  
+**Changes:**
+
+- Standardized section numbering to the sequential 16-section format.
+- Added changelog metadata for future epic maintenance.

@@ -1,8 +1,8 @@
 # Project Siddhanta: Broker + DP Proposal Insert
 
-Version: 1.0  
-Status: Customer-facing broker/depository-participant insert derived from verified claims only  
-Last revised: March 1, 2026
+Version: 1.0.1
+Status: Customer-facing broker/depository-participant insert derived from verified claims only
+Last revised: March 10, 2026
 
 Primary source baseline: [Customer_Facing_Claims_Pack.md](Customer_Facing_Claims_Pack.md)  
 Source register: [Authoritative_Source_Register.md](Authoritative_Source_Register.md)  
@@ -30,6 +30,8 @@ The operational pressure points are not just trading throughput. The harder prob
 ---
 
 ## What Siddhanta Delivers
+
+Project Siddhanta is built as a **generic, extensible capital markets operating platform** — Nepal is the first jurisdiction, not the ceiling. The Generic Core handles all platform-wide concerns (identity, ledger, compliance rule evaluation, event sourcing, AI governance, audit) without any hard-coded Nepal-specific logic. Nepal's regulatory rules, exchange parameters, and fee schedules are implemented as pluggable packs that can be upgraded or replaced as rules change — without touching the core.
 
 For brokers and DPs, Siddhanta focuses on:
 

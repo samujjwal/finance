@@ -1,8 +1,8 @@
-EPIC-ID:    EPIC-K-02
-EPIC NAME:  Configuration Engine
-LAYER:      KERNEL
-MODULE:     K-02 Configuration Engine
-VERSION:    1.1.0
+EPIC-ID: EPIC-K-02
+EPIC NAME: Configuration Engine
+LAYER: KERNEL
+MODULE: K-02 Configuration Engine
+VERSION: 1.1.1
 
 ---
 
@@ -68,65 +68,65 @@ Provide a robust, hierarchical Configuration Engine (K-02) that serves as the si
 
 #### Section 6 — Event Model Definition
 
-| Field | Description |
-|---|---|
-| Event Name | `ConfigPackActivatedEvent` |
-| Schema Version | `v1.0.0` |
-| Trigger Condition | A config pack reaches its effective date and becomes active. |
-| Payload | `{ "pack_id": "...", "type": "JURISDICTION", "context_key": "NP", "effective_date_bs": "...", "effective_date_greg": "..." }` |
-| Consumers | All Domain Modules (to flush local caches), Audit Framework |
-| Idempotency Key | `hash(pack_id + version + activation_timestamp)` |
-| Replay Behavior | Updates the materialized view of active configs without triggering side-effects in domain modules. |
-| Retention Policy | Permanent (system core state). |
+| Field             | Description                                                                                                                   |
+| ----------------- | ----------------------------------------------------------------------------------------------------------------------------- |
+| Event Name        | `ConfigPackActivatedEvent`                                                                                                    |
+| Schema Version    | `v1.0.0`                                                                                                                      |
+| Trigger Condition | A config pack reaches its effective date and becomes active.                                                                  |
+| Payload           | `{ "pack_id": "...", "type": "JURISDICTION", "context_key": "NP", "effective_date_bs": "...", "effective_date_greg": "..." }` |
+| Consumers         | All Domain Modules (to flush local caches), Audit Framework                                                                   |
+| Idempotency Key   | `hash(pack_id + version + activation_timestamp)`                                                                              |
+| Replay Behavior   | Updates the materialized view of active configs without triggering side-effects in domain modules.                            |
+| Retention Policy  | Permanent (system core state).                                                                                                |
 
-| Field | Description |
-|---|---|
-| Event Name | `ConfigRolledBackEvent` |
-| Schema Version | `v1.0.0` |
-| Trigger Condition | An administrator rolls back a config pack to a previous version. |
-| Payload | `{ "pack_id": "...", "rolled_back_from": "v2.1", "rolled_back_to": "v2.0", "reason": "...", "actor_id": "..." }` |
-| Consumers | All Domain Modules (cache invalidation), Audit Framework, Admin Portal |
-| Idempotency Key | `hash(pack_id + rolled_back_to + timestamp)` |
-| Replay Behavior | Restores the materialized config state to the target version. |
-| Retention Policy | Permanent. | [ARB D.3]
+| Field             | Description                                                                                                      |
+| ----------------- | ---------------------------------------------------------------------------------------------------------------- | --------- |
+| Event Name        | `ConfigRolledBackEvent`                                                                                          |
+| Schema Version    | `v1.0.0`                                                                                                         |
+| Trigger Condition | An administrator rolls back a config pack to a previous version.                                                 |
+| Payload           | `{ "pack_id": "...", "rolled_back_from": "v2.1", "rolled_back_to": "v2.0", "reason": "...", "actor_id": "..." }` |
+| Consumers         | All Domain Modules (cache invalidation), Audit Framework, Admin Portal                                           |
+| Idempotency Key   | `hash(pack_id + rolled_back_to + timestamp)`                                                                     |
+| Replay Behavior   | Restores the materialized config state to the target version.                                                    |
+| Retention Policy  | Permanent.                                                                                                       | [ARB D.3] |
 
 ---
 
-#### Section 6.5 — Command Model Definition
+#### Section 7 — Command Model Definition
 
-| Field | Description |
-|---|---|
-| Command Name | `UpdateConfigCommand` |
-| Schema Version | `v1.0.0` |
+| Field            | Description                                                               |
+| ---------------- | ------------------------------------------------------------------------- |
+| Command Name     | `UpdateConfigCommand`                                                     |
+| Schema Version   | `v1.0.0`                                                                  |
 | Validation Rules | Valid schema, passes validation rules, maker-checker approval if required |
-| Handler | `ConfigCommandHandler` in K-02 Config Engine |
-| Success Event | `ConfigUpdated` |
-| Failure Event | `ConfigUpdateFailed` |
-| Idempotency | Command ID must be unique; duplicate commands return original result |
+| Handler          | `ConfigCommandHandler` in K-02 Config Engine                              |
+| Success Event    | `ConfigUpdated`                                                           |
+| Failure Event    | `ConfigUpdateFailed`                                                      |
+| Idempotency      | Command ID must be unique; duplicate commands return original result      |
 
-| Field | Description |
-|---|---|
-| Command Name | `RollbackConfigCommand` |
-| Schema Version | `v1.0.0` |
-| Validation Rules | Target version exists, requester authorized |
-| Handler | `ConfigCommandHandler` in K-02 Config Engine |
-| Success Event | `ConfigRolledBack` |
-| Failure Event | `ConfigRollbackFailed` |
-| Idempotency | Command ID must be unique; duplicate commands return original result |
+| Field            | Description                                                          |
+| ---------------- | -------------------------------------------------------------------- |
+| Command Name     | `RollbackConfigCommand`                                              |
+| Schema Version   | `v1.0.0`                                                             |
+| Validation Rules | Target version exists, requester authorized                          |
+| Handler          | `ConfigCommandHandler` in K-02 Config Engine                         |
+| Success Event    | `ConfigRolledBack`                                                   |
+| Failure Event    | `ConfigRollbackFailed`                                               |
+| Idempotency      | Command ID must be unique; duplicate commands return original result |
 
-| Field | Description |
-|---|---|
-| Command Name | `PublishConfigCommand` |
-| Schema Version | `v1.0.0` |
-| Validation Rules | Config validated, canary deployment strategy defined |
-| Handler | `ConfigCommandHandler` in K-02 Config Engine |
-| Success Event | `ConfigPublished` |
-| Failure Event | `ConfigPublishFailed` |
-| Idempotency | Command ID must be unique; duplicate commands return original result |
+| Field            | Description                                                          |
+| ---------------- | -------------------------------------------------------------------- |
+| Command Name     | `PublishConfigCommand`                                               |
+| Schema Version   | `v1.0.0`                                                             |
+| Validation Rules | Config validated, canary deployment strategy defined                 |
+| Handler          | `ConfigCommandHandler` in K-02 Config Engine                         |
+| Success Event    | `ConfigPublished`                                                    |
+| Failure Event    | `ConfigPublishFailed`                                                |
+| Idempotency      | Command ID must be unique; duplicate commands return original result |
 
 ---
 
-#### Section 7 — AI Integration Requirements
+#### Section 8 — AI Integration Requirements
 
 - **AI Hook Type:** Anomaly Detection / Copilot Assist
 - **Workflow Steps Exposed:** Config Pack submission/validation.
@@ -138,28 +138,28 @@ Provide a robust, hierarchical Configuration Engine (K-02) that serves as the si
 
 ---
 
-#### Section 8 — NFRs
+#### Section 9 — NFRs
 
-| NFR Category | Required Targets |
-|---|---|
-| Latency / Throughput | Read P99 < 5ms; handle 20,000 TPS via distributed cache |
-| Scalability | Fully stateless edge caches; horizontally scalable |
-| Availability | 99.999% uptime |
-| Consistency Model | Eventual consistency across edge caches (max lag < 100ms) |
-| Security | Configuration payloads encrypted at rest if marked sensitive |
-| Data Residency | Config data replicated globally unless restricted by specific Jurisdiction schemas |
-| Data Retention | Full history retained indefinitely |
-| Auditability | Every config modification recorded |
-| Observability | Metrics: `config.resolution.latency`, `config.cache.hit_rate` |
-| Extensibility | N/A (Core module) |
-| Upgrade / Compatibility | Backward compatible schema resolution |
-| On-Prem Constraints | Able to bootstrap from a signed local file |
-| Ledger Integrity | N/A |
-| Dual-Calendar Correctness | Correct activation on BS effective date |
+| NFR Category              | Required Targets                                                                   |
+| ------------------------- | ---------------------------------------------------------------------------------- |
+| Latency / Throughput      | Read P99 < 5ms; handle 20,000 TPS via distributed cache                            |
+| Scalability               | Fully stateless edge caches; horizontally scalable                                 |
+| Availability              | 99.999% uptime                                                                     |
+| Consistency Model         | Eventual consistency across edge caches (max lag < 100ms)                          |
+| Security                  | Configuration payloads encrypted at rest if marked sensitive                       |
+| Data Residency            | Config data replicated globally unless restricted by specific Jurisdiction schemas |
+| Data Retention            | Full history retained indefinitely                                                 |
+| Auditability              | Every config modification recorded                                                 |
+| Observability             | Metrics: `config.resolution.latency`, `config.cache.hit_rate`                      |
+| Extensibility             | N/A (Core module)                                                                  |
+| Upgrade / Compatibility   | Backward compatible schema resolution                                              |
+| On-Prem Constraints       | Able to bootstrap from a signed local file                                         |
+| Ledger Integrity          | N/A                                                                                |
+| Dual-Calendar Correctness | Correct activation on BS effective date                                            |
 
 ---
 
-#### Section 9 — Acceptance Criteria
+#### Section 10 — Acceptance Criteria
 
 1. **Given** a hierarchy of Global, Jurisdiction (NP), and Tenant configs, **When** a resolution request is made, **Then** the resulting JSON correctly merges all levels with Tenant overriding Jurisdiction, and Jurisdiction overriding Global.
 2. **Given** a domain module caching config, **When** a `ConfigPackActivatedEvent` is published, **Then** the domain module immediately fetches the new config without restarting.
@@ -169,7 +169,7 @@ Provide a robust, hierarchical Configuration Engine (K-02) that serves as the si
 
 ---
 
-#### Section 10 — Failure Modes & Resilience
+#### Section 11 — Failure Modes & Resilience
 
 - **Database Partition:** Read requests served from local memory caches. Writes rejected until partition resolves.
 - **Invalid Schema Registration:** Rejected immediately.
@@ -177,19 +177,19 @@ Provide a robust, hierarchical Configuration Engine (K-02) that serves as the si
 
 ---
 
-#### Section 11 — Observability & Audit
+#### Section 12 — Observability & Audit
 
-| Telemetry Type | Required Details |
-|---|---|
-| Metrics | `config.read.latency`, `config.write.count`, `config.reload.success` |
-| Logs | Structured logs with `pack_id`, `tenant_id`, `action` |
-| Traces | Span `ConfigClient.resolve` |
-| Audit Events | Action: `CreateConfigPack`, `UpdateConfigPack` [LCA-AUDIT-001] |
+| Telemetry Type      | Required Details                                                      |
+| ------------------- | --------------------------------------------------------------------- |
+| Metrics             | `config.read.latency`, `config.write.count`, `config.reload.success`  |
+| Logs                | Structured logs with `pack_id`, `tenant_id`, `action`                 |
+| Traces              | Span `ConfigClient.resolve`                                           |
+| Audit Events        | Action: `CreateConfigPack`, `UpdateConfigPack` [LCA-AUDIT-001]        |
 | Regulatory Evidence | Audit trail of all parameter changes (e.g., fee rates, margin limits) |
 
 ---
 
-#### Section 12 — Compliance & Regulatory Traceability
+#### Section 13 — Compliance & Regulatory Traceability
 
 - Record retention — Configuration history kept permanently [LCA-RET-001]
 - Segregation of duties — Config updates require maker-checker [LCA-SOD-001]
@@ -197,20 +197,32 @@ Provide a robust, hierarchical Configuration Engine (K-02) that serves as the si
 
 ---
 
-#### Section 13 — Extension Points & Contracts
+#### Section 14 — Extension Points & Contracts
 
 - **SDK Contract:** `ConfigClient.resolve(context)`, `ConfigClient.watch(keys, callback)`.
 - **Jurisdiction Plugin Extension Points:** N/A (This module consumes plugins).
 
 ---
 
-#### Section 14 — Future-Safe Architecture Evaluation
+#### Section 15 — Future-Safe Architecture Evaluation
 
-| Question | Expected Answer |
-|---|---|
-| Can this module support India/Bangladesh via plugin? | Yes, natively designed for this. |
-| Can tax rules change without redeploy? | Yes, via Hot Reload. |
-| Can settlement cycle change without code change? | Yes. |
-| Can this run in an air-gapped deployment? | Yes, via signed bundles. |
-| Can this module handle digital assets (tokenized securities, crypto)? | Yes. Digital-asset-specific config namespaces (token types, chain IDs, gas limits) are T1 Config Packs. |
-| Is the design ready for CBDC integration or T+0 settlement? | Yes. Settlement-cycle configs are hot-reloadable; switching from T+1 to T+0 is a config change, not a code change. |
+| Question                                                              | Expected Answer                                                                                                    |
+| --------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------ |
+| Can this module support India/Bangladesh via plugin?                  | Yes, natively designed for this.                                                                                   |
+| Can tax rules change without redeploy?                                | Yes, via Hot Reload.                                                                                               |
+| Can settlement cycle change without code change?                      | Yes.                                                                                                               |
+| Can this run in an air-gapped deployment?                             | Yes, via signed bundles.                                                                                           |
+| Can this module handle digital assets (tokenized securities, crypto)? | Yes. Digital-asset-specific config namespaces (token types, chain IDs, gas limits) are T1 Config Packs.            |
+| Is the design ready for CBDC integration or T+0 settlement?           | Yes. Settlement-cycle configs are hot-reloadable; switching from T+1 to T+0 is a config change, not a code change. |
+
+---
+
+## Changelog
+
+### Version 1.1.1 (2026-03-10)
+
+**Type:** PATCH  
+**Changes:**
+
+- Standardized section numbering to the sequential 16-section format.
+- Added changelog metadata for future epic maintenance.

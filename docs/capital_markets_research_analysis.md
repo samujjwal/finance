@@ -4,7 +4,7 @@
 **Date:** March 9, 2026  
 **Status:** Current Research Analysis (Aligned with Siddhanta v2.1)
 
-Shared terminology and policy baseline: [Documentation_Glossary_and_Policy_Appendix.md](Documentation_Glossary_and_Policy_Appendix.md)
+Shared terminology and policy baseline: [Documentation_Glossary_and_Policy_Appendix.md](../archive/Documentation_Glossary_and_Policy_Appendix.md)
 Shared authoritative source register: [Authoritative_Source_Register.md](Authoritative_Source_Register.md)
 Reference style for time-sensitive external facts: `ASR-*` IDs from the shared source register.
 
@@ -57,20 +57,20 @@ Implementation-wise, a realistic "AI‑native platform + packs + connectors" bui
 The table below compiles publicly available, regulator/exchange/depository statistics.
 Nepal rows are actively maintained against the shared source register; non-Nepal rows are comparative benchmarks and may lag current public filings.
 
-| Country | Indicator | Selected public signal (mixed dates; revalidate before transaction use) | Reference ID |
-|---|---|---|---|
-| India | Demat accounts | 20,70,59,626 demat accounts (~207.1M) | `ASR-IND-SEBI-2025-09` |
-| India | Market cap | All India market capitalisation ₹452 lakh crore | `ASR-IND-SEBI-2025-09` |
-| India | Mutual fund AUM | Average AUM ₹75,61,309 crore | `ASR-IND-SEBI-2025-09` |
-| India | Regulated intermediaries (examples) | Merchant bankers 235; depository participants NSDL 299 and CDSL 582 | `ASR-IND-SEBI-2025-09` |
-| Nepal | Market cap and listings | Mid‑2025 public references indicate stock market capitalization of about Rs. 4,656.99 bn; listed-company counts vary by source and should be revalidated against current SEBON/NEPSE disclosures | `ASR-NEP-MKT-ILL-2025` |
-| Nepal | Depository adoption | Demat accounts 7,511,020 and registered Meroshare users 6,586,798 | `ASR-NEP-CDSC-2026-03-01` |
-| Nepal | Intermediary footprint | 90 stock brokers, 2 stock dealers, 32 merchant bankers, 122 DPs, 19 specialized investment fund managers, a separate category of 17 "Fund Manager and Depository" entities, and 46 RTA entries | `ASR-NEP-SEBON-2026-03-01` / `ASR-NEP-CDSC-2026-03-01` |
-| Bangladesh | Depository adoption | BO accounts (operable in CDS) 1,650,111; DPs 559; ISO 27001 certification stated | `ASR-BGD-CDBL-2026-02-26` |
-| Bangladesh | Broker base (exchange membership) | Comparative benchmark: 250 TREC holders (234 active in a 2025 exchange market-structure summary) | `ASR-BGD-CSE-2025-Q1` |
-| Sri Lanka | Digital onboarding | SEC materials describe eKYC onboarding with biometric and NIC verification; exact speed claims remain a benchmark, not a committed SLA | `ASR-LKA-SEC-2026` |
-| Sri Lanka | Depository operations | CSE states investors can create a CDS account in-app and receive account details within 24 hours | `ASR-LKA-CSE-APP-2026` |
-| Myanmar | Market scale | YSX daily market statistics report total market capitalisation of 794,378 million MMK (use local-currency benchmark unless FX-normalized separately) | `ASR-MMR-YSX-2026-02-11` |
+| Country    | Indicator                           | Selected public signal (mixed dates; revalidate before transaction use)                                                                                                                          | Reference ID                                           |
+| ---------- | ----------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------ |
+| India      | Demat accounts                      | 20,70,59,626 demat accounts (~207.1M)                                                                                                                                                            | `ASR-IND-SEBI-2025-09`                                 |
+| India      | Market cap                          | All India market capitalisation ₹452 lakh crore                                                                                                                                                  | `ASR-IND-SEBI-2025-09`                                 |
+| India      | Mutual fund AUM                     | Average AUM ₹75,61,309 crore                                                                                                                                                                     | `ASR-IND-SEBI-2025-09`                                 |
+| India      | Regulated intermediaries (examples) | Merchant bankers 235; depository participants NSDL 299 and CDSL 582                                                                                                                              | `ASR-IND-SEBI-2025-09`                                 |
+| Nepal      | Market cap and listings             | Mid‑2025 public references indicate stock market capitalization of about Rs. 4,656.99 bn; listed-company counts vary by source and should be revalidated against current SEBON/NEPSE disclosures | `ASR-NEP-MKT-ILL-2025`                                 |
+| Nepal      | Depository adoption                 | Demat accounts 7,511,020 and registered Meroshare users 6,586,798                                                                                                                                | `ASR-NEP-CDSC-2026-03-01`                              |
+| Nepal      | Intermediary footprint              | 90 stock brokers, 2 stock dealers, 32 merchant bankers, 122 DPs, 19 specialized investment fund managers, a separate category of 17 "Fund Manager and Depository" entities, and 46 RTA entries   | `ASR-NEP-SEBON-2026-03-01` / `ASR-NEP-CDSC-2026-03-01` |
+| Bangladesh | Depository adoption                 | BO accounts (operable in CDS) 1,650,111; DPs 559; ISO 27001 certification stated                                                                                                                 | `ASR-BGD-CDBL-2026-02-26`                              |
+| Bangladesh | Broker base (exchange membership)   | Comparative benchmark: 250 TREC holders (234 active in a 2025 exchange market-structure summary)                                                                                                 | `ASR-BGD-CSE-2025-Q1`                                  |
+| Sri Lanka  | Digital onboarding                  | SEC materials describe eKYC onboarding with biometric and NIC verification; exact speed claims remain a benchmark, not a committed SLA                                                           | `ASR-LKA-SEC-2026`                                     |
+| Sri Lanka  | Depository operations               | CSE states investors can create a CDS account in-app and receive account details within 24 hours                                                                                                 | `ASR-LKA-CSE-APP-2026`                                 |
+| Myanmar    | Market scale                        | YSX daily market statistics report total market capitalisation of 794,378 million MMK (use local-currency benchmark unless FX-normalized separately)                                             | `ASR-MMR-YSX-2026-02-11`                               |
 
 ### Comparable market capitalization snapshot (cross-country)
 
@@ -82,7 +82,7 @@ xychart-beta
   bar [4831.7, 34.0, 29.7, 22.1]
 ```
 
-*Approximation notes: the comparative market-cap chart remains an illustrative visualization. India, Bangladesh, and Sri Lanka benchmark bars map to WFE July 2025 exchange rows (`ASR-IND-WFE-2025-07`, `ASR-BGD-WFE-2025-07`, `ASR-LKA-WFE-2025-07`). Nepal remains an indicative mid-2025 conversion benchmark (`ASR-NEP-MKT-ILL-2025`). Myanmar is intentionally excluded from the USD chart until a fresh FX-normalized conversion is produced from `ASR-MMR-YSX-2026-02-11`.*
+_Approximation notes: the comparative market-cap chart remains an illustrative visualization. India, Bangladesh, and Sri Lanka benchmark bars map to WFE July 2025 exchange rows (`ASR-IND-WFE-2025-07`, `ASR-BGD-WFE-2025-07`, `ASR-LKA-WFE-2025-07`). Nepal remains an indicative mid-2025 conversion benchmark (`ASR-NEP-MKT-ILL-2025`). Myanmar is intentionally excluded from the USD chart until a fresh FX-normalized conversion is produced from `ASR-MMR-YSX-2026-02-11`._
 
 ### Addressable market framing (TAM/SAM/SOM)
 
@@ -94,20 +94,20 @@ Because capital markets platform pricing is mostly enterprise-negotiated and pub
 
 **Quantified TAM/SAM/SOM estimates (illustrative):**
 
-| Segment | Entity count (approx.) | Avg. annual platform spend assumption | TAM estimate |
-|---|---|---|---|
-| India brokers/DPs (~880) | 880 | $50K–$500K/yr (wide range by tier) | $44M–$440M/yr |
-| India asset managers/MF houses (~50 AMCs + advisors ~949) | ~1,000 | $100K–$1M/yr | $100M–$1B/yr |
-| India merchant banks/IBs (~235) | 235 | $80K–$400K/yr | $19M–$94M/yr |
-| Nepal brokers (~90) + DPs | ~100 | $10K–$80K/yr | $1M–$8M/yr |
-| Bangladesh brokers (~250) + DPs (~559) | ~810 | $15K–$100K/yr | $12M–$81M/yr |
-| Sri Lanka brokers + DPs | ~100 | $15K–$100K/yr | $1.5M–$10M/yr |
-| Market infrastructure (exchanges/CSDs/CCPs) | ~15 | $500K–$10M/yr | $7.5M–$150M/yr |
-| **Total South Asia TAM (annualized)** | | | **$185M–$1.8B/yr** |
-| **SAM (reachable, 40–60% of TAM)** | | | **$75M–$1.1B/yr** |
-| **SOM (3–5 yr capture, 5–10% SAM)** | | | **$4M–$110M/yr** |
+| Segment                                                   | Entity count (approx.) | Avg. annual platform spend assumption | TAM estimate       |
+| --------------------------------------------------------- | ---------------------- | ------------------------------------- | ------------------ |
+| India brokers/DPs (~880)                                  | 880                    | $50K–$500K/yr (wide range by tier)    | $44M–$440M/yr      |
+| India asset managers/MF houses (~50 AMCs + advisors ~949) | ~1,000                 | $100K–$1M/yr                          | $100M–$1B/yr       |
+| India merchant banks/IBs (~235)                           | 235                    | $80K–$400K/yr                         | $19M–$94M/yr       |
+| Nepal brokers (~90) + DPs                                 | ~100                   | $10K–$80K/yr                          | $1M–$8M/yr         |
+| Bangladesh brokers (~250) + DPs (~559)                    | ~810                   | $15K–$100K/yr                         | $12M–$81M/yr       |
+| Sri Lanka brokers + DPs                                   | ~100                   | $15K–$100K/yr                         | $1.5M–$10M/yr      |
+| Market infrastructure (exchanges/CSDs/CCPs)               | ~15                    | $500K–$10M/yr                         | $7.5M–$150M/yr     |
+| **Total South Asia TAM (annualized)**                     |                        |                                       | **$185M–$1.8B/yr** |
+| **SAM (reachable, 40–60% of TAM)**                        |                        |                                       | **$75M–$1.1B/yr**  |
+| **SOM (3–5 yr capture, 5–10% SAM)**                       |                        |                                       | **$4M–$110M/yr**   |
 
-*Notes: These are order-of-magnitude planning estimates. Actual spend varies enormously by institution size, current technology maturity, and willingness to migrate. India dominates the addressable market. Enterprise deals for exchange/CSD/CCP-grade platforms skew the upper bounds significantly.*
+_Notes: These are order-of-magnitude planning estimates. Actual spend varies enormously by institution size, current technology maturity, and willingness to migrate. India dominates the addressable market. Enterprise deals for exchange/CSD/CCP-grade platforms skew the upper bounds significantly._
 
 ### Penetration opportunities by country
 
@@ -142,6 +142,7 @@ India is a live case study: SEBI expanded optional **same‑day (T+0)** settleme
 ISO 20022 adoption in securities messaging (corporate actions, settlement, reconciliation) is a long-term structural shift that improves interoperability but requires strong data models, mapping, and versioned integrations.
 
 Platform implications:
+
 - canonical event and instruction models (corporate actions, settlement instructions, entitlement calculations),
 - **AI-assisted message mapping** (LLM-powered tools that understand ISO 15022 and ISO 20022 semantics, automatically generate mapping configurations, and validate transformations),
 - a "certification harness" for message conformance per counterparty/venue,
@@ -158,6 +159,7 @@ Digital onboarding is a major adoption driver in South Asia because it reduces c
 - **Sri Lanka**: Information and Communication Technology Agency of Sri Lanka runs the Sri Lanka Unique Digital Identity (SLUDI) project as part of the government's digital transformation strategy.
 
 **AI‑native onboarding platform requirements:**
+
 - **Intelligent Document Processing (IDP)**: vision models + OCR + NLP for automated extraction and verification of identity documents, proof of address, financial statements, and corporate constitutive documents—across multiple languages (Hindi, Bengali, Nepali, Sinhala, Tamil, Burmese, English),
 - **AI-powered risk scoring**: ML models for real-time AML/CFT risk assessment during onboarding, incorporating entity resolution, adverse media screening, PEP/sanctions matching, and network analysis,
 - **Automated suitability assessment**: AI-driven investor profiling based on disclosed financial information, investment experience, and risk appetite—with explainable recommendations,
@@ -173,6 +175,7 @@ Tokenization is shifting from experimentation to structured policy discussions. 
 The Financial Stability Board published a global regulatory framework for crypto-asset activities (2023), emphasizing consistent regulation for stablecoins ("same activity, same risk, same regulation"). IOSCO has issued policy recommendations for crypto and digital asset markets (2023) and continues monitoring implementation.
 
 Platform requirements (if you decide to support tokenized instruments):
+
 - digital-asset custody book of record (segregation, safekeeping controls),
 - key management/HSM integration and transaction policy engines,
 - on-chain/off-chain reconciliation and proof capture,
@@ -190,6 +193,7 @@ Sustainable finance is becoming operationally "real" in South Asia.
 - **Bangladesh**: regulations include green bond definitions within debt securities frameworks; the regulator has taken steps toward Islamic capital market governance (e.g., Shari'ah Advisory Council formation order).
 
 **AI-enhanced platform requirements:**
+
 - **AI-powered use-of-proceeds tracking**: NLP analysis of issuer reports, bank statements, and project documentation to automatically verify and classify green/social bond fund utilization,
 - ESG taxonomy support and disclosure workflows with automated completeness checks,
 - **Automated Shari'ah screening**: ML-driven classification of securities against configurable Shari'ah compliance criteria (financial ratios, business activity screening) with audit trail,
@@ -203,6 +207,7 @@ Open APIs are simultaneously a growth engine and a risk surface. India's regulat
 On AI in capital markets, IOSCO's consultation report documents use cases and risks, noting observed use of AI by market participants (including broker-dealers) for surveillance and fraud detection. BIS summaries flag that AI can amplify vulnerabilities without appropriate controls and oversight.
 
 **Platform implications:**
+
 - API gateway with strong identity + authorization + throttling + order tagging,
 - audited "algo provider" onboarding/registration and strategy cataloging for API-based algo trading where required,
 - **AI-native surveillance engine** (not a bolted-on module): real-time pattern recognition across order flow, trade execution, and market data to detect manipulation, spoofing, layering, insider trading, and wash trading—with explainable alerts and confidence scoring,
@@ -299,6 +304,7 @@ flowchart TB
 The platform embeds a **model-agnostic LLM gateway** that supports multiple foundation model providers (OpenAI, Anthropic, open-source models like Llama/Mistral, and on-premise deployments for data-sensitive operations).
 
 **Key capabilities:**
+
 - **Retrieval-Augmented Generation (RAG)**: regulatory documents, operating procedures, market rules, and historical case data are indexed in a vector database. The LLM answers questions grounded in authoritative context, reducing hallucination risk.
 - **Structured output generation**: regulatory reports, client communications, investigation summaries, and disclosure documents generated from templates + data + LLM synthesis.
 - **Multi-language support**: native understanding of English, Hindi, Bengali, Nepali, Sinhala, and Tamil for document processing and user interaction across South Asian markets.
@@ -307,6 +313,7 @@ The platform embeds a **model-agnostic LLM gateway** that supports multiple foun
 #### 2. ML model registry and serving
 
 A centralized model lifecycle management system:
+
 - **Model registry**: version-controlled storage of all ML models with metadata (training data lineage, performance metrics, bias assessments, approval status).
 - **A/B testing and shadow mode**: new models run in shadow alongside production models; outputs are compared before full promotion.
 - **Feature store**: shared, versioned feature sets (e.g., counterparty risk features, trade pattern features, market volatility features) that feed multiple models consistently.
@@ -317,17 +324,18 @@ A centralized model lifecycle management system:
 
 The platform's **agentic layer** enables bounded multi-step workflows. Agents are specialized, constrained, and auditable:
 
-| Agent type | Function | Autonomy level | Escalation trigger |
-|---|---|---|---|
-| **Reconciliation Agent** | Investigates breaks, matches partial entries, proposes resolution with evidence | Medium-High (auto-resolve known low-risk patterns) | Unknown pattern, high-value threshold, multi-entity impact |
-| **Compliance Monitoring Agent** | Screens transactions against sanctions/PEP lists, monitors position limits, checks trade restrictions | Medium-High (deterministic holds/blocks for clear policy breaches; AI flags and prioritizes) | Ambiguous matches, near-threshold positions, novel entity patterns |
-| **KYC Refresh Agent** | Monitors trigger events, pulls updated data, re-scores risk, generates review package | Medium (prepares package, human approves) | Risk score increase >threshold, adverse media hit, PEP status change |
-| **Regulatory Reporting Agent** | Assembles data, validates completeness, generates draft reports, flags anomalies | Medium (generates draft, human signs off) | Data gaps, validation failures, material changes from prior period |
-| **Settlement Optimization Agent** | Predicts settlement failures, recommends netting optimization, pre-positions liquidity | Medium-High (auto-optimize within approved parameters) | Predicted failure rate >threshold, liquidity constraint, new counterparty |
-| **Client Communication Agent** | Generates personalized contract notes, statements, notifications in appropriate language | High (auto-send for standard communications) | Exceptions, complaints, material disclosures |
-| **Incident Response Agent** | Detects anomalies in system behavior, triggers alerts, initiates runbook execution | Medium-High (auto-remediate known low-risk failure patterns only) | Unknown failure mode, security incident, data integrity concern |
+| Agent type                        | Function                                                                                              | Autonomy level                                                                               | Escalation trigger                                                        |
+| --------------------------------- | ----------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------- |
+| **Reconciliation Agent**          | Investigates breaks, matches partial entries, proposes resolution with evidence                       | Medium-High (auto-resolve known low-risk patterns)                                           | Unknown pattern, high-value threshold, multi-entity impact                |
+| **Compliance Monitoring Agent**   | Screens transactions against sanctions/PEP lists, monitors position limits, checks trade restrictions | Medium-High (deterministic holds/blocks for clear policy breaches; AI flags and prioritizes) | Ambiguous matches, near-threshold positions, novel entity patterns        |
+| **KYC Refresh Agent**             | Monitors trigger events, pulls updated data, re-scores risk, generates review package                 | Medium (prepares package, human approves)                                                    | Risk score increase >threshold, adverse media hit, PEP status change      |
+| **Regulatory Reporting Agent**    | Assembles data, validates completeness, generates draft reports, flags anomalies                      | Medium (generates draft, human signs off)                                                    | Data gaps, validation failures, material changes from prior period        |
+| **Settlement Optimization Agent** | Predicts settlement failures, recommends netting optimization, pre-positions liquidity                | Medium-High (auto-optimize within approved parameters)                                       | Predicted failure rate >threshold, liquidity constraint, new counterparty |
+| **Client Communication Agent**    | Generates personalized contract notes, statements, notifications in appropriate language              | High (auto-send for standard communications)                                                 | Exceptions, complaints, material disclosures                              |
+| **Incident Response Agent**       | Detects anomalies in system behavior, triggers alerts, initiates runbook execution                    | Medium-High (auto-remediate known low-risk failure patterns only)                            | Unknown failure mode, security incident, data integrity concern           |
 
 **Agent governance framework:**
+
 - Each agent has a **capability manifest** declaring: permitted actions, data access scope, maximum autonomous financial impact, escalation rules, and audit requirements.
 - All agent actions are logged to an **immutable agent audit trail** (distinct from the operational audit log) with: trigger event, reasoning chain, confidence score, action taken, and outcome.
 - **Agent kill switches**: operators can disable any agent class instantly, with graceful fallback to human-managed workflows.
@@ -349,23 +357,26 @@ A **financial knowledge graph** that models relationships between entities (issu
 - **Entity resolution**: deduplication and linking across data sources (KYC records, trading records, public filings, sanctions lists) using ML-based entity matching.
 - **Regulatory rule engine**: structured representation of regulatory requirements by jurisdiction, entity type, and instrument class—enabling automated compliance checking and impact analysis when rules change.
 - **Relationship discovery**: automated detection of beneficial ownership chains, related-party transactions, and group exposures—critical for AML/CFT and concentration risk.
-- **Regulatory change monitoring**: NLP-powered scanning of regulatory gazettes, circulars, and consultation papers across target jurisdictions—with automated impact assessment against current platform configuration and operator workflows.
+- **Regulatory change monitoring**: NLP-powered scanning of regulatory gazettes, circulars, and consultation papers across target jurisdictions—with automated impact assessment against current platform configuration and operator console workflows.
 
 ### AI copilot framework
 
 Every operator pack includes an **AI copilot** interface—a conversational, context-aware assistant that understands the user's role, current task, and relevant data:
 
 **Operations copilot:**
+
 - "Show me all unresolved reconciliation breaks from today, sorted by age and value"
 - "Why did trade #12345 fail settlement? What's the recommended resolution?"
 - "Draft the regulatory capital report for Q3 and highlight any items that changed by >10% from Q2"
 
 **Compliance copilot:**
+
 - "Screen this investor against sanctions and PEP lists and generate a risk assessment"
 - "What are the new SEBI requirements for API-based algo trading and how do they affect our current configuration?"
 - "Generate an investigation report for surveillance alert #789 including the full event timeline"
 
 **Management copilot:**
+
 - "What is our current STP rate by asset class? Where are the biggest bottlenecks?"
 - "Forecast our margin requirements for the next 5 trading days based on current positions and market conditions"
 - "Compare our operational metrics against the platform benchmarks for similar-sized brokers"
@@ -384,7 +395,7 @@ flowchart LR
   L2 --> L3["Level 3\nIntelligent\nAutomation"]
   L3 --> L4["Level 4\nAgentic\nAutomation"]
   L4 --> L5["Level 5\nAutonomous\nOperations"]
-  
+
   style L1 fill:#ff6b6b
   style L2 fill:#ffa07a
   style L3 fill:#ffd700
@@ -392,27 +403,27 @@ flowchart LR
   style L5 fill:#87ceeb
 ```
 
-| Level | Description | Platform target |
-|---|---|---|
-| **L1 – Manual** | Human does everything; systems are record-keeping only | Legacy baseline (what we replace) |
-| **L2 – Rule-based** | Deterministic rules automate known, fixed processes | Minimum for launch (Day 1) |
-| **L3 – Intelligent** | ML models augment decisions; humans approve AI recommendations | Core platform capability (Month 3–6) |
-| **L4 – Agentic** | AI agents execute multi-step workflows within guardrails and explicit escalation thresholds | Platform differentiator (Month 6–12) |
-| **L5 – Bounded autonomous** | AI manages tightly bounded, low-impact routines; regulated or material decisions remain deterministic and/or human-approved | Long-term vision (Year 2+) |
+| Level                       | Description                                                                                                                 | Platform target                      |
+| --------------------------- | --------------------------------------------------------------------------------------------------------------------------- | ------------------------------------ |
+| **L1 – Manual**             | Human does everything; systems are record-keeping only                                                                      | Legacy baseline (what we replace)    |
+| **L2 – Rule-based**         | Deterministic rules automate known, fixed processes                                                                         | Minimum for launch (Day 1)           |
+| **L3 – Intelligent**        | ML models augment decisions; humans approve AI recommendations                                                              | Core platform capability (Month 3–6) |
+| **L4 – Agentic**            | AI agents execute multi-step workflows within guardrails and explicit escalation thresholds                                 | Platform differentiator (Month 6–12) |
+| **L5 – Bounded autonomous** | AI manages tightly bounded, low-impact routines; regulated or material decisions remain deterministic and/or human-approved | Long-term vision (Year 2+)           |
 
 ### Automation targets by operational domain
 
-| Domain | Current industry benchmark (manual/semi-auto) | Platform target (AI-native) | How |
-|---|---|---|---|
-| **Trade capture → settlement** | 70–85% STP | >98% STP | Pre-trade validation, auto-enrichment, AI-predicted fail prevention |
-| **Reconciliation** | 60–75% auto-match | >95% auto-match + bounded auto-resolve for standard cases | ML matching with fuzzy logic, agentic break investigation |
-| **KYC onboarding** | Days to weeks | <30 minutes (low-risk, where approved eKYC rails exist) | IDP + automated verification + risk scoring |
-| **KYC refresh** | Manual periodic review | Continuous, event-driven | cKYC agent + trigger monitoring |
-| **Regulatory reporting** | Semi-automated (significant manual assembly) | Auto-generated, human-reviewed | RAG + structured data + validation rules |
-| **Corporate actions** | 50–70% STP | >90% STP for standard cases | AI extraction from notices, auto-entitlement calculation with exception review |
-| **Client communications** | Template-based, manual | AI-generated, auto-dispatched | GenAI + client preference engine |
-| **Surveillance** | Rule-based (high false positive rates ~95%) | AI-augmented (false positive reduction 60–80%) | ML pattern recognition + contextual scoring |
-| **Incident response** | Manual runbooks | Auto-detection + bounded auto-remediation for known low-risk patterns | Observability + AI incident agent |
+| Domain                         | Current industry benchmark (manual/semi-auto) | Platform target (AI-native)                                           | How                                                                            |
+| ------------------------------ | --------------------------------------------- | --------------------------------------------------------------------- | ------------------------------------------------------------------------------ |
+| **Trade capture → settlement** | 70–85% STP                                    | >98% STP                                                              | Pre-trade validation, auto-enrichment, AI-predicted fail prevention            |
+| **Reconciliation**             | 60–75% auto-match                             | >95% auto-match + bounded auto-resolve for standard cases             | ML matching with fuzzy logic, agentic break investigation                      |
+| **KYC onboarding**             | Days to weeks                                 | <30 minutes (low-risk, where approved eKYC rails exist)               | IDP + automated verification + risk scoring                                    |
+| **KYC refresh**                | Manual periodic review                        | Continuous, event-driven                                              | cKYC agent + trigger monitoring                                                |
+| **Regulatory reporting**       | Semi-automated (significant manual assembly)  | Auto-generated, human-reviewed                                        | RAG + structured data + validation rules                                       |
+| **Corporate actions**          | 50–70% STP                                    | >90% STP for standard cases                                           | AI extraction from notices, auto-entitlement calculation with exception review |
+| **Client communications**      | Template-based, manual                        | AI-generated, auto-dispatched                                         | GenAI + client preference engine                                               |
+| **Surveillance**               | Rule-based (high false positive rates ~95%)   | AI-augmented (false positive reduction 60–80%)                        | ML pattern recognition + contextual scoring                                    |
+| **Incident response**          | Manual runbooks                               | Auto-detection + bounded auto-remediation for known low-risk patterns | Observability + AI incident agent                                              |
 
 ### Self-healing and auto-remediation
 
@@ -628,17 +639,17 @@ The market splits into six practical strata (updated to reflect AI landscape):
 
 ### Feature comparison matrix (publicly evidenced)
 
-| Capability area | Broadridge | FIS | ION | Nasdaq (Calypso/AxiomSL) | Murex | TCS | **This Platform (target)** |
-|---|---|---|---|---|---|---|---|
-| Multi-asset post-trade + STP | Strong | Strong | Strong (deriv.) | Moderate–Strong | Strong | Strong | **Strong (AI-optimized)** |
-| Sub-ledger / accounting | Strong | Strong | Moderate | Moderate | Strong | Moderate–Strong | **Strong (event-sourced)** |
-| Collateral / margin | Varies | Strong | Moderate | Strong | Strong | Varies | **Strong (ML-augmented)** |
-| Regulatory reporting | Varies | Varies | Varies | Strong | Varies | Varies | **Strong (AI-generated)** |
-| Cloud / SaaS | Mixed | Strong | Mixed | Mixed | Mixed | Mixed | **Native (Kubernetes)** |
-| **AI-native architecture** | **Bolt-on** | **Bolt-on** | **Bolt-on** | **Bolt-on (AxiomSL)** | **Bolt-on** | **Bolt-on** | **Core** |
-| **Agentic automation** | **None** | **None** | **None** | **None** | **None** | **None** | **Core** |
-| **South Asia compliance packs** | **Partial** | **Partial** | **Minimal** | **Minimal** | **Minimal** | **Strong (India)** | **Comprehensive** |
-| **GenAI copilot** | **Emerging** | **Emerging** | **None** | **None** | **None** | **None** | **Core** |
+| Capability area                 | Broadridge   | FIS          | ION             | Nasdaq (Calypso/AxiomSL) | Murex       | TCS                | **This Platform (target)** |
+| ------------------------------- | ------------ | ------------ | --------------- | ------------------------ | ----------- | ------------------ | -------------------------- |
+| Multi-asset post-trade + STP    | Strong       | Strong       | Strong (deriv.) | Moderate–Strong          | Strong      | Strong             | **Strong (AI-optimized)**  |
+| Sub-ledger / accounting         | Strong       | Strong       | Moderate        | Moderate                 | Strong      | Moderate–Strong    | **Strong (event-sourced)** |
+| Collateral / margin             | Varies       | Strong       | Moderate        | Strong                   | Strong      | Varies             | **Strong (ML-augmented)**  |
+| Regulatory reporting            | Varies       | Varies       | Varies          | Strong                   | Varies      | Varies             | **Strong (AI-generated)**  |
+| Cloud / SaaS                    | Mixed        | Strong       | Mixed           | Mixed                    | Mixed       | Mixed              | **Native (Kubernetes)**    |
+| **AI-native architecture**      | **Bolt-on**  | **Bolt-on**  | **Bolt-on**     | **Bolt-on (AxiomSL)**    | **Bolt-on** | **Bolt-on**        | **Core**                   |
+| **Agentic automation**          | **None**     | **None**     | **None**        | **None**                 | **None**    | **None**           | **Core**                   |
+| **South Asia compliance packs** | **Partial**  | **Partial**  | **Minimal**     | **Minimal**              | **Minimal** | **Strong (India)** | **Comprehensive**          |
+| **GenAI copilot**               | **Emerging** | **Emerging** | **None**        | **None**                 | **None**    | **None**           | **Core**                   |
 
 ### Positioning opportunity: AI-native differentiation
 
@@ -661,6 +672,7 @@ A new platform can leapfrog by:
 ### Pricing models
 
 Where pricing is opaque, platform strategy should assume procurement will demand:
+
 - modular pricing per operator pack and per environment,
 - transparent implementation/service bundles,
 - predictable "usage levers" (accounts, active users, trades, assets) tied to ROI,
@@ -675,6 +687,7 @@ This section merges the "operator pack" concept from the provided MD specificati
 ### Brokerage and depository participant operators (retail + institutional)
 
 **Primary needs in South Asia:**
+
 - fast onboarding + eKYC (target <30 minutes for low-risk cases where approved digital rails exist),
 - omnichannel trading (web/mobile) with permissioned internet trading,
 - intelligent client communications (AI-generated, multi-language),
@@ -683,6 +696,7 @@ This section merges the "operator pack" concept from the provided MD specificati
 - **algo governance toolkit** (strategy registration, tagging, monitoring, audit trail).
 
 **Platform "minimum viable" brokerage/DP pack (AI-native, controls-first):**
+
 - client master + KYC evidence vault (with AI-triggered renewal),
 - OMS + risk checks + order tagging (with ML pre-trade risk),
 - settlement & depository integration adapters,
@@ -695,12 +709,14 @@ This section merges the "operator pack" concept from the provided MD specificati
 ### Merchant banking / ECM / DCM operators
 
 **Needs:**
+
 - issuer workflows (IPO/RPO/rights), intelligent document management, approvals,
 - BookBuilding/subscription integration where applicable,
 - **AI-powered due diligence**: automated document review, red-flag detection, and completeness checking,
 - post-issuance reporting and investor servicing.
 
 **AI-enhanced platform requirements:**
+
 - deal pipelines, permissions, maker-checker approvals,
 - issuer "data room" plugin with **AI-powered document summarization and Q&A**,
 - disclosure template engine with versioning and e-sign,
@@ -711,6 +727,7 @@ This section merges the "operator pack" concept from the provided MD specificati
 ### Investment banking / M&A (advisory + execution support)
 
 In these markets, many workflows remain document-driven. A platform can differentiate by:
+
 - secure workflow orchestration with AI-powered task management,
 - **intelligent document processing** for due diligence, financial modeling, and valuation documentation,
 - client onboarding/eKYC reuse,
@@ -720,6 +737,7 @@ In these markets, many workflows remain document-driven. A platform can differen
 ### Asset and wealth management operators
 
 **Needs:**
+
 - portfolio and order management,
 - compliance rules with AI-powered pre-trade checking,
 - accounting/NAV/fees with intelligent reconciliation,
@@ -727,6 +745,7 @@ In these markets, many workflows remain document-driven. A platform can differen
 - **robo-advisory capabilities** as an operator pack extension.
 
 Buy-side incumbents are strong (Aladdin, SimCorp One, Charles River OEMS). A new entrant should compete via:
+
 - localized compliance packs,
 - cost-effective deployment for mid-tier managers,
 - integrations with local custody/depository,
@@ -737,6 +756,7 @@ Buy-side incumbents are strong (Aladdin, SimCorp One, Charles River OEMS). A new
 If the platform supports market infrastructure-grade deployments, the architecture must align with PFMI expectations (governance, credit/liquidity risk management, default management, settlement finality, operational risk, transparency).
 
 **AI-enhanced capabilities for FMI operators:**
+
 - **AI-powered market surveillance** at exchange level (pattern recognition, anomaly detection, cross-market correlation),
 - **intelligent default management**: ML models predicting clearing member stress before default events,
 - **smart margin optimization**: dynamic haircut calibration based on market conditions and historical loss distributions,
@@ -767,6 +787,7 @@ flowchart LR
 ```
 
 **Standards alignment:**
+
 - **CSD / CCP / integrated utility** modes are most directly constrained by PFMI expectations.
 - Intermediary-facing packs must align to IOSCO principles (market integrity, client asset protection, conflicts, fair dealing).
 - AML/CFT tooling must align to FATF risk-based guidance in securities markets.
@@ -790,22 +811,23 @@ A plugin marketplace is commercially compelling because each country has unique 
 
 **High-value plugin categories in South Asia:**
 
-| Plugin category | Markets | AI-native capability |
-|---|---|---|
-| Regulatory reporting packs | All | AI-generated reports with validation |
-| eKYC adapters | All | Approval-dependent eKYC connectors using IDP + biometric verification + risk scoring where legally and operationally available |
-| IPO/primary issuance workflows | BD, IN | AI-powered demand forecasting, automated allotment |
-| Specialized investment fund workflows | NP, IN, LK | Eligibility controls, mandate restrictions, institutional reporting |
-| Registrar / RTA servicing | NP, BD, LK | Registry maintenance, book-closure support, entitlement data servicing |
-| ESG/green bond disclosure | IN, LK, BD | NLP-based use-of-proceeds verification |
-| Islamic finance screening | BD, LK | ML-driven Shari'ah compliance classification |
-| T+0/T+1 operational tooling | IN | AI-predicted settlement fails, auto-optimization |
-| AI surveillance modules | All | Pattern recognition, anomaly detection |
-| Algo governance toolkit | IN | Strategy cataloging, automated audit |
-| Client communication engine | All | GenAI multi-language generation |
-| Data quality & enrichment | All | AI-powered cleansing, entity resolution |
+| Plugin category                       | Markets    | AI-native capability                                                                                                           |
+| ------------------------------------- | ---------- | ------------------------------------------------------------------------------------------------------------------------------ |
+| Regulatory reporting packs            | All        | AI-generated reports with validation                                                                                           |
+| eKYC adapters                         | All        | Approval-dependent eKYC connectors using IDP + biometric verification + risk scoring where legally and operationally available |
+| IPO/primary issuance workflows        | BD, IN     | AI-powered demand forecasting, automated allotment                                                                             |
+| Specialized investment fund workflows | NP, IN, LK | Eligibility controls, mandate restrictions, institutional reporting                                                            |
+| Registrar / RTA servicing             | NP, BD, LK | Registry maintenance, book-closure support, entitlement data servicing                                                         |
+| ESG/green bond disclosure             | IN, LK, BD | NLP-based use-of-proceeds verification                                                                                         |
+| Islamic finance screening             | BD, LK     | ML-driven Shari'ah compliance classification                                                                                   |
+| T+0/T+1 operational tooling           | IN         | AI-predicted settlement fails, auto-optimization                                                                               |
+| AI surveillance modules               | All        | Pattern recognition, anomaly detection                                                                                         |
+| Algo governance toolkit               | IN         | Strategy cataloging, automated audit                                                                                           |
+| Client communication engine           | All        | GenAI multi-language generation                                                                                                |
+| Data quality & enrichment             | All        | AI-powered cleansing, entity resolution                                                                                        |
 
 **Monetization models (practical):**
+
 - core subscription (platform) + per-pack subscription (operator pack),
 - usage-based fees (accounts, active users, trades, AUM bands),
 - **AI compute metering** (LLM inference, ML model training, agent executions),
@@ -822,12 +844,12 @@ A plugin marketplace is commercially compelling because each country has unique 
 
 The platform operates under an **SRE discipline** with financial-grade SLAs:
 
-| Service tier | Availability target | Latency (p99) | RPO | RTO |
-|---|---|---|---|---|
-| **Critical path** (OMS, ledger, settlement, margin) | 99.99% (52 min/yr downtime) | <100ms | 0 (synchronous replication) | <5 min |
-| **Essential** (reconciliation, reporting, onboarding) | 99.95% (4.4 hrs/yr) | <500ms | <1 min | <15 min |
-| **AI services** (copilot, surveillance, IDP) | 99.9% (8.8 hrs/yr) | <2s (LLM inference) | <5 min | <30 min |
-| **Analytics** (dashboards, BI, ad-hoc queries) | 99.5% | <5s | <1 hr | <1 hr |
+| Service tier                                          | Availability target         | Latency (p99)       | RPO                         | RTO     |
+| ----------------------------------------------------- | --------------------------- | ------------------- | --------------------------- | ------- |
+| **Critical path** (OMS, ledger, settlement, margin)   | 99.99% (52 min/yr downtime) | <100ms              | 0 (synchronous replication) | <5 min  |
+| **Essential** (reconciliation, reporting, onboarding) | 99.95% (4.4 hrs/yr)         | <500ms              | <1 min                      | <15 min |
+| **AI services** (copilot, surveillance, IDP)          | 99.9% (8.8 hrs/yr)          | <2s (LLM inference) | <5 min                      | <30 min |
+| **Analytics** (dashboards, BI, ad-hoc queries)        | 99.5%                       | <5s                 | <1 hr                       | <1 hr   |
 
 ### Observability stack
 
@@ -837,7 +859,7 @@ flowchart LR
   APP -->|Metrics| PROM[Prometheus\nMetrics]
   APP -->|Traces| TEMPO[Tempo/Jaeger\nDistributed Tracing]
   APP -->|Events| KFK2[Kafka\nEvent Stream]
-  
+
   ELK --> GRAF[Grafana\nUnified Dashboards]
   PROM --> GRAF
   TEMPO --> GRAF
@@ -847,6 +869,7 @@ flowchart LR
 ```
 
 **AI-powered observability:**
+
 - **Anomaly detection**: ML models trained on historical system metrics detect abnormal patterns (CPU, memory, latency, error rates, queue depths) before they become incidents.
 - **Root cause analysis**: when an incident occurs, the AI correlates signals across services, identifies the probable root cause, and recommends remediation steps.
 - **Capacity planning**: predictive models forecast resource needs based on growth trends, seasonal patterns, and planned market events (IPO launches, settlement cycle changes).
@@ -874,10 +897,12 @@ flowchart LR
 ### Central Bank Digital Currencies (CBDCs)
 
 Multiple South Asian central banks are exploring or piloting CBDCs:
+
 - **India**: RBI's e-Rupee (e₹) wholesale and retail CBDC pilots are active, with the wholesale variant targeting interbank settlement and the retail variant targeting broader digital payments.
 - **Nepal, Bangladesh, Sri Lanka**: research and exploration phases, with varying timelines.
 
 **Platform readiness requirements:**
+
 - **CBDC settlement rail integration**: ability to settle securities transactions using CBDC as the settlement asset (alongside traditional central bank money and commercial bank money).
 - **Programmable settlement logic**: support for atomic DvP (delivery versus payment) with CBDC smart contracts—enabling guaranteed simultaneous exchange of securities and payment.
 - **Multi-money settlement**: the ledger architecture must support settlement in multiple forms of money (CBDC, commercial bank money, stablecoin if regulated) with seamless reconciliation.
@@ -895,6 +920,7 @@ Quantum computing threatens current public-key cryptography (RSA, ECC) within 10
 ### Decentralized finance (DeFi) bridges
 
 While DeFi remains regulatory uncertain in South Asia, the platform should be architecturally ready for:
+
 - **Regulated DeFi interaction**: if regulators approve, the ability to interface with permissioned/regulated DeFi protocols for specific use cases (e.g., repo markets, collateral management).
 - **Oracle integration**: providing verified market data to on-chain protocols (becoming a "trusted oracle" for price feeds and reference data).
 - **Cross-ledger settlement**: atomic settlement across traditional and DLT-based systems.
@@ -902,6 +928,7 @@ While DeFi remains regulatory uncertain in South Asia, the platform should be ar
 ### Embedded finance and Banking-as-a-Service (BaaS)
 
 Capital markets capabilities will increasingly be embedded in non-financial applications:
+
 - **API-first design** enables fintech partners to embed trading, portfolio management, and investment workflows into consumer applications.
 - **White-label operator packs**: pre-configured, branded, compliant capital markets capabilities that fintechs can deploy under their own brand with the platform as infrastructure.
 - **Micro-investment and fractional ownership**: platform support for fractional securities and micro-lot trading as regulators enable these features.
@@ -909,6 +936,7 @@ Capital markets capabilities will increasingly be embedded in non-financial appl
 ### Real-time cross-border settlement
 
 As South Asian markets deepen integration:
+
 - **FX settlement optimization**: integration with CLS (for supported currencies) or bilateral netting for cross-border settlement.
 - **Correspondent banking integration**: automated nostro/vostro reconciliation with AI-powered exception resolution.
 - **SWIFT gpi integration**: real-time payment tracking for cross-border settlement flows.
@@ -921,74 +949,84 @@ As South Asian markets deepen integration:
 ### Country-specific partnerships and route-to-market
 
 **India**
+
 - **Primary partnerships**: system integrators and regtech/infosec partners for compliance-heavy deployments; cloud providers with audited control frameworks (AWS, Azure, GCP with India regions); broker/wealth platforms needing SEBI cloud and CSCRF compliance automation.
 - **Wedge offerings**: "CSCRF‑ready broker stack," API/algo governance tooling (tagging, registration workflows), T+0 readiness modules, and **AI-powered operational intelligence** (copilot, surveillance, reconciliation agents).
 - **Regulatory signals**: SEBI frameworks for cloud adoption and cybersecurity/cyber resilience are direct product requirements. SEBI's algo trading circular creates immediate demand for governance tooling.
 - **AI angle**: India's large, liquid markets generate massive training data volumes. Position the AI layer as a competitive advantage for brokers seeking operational efficiency and compliance automation.
 
 **Nepal**
+
 - **Primary partnerships**: broker associations, the depository utility (CDSC), and local banks for payment rails; focus on packaged implementations for 90 brokers.
 - **Wedge offerings**: broker/DP operator pack with AI-powered reconciliations; investor portal connectors aligned to existing depository participation (millions of demat/Meroshare users).
 - **Regulatory signals**: central bank reports show market growth and sector composition (banks/insurance dominate market cap), implying risk/reporting features should support those instruments first.
 - **AI angle**: even with a small broker base, AI-powered automation dramatically reduces per-broker implementation cost and ongoing operational overhead—making small-market economics viable.
 
 **Bangladesh**
+
 - **Primary partnerships**: depository and DP ecosystem (large DP network), broker community (TREC holders), and AML/KYC stakeholders aligned to e-KYC guidelines.
 - **Wedge offerings**: DP/broker back office modernization with AI-powered reconciliations, BO servicing, margin controls, reporting; optional Islamic finance governance plugin.
 - **Market infrastructure**: CCP existence (Central Counterparty Bangladesh Limited, incorporated Jan 2019) suggests future demand for clearing-grade margin/collateral workflows.
 - **AI angle**: the large DP network (559 DPs) creates data network effects—more operators on the platform means better ML models for reconciliation, risk, and fraud detection.
 
 **Sri Lanka**
+
 - **Primary partnerships**: regulator-led digitization initiatives; brokerage distribution with mobile-first onboarding; sustainable finance initiatives.
 - **Wedge offerings**: AI-powered digital onboarding + brokerage/DP operations; intelligent statement distribution and investor direct-link tooling; GSS/green bond disclosure plugin.
 - **AI angle**: SEC Sri Lanka's explicit push for digital onboarding creates a direct adoption pathway for AI-powered KYC and investor servicing.
 
 **Myanmar**
+
 - **Primary partnerships**: exchange and regulator partnerships are prerequisite; likely a limited buyer pool.
 - **Wedge offerings**: if pursued, a lightweight brokerage/back office stack with strong compliance defaults and AI-powered operations to minimize manual overhead; however market size signals warrant caution.
 
 ### Regulatory and operational risks
 
-| Risk | Impact | Mitigation |
-|---|---|---|
-| **Cloud and outsourcing constraints** (India explicitly regulates cloud adoption for SEBI-regulated entities) | Blocks procurement if controls are insufficient | Pre-built SEBI cloud compliance controls; deployment on India-region cloud; on-premise/hybrid option |
-| **Cybersecurity and resilience** (SEBI CSCRF requirements) | Non-compliance = operational shutdown risk | CSCRF controls embedded as platform defaults; continuous compliance monitoring |
-| **API/algo ecosystem risk** (India tightening retail algo governance) | Feature delay or rework if regulations change | Modular algo governance module; configurable per regulatory regime |
-| **AML/CFT compliance** (FATF risk-based expectations) | Regulatory penalties; reputational damage | AI-powered risk scoring with explainability; FATF-aligned workflow templates |
-| **AI model risk** (regulatory uncertainty about AI in financial services) | Model failures could cause financial loss or compliance breach | Human-in-the-loop controls; model governance framework; explainability; shadow testing |
-| **AI bias and fairness** | Discriminatory outcomes in KYC/onboarding/risk scoring | Bias monitoring, fairness metrics, regular audits, diverse training data |
-| **Digital assets regulatory uncertainty** | Compliance and reputational risk if tokenization offered prematurely | Optional plugin behind strict certification; jurisdiction-specific activation |
-| **Integration lock-in** to market infrastructure | High cost to maintain per-venue connectors | Connector certification harness as a product line; abstract integration layer |
-| **Data sovereignty and localization** | Different countries have different data residency requirements | Per-jurisdiction data residency controls in multi-tenant architecture, with in-country defaults where required and only approved exceptions for cross-border failover/tooling |
-| **Vendor concentration risk** (dependence on single LLM provider) | Service disruption or pricing changes | Multi-model gateway; support for open-source models; on-premise fallback |
+| Risk                                                                                                          | Impact                                                               | Mitigation                                                                                                                                                                    |
+| ------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Cloud and outsourcing constraints** (India explicitly regulates cloud adoption for SEBI-regulated entities) | Blocks procurement if controls are insufficient                      | Pre-built SEBI cloud compliance controls; deployment on India-region cloud; on-premise/hybrid option                                                                          |
+| **Cybersecurity and resilience** (SEBI CSCRF requirements)                                                    | Non-compliance = operational shutdown risk                           | CSCRF controls embedded as platform defaults; continuous compliance monitoring                                                                                                |
+| **API/algo ecosystem risk** (India tightening retail algo governance)                                         | Feature delay or rework if regulations change                        | Modular algo governance module; configurable per regulatory regime                                                                                                            |
+| **AML/CFT compliance** (FATF risk-based expectations)                                                         | Regulatory penalties; reputational damage                            | AI-powered risk scoring with explainability; FATF-aligned workflow templates                                                                                                  |
+| **AI model risk** (regulatory uncertainty about AI in financial services)                                     | Model failures could cause financial loss or compliance breach       | Human-in-the-loop controls; model governance framework; explainability; shadow testing                                                                                        |
+| **AI bias and fairness**                                                                                      | Discriminatory outcomes in KYC/onboarding/risk scoring               | Bias monitoring, fairness metrics, regular audits, diverse training data                                                                                                      |
+| **Digital assets regulatory uncertainty**                                                                     | Compliance and reputational risk if tokenization offered prematurely | Optional plugin behind strict certification; jurisdiction-specific activation                                                                                                 |
+| **Integration lock-in** to market infrastructure                                                              | High cost to maintain per-venue connectors                           | Connector certification harness as a product line; abstract integration layer                                                                                                 |
+| **Data sovereignty and localization**                                                                         | Different countries have different data residency requirements       | Per-jurisdiction data residency controls in multi-tenant architecture, with in-country defaults where required and only approved exceptions for cross-border failover/tooling |
+| **Vendor concentration risk** (dependence on single LLM provider)                                             | Service disruption or pricing changes                                | Multi-model gateway; support for open-source models; on-premise fallback                                                                                                      |
 
 ### SWOT summaries (entry stance)
 
 **India**
+
 - Strengths: massive investor base and deep markets; strong regulatory clarity on cloud/cyber controls; rich data for AI training.
 - Weaknesses: intense incumbent competition; high compliance and integration costs; complex multi-regulator landscape.
 - Opportunities: T+0 expansion, retail algo governance, cybersecurity frameworks drive upgrades; AI-native differentiation against legacy vendors.
 - Threats: long vendor lock-ins; regulatory change pace; outages/compliance penalties; well-funded local fintechs.
 
 **Nepal**
+
 - Strengths: concentrated market with a manageable broker universe; strong depository adoption; high willingness to digitize.
 - Weaknesses: smaller budgets; heavy reliance on a few infrastructure entities; limited local AI/ML talent.
 - Opportunities: packaged broker/DP modernization; AI automation makes small-market economics viable; potential "lighthouse" for regional expansion.
 - Threats: procurement constraints; integration risk with existing systems; political/economic instability.
 
 **Bangladesh**
+
 - Strengths: sizable intermediary membership and large DP network; depository ISO 27001 certified; growing digital adoption.
 - Weaknesses: market volatility and governance challenges can constrain tech budgets; infrastructure capacity.
 - Opportunities: digital brokerage account directives and eKYC enable modernization; CCP adoption creates clearing platform demand; Islamic finance growing.
 - Threats: policy swings; operational constraints around CCP adoption; currency controls.
 
 **Sri Lanka**
+
 - Strengths: regulator publicly pushing digital onboarding and NIC verification; green finance agenda.
 - Weaknesses: smaller market scale; macro constraints; post-crisis recovery mode.
 - Opportunities: onboarding + client communications; sustainable finance productization; AI copilot for under-resourced brokers.
 - Threats: currency and market cycles affecting project funding; limited institutional capacity for large platform deployments.
 
 **Myanmar**
+
 - Strengths: potential "greenfield" modernization in a small ecosystem.
 - Weaknesses: very small market scale; uncertain operating environment; limited digital infrastructure.
 - Opportunities: partnership-led modernization if the market expands.
@@ -998,21 +1036,21 @@ As South Asian markets deepen integration:
 
 These are **engineering-delivery ranges** for planning. AI-native development requires specialized roles (ML engineers, data engineers, AI product managers) alongside traditional capital markets developers.
 
-| Option | Scope | Timeline | Core team size (approx.) | Cost range (USD) |
-|---|---|---|---|---|
-| **MVP (AI-native wedge)** | Core platform + AI layer (copilot, recon agent, basic ML) + brokerage/DP pack + reconciliations + regulatory reports + 1–2 exchange/depository connectors | 9–12 months | 40–70 FTE (incl. 8–12 AI/ML engineers) | $4M–$15M |
-| **Standard growth** | MVP + merchant banking workflows + richer data/pricing + IDP + full agent suite + onboarding automation + plugin marketplace v1 | 18–24 months | 70–130 FTE (incl. 15–25 AI/ML) | $15M–$45M |
-| **Utility-grade** | Standard + clearing/CSD modes, PFMI-grade resilience, multi-venue certification harness, advanced collateral, full knowledge graph, high automation for bounded routines | 24–36+ months | 140–220+ FTE (incl. 30–40 AI/ML) | $45M–$150M |
+| Option                    | Scope                                                                                                                                                                    | Timeline      | Core team size (approx.)               | Cost range (USD) |
+| ------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------- | -------------------------------------- | ---------------- |
+| **MVP (AI-native wedge)** | Core platform + AI layer (copilot, recon agent, basic ML) + brokerage/DP pack + reconciliations + regulatory reports + 1–2 exchange/depository connectors                | 9–12 months   | 40–70 FTE (incl. 8–12 AI/ML engineers) | $4M–$15M         |
+| **Standard growth**       | MVP + merchant banking workflows + richer data/pricing + IDP + full agent suite + onboarding automation + plugin marketplace v1                                          | 18–24 months  | 70–130 FTE (incl. 15–25 AI/ML)         | $15M–$45M        |
+| **Utility-grade**         | Standard + clearing/CSD modes, PFMI-grade resilience, multi-venue certification harness, advanced collateral, full knowledge graph, high automation for bounded routines | 24–36+ months | 140–220+ FTE (incl. 30–40 AI/ML)       | $45M–$150M       |
 
 **Key AI/ML team composition (for MVP):**
 
-| Role | Count | Responsibility |
-|---|---|---|
-| ML Engineers | 3–5 | Model development, training pipelines, feature engineering |
-| AI/LLM Engineers | 2–3 | Foundation model integration, RAG, agent framework |
-| Data Engineers | 3–4 | Data pipelines, feature store, data quality |
-| AI Product Manager | 1 | AI roadmap, use case prioritization, governance |
-| MLOps Engineer | 1–2 | Model deployment, monitoring, CI/CD for ML |
+| Role               | Count | Responsibility                                             |
+| ------------------ | ----- | ---------------------------------------------------------- |
+| ML Engineers       | 3–5   | Model development, training pipelines, feature engineering |
+| AI/LLM Engineers   | 2–3   | Foundation model integration, RAG, agent framework         |
+| Data Engineers     | 3–4   | Data pipelines, feature store, data quality                |
+| AI Product Manager | 1     | AI roadmap, use case prioritization, governance            |
+| MLOps Engineer     | 1–2   | Model deployment, monitoring, CI/CD for ML                 |
 
 ---
 
@@ -1024,30 +1062,30 @@ The report uses (1) public regulator/depository/exchange statistics to character
 
 ### Appendix B: Key data assumptions
 
-- Market cap snapshots are used as *relative magnitude signals*, not revenue proxies. WFE domestic market capitalization is used for cross-country comparability where available.
+- Market cap snapshots are used as _relative magnitude signals_, not revenue proxies. WFE domestic market capitalization is used for cross-country comparability where available.
 - Nepal USD conversion is based on NRB-reported market cap and exchange rate at mid-July 2025 (indicative).
 - TAM/SAM/SOM estimates use entity count × estimated platform spend range. Actual spend varies by institution size and current technology maturity.
 - Cost estimates assume blended team rates of $80K–$150K/yr per FTE (South Asia/hybrid delivery model).
 
 ### Appendix C: Prioritized feature checklist mapped to regulatory controls
 
-| Priority feature | Control objective | Reference standard(s) | AI/Automation capability |
-|---|---|---|---|
-| Identity, RBAC/ABAC, strong audit logs | Accountability, traceability, governance | PFMI governance/operational risk; IOSCO fair markets principles | AI-powered access anomaly detection |
-| Client asset & client money segregation | Investor protection, safekeeping | IOSCO investor protection; PFMI custody/investment risks | Automated reconciliation, predictive breach detection |
-| Reconciliations with exception mgmt | Operational integrity under compressed cycles | T+1/T+0 operational requirements | Agentic auto-resolution, ML matching |
-| Cloud control plane | Outsourcing and operational resilience | SEBI cloud adoption framework | Automated compliance monitoring, drift detection |
-| Cyber resilience | Systemic resilience | SEBI CSCRF; PFMI operational risk | AI-powered threat detection, auto-remediation |
-| AML/CFT risk engine | Risk-based approach in securities sector | FATF RBA guidance | ML risk scoring, entity resolution, network analysis |
-| ISO 20022 integration layer | Interoperability, reduced manual errors | SWIFT/DTCC ISO 20022 | AI-assisted message mapping and repair |
-| ESG/Green bond disclosure | Integrity of sustainable finance claims | SEBI green/ESG frameworks; Sri Lanka green bond materials | NLP-based use-of-proceeds verification |
-| AI governance + explainability | Market integrity and consumer protection | IOSCO AI report; BIS AI stability bulletin | Model registry, bias monitoring, explainability tooling |
-| **Agentic automation** | **Operational efficiency, error reduction** | **IOSCO operational resilience; PFMI business continuity** | **Multi-agent orchestration with guardrails and explicit human decision boundaries** |
-| **Intelligent Document Processing** | **Onboarding efficiency, data accuracy** | **eKYC regulations (all jurisdictions)** | **Vision + NLP models for multi-language doc processing** |
-| **AI copilot interface** | **Operational productivity, compliance support** | **General operational efficiency** | **RAG-powered conversational assistant per operator role** |
-| **Predictive analytics** | **Risk management, proactive operations** | **PFMI risk management; IOSCO surveillance** | **ML models for fail prediction, margin forecasting, anomaly detection** |
-| **Continuous KYC (cKYC)** | **Ongoing customer due diligence** | **FATF CDD requirements** | **Event-driven risk reassessment, adverse media monitoring** |
-| **Regulatory change management** | **Compliance agility** | **All jurisdictions** | **NLP scanning + knowledge graph impact analysis** |
+| Priority feature                        | Control objective                                | Reference standard(s)                                           | AI/Automation capability                                                             |
+| --------------------------------------- | ------------------------------------------------ | --------------------------------------------------------------- | ------------------------------------------------------------------------------------ |
+| Identity, RBAC/ABAC, strong audit logs  | Accountability, traceability, governance         | PFMI governance/operational risk; IOSCO fair markets principles | AI-powered access anomaly detection                                                  |
+| Client asset & client money segregation | Investor protection, safekeeping                 | IOSCO investor protection; PFMI custody/investment risks        | Automated reconciliation, predictive breach detection                                |
+| Reconciliations with exception mgmt     | Operational integrity under compressed cycles    | T+1/T+0 operational requirements                                | Agentic auto-resolution, ML matching                                                 |
+| Cloud control plane                     | Outsourcing and operational resilience           | SEBI cloud adoption framework                                   | Automated compliance monitoring, drift detection                                     |
+| Cyber resilience                        | Systemic resilience                              | SEBI CSCRF; PFMI operational risk                               | AI-powered threat detection, auto-remediation                                        |
+| AML/CFT risk engine                     | Risk-based approach in securities sector         | FATF RBA guidance                                               | ML risk scoring, entity resolution, network analysis                                 |
+| ISO 20022 integration layer             | Interoperability, reduced manual errors          | SWIFT/DTCC ISO 20022                                            | AI-assisted message mapping and repair                                               |
+| ESG/Green bond disclosure               | Integrity of sustainable finance claims          | SEBI green/ESG frameworks; Sri Lanka green bond materials       | NLP-based use-of-proceeds verification                                               |
+| AI governance + explainability          | Market integrity and consumer protection         | IOSCO AI report; BIS AI stability bulletin                      | Model registry, bias monitoring, explainability tooling                              |
+| **Agentic automation**                  | **Operational efficiency, error reduction**      | **IOSCO operational resilience; PFMI business continuity**      | **Multi-agent orchestration with guardrails and explicit human decision boundaries** |
+| **Intelligent Document Processing**     | **Onboarding efficiency, data accuracy**         | **eKYC regulations (all jurisdictions)**                        | **Vision + NLP models for multi-language doc processing**                            |
+| **AI copilot interface**                | **Operational productivity, compliance support** | **General operational efficiency**                              | **RAG-powered conversational assistant per operator role**                           |
+| **Predictive analytics**                | **Risk management, proactive operations**        | **PFMI risk management; IOSCO surveillance**                    | **ML models for fail prediction, margin forecasting, anomaly detection**             |
+| **Continuous KYC (cKYC)**               | **Ongoing customer due diligence**               | **FATF CDD requirements**                                       | **Event-driven risk reassessment, adverse media monitoring**                         |
+| **Regulatory change management**        | **Compliance agility**                           | **All jurisdictions**                                           | **NLP scanning + knowledge graph impact analysis**                                   |
 
 ### Appendix D: Plugin contract JSON Schema (manifest-level)
 
@@ -1140,7 +1178,11 @@ Below is a practical plugin "manifest" schema supporting capability discovery, p
           "properties": {
             "openapi": { "type": "string", "format": "uri" },
             "base_path": { "type": "string", "default": "/" },
-            "grpc_proto": { "type": "string", "format": "uri", "description": "Optional gRPC proto file URI for high-throughput interfaces" }
+            "grpc_proto": {
+              "type": "string",
+              "format": "uri",
+              "description": "Optional gRPC proto file URI for high-throughput interfaces"
+            }
           }
         },
         "events": {
@@ -1205,7 +1247,16 @@ Below is a practical plugin "manifest" schema supporting capability discovery, p
             "required": ["name", "type"],
             "properties": {
               "name": { "type": "string" },
-              "type": { "type": "string", "enum": ["api_key", "oauth_client", "certificate", "hsm_key_ref", "model_api_key"] }
+              "type": {
+                "type": "string",
+                "enum": [
+                  "api_key",
+                  "oauth_client",
+                  "certificate",
+                  "hsm_key_ref",
+                  "model_api_key"
+                ]
+              }
             }
           }
         },
@@ -1214,9 +1265,16 @@ Below is a practical plugin "manifest" schema supporting capability discovery, p
           "additionalProperties": false,
           "required": ["log_level", "pii_redaction"],
           "properties": {
-            "log_level": { "type": "string", "enum": ["minimal", "standard", "verbose"] },
+            "log_level": {
+              "type": "string",
+              "enum": ["minimal", "standard", "verbose"]
+            },
             "pii_redaction": { "type": "boolean" },
-            "ai_decision_logging": { "type": "boolean", "default": true, "description": "Whether AI model decisions and confidence scores are logged" }
+            "ai_decision_logging": {
+              "type": "boolean",
+              "default": true,
+              "description": "Whether AI model decisions and confidence scores are logged"
+            }
           }
         }
       }
@@ -1233,18 +1291,45 @@ Below is a practical plugin "manifest" schema supporting capability discovery, p
             "required": ["name", "type", "version", "purpose"],
             "properties": {
               "name": { "type": "string" },
-              "type": { "type": "string", "enum": ["llm", "classification", "regression", "clustering", "anomaly_detection", "nlp", "vision", "reinforcement_learning"] },
+              "type": {
+                "type": "string",
+                "enum": [
+                  "llm",
+                  "classification",
+                  "regression",
+                  "clustering",
+                  "anomaly_detection",
+                  "nlp",
+                  "vision",
+                  "reinforcement_learning"
+                ]
+              },
               "version": { "type": "string" },
               "purpose": { "type": "string" },
               "training_data_description": { "type": "string" },
               "bias_assessment_uri": { "type": "string", "format": "uri" },
-              "explainability_method": { "type": "string", "enum": ["shap", "lime", "attention", "counterfactual", "rule_extraction", "none"] }
+              "explainability_method": {
+                "type": "string",
+                "enum": [
+                  "shap",
+                  "lime",
+                  "attention",
+                  "counterfactual",
+                  "rule_extraction",
+                  "none"
+                ]
+              }
             }
           }
         },
         "human_oversight": {
           "type": "string",
-          "enum": ["deterministic_controls_only", "human_review_required", "human_in_the_loop", "human_on_the_loop"],
+          "enum": [
+            "deterministic_controls_only",
+            "human_review_required",
+            "human_in_the_loop",
+            "human_on_the_loop"
+          ],
           "description": "Level of human oversight required for AI decisions; regulated decisions should default away from full autonomy"
         },
         "max_autonomous_impact": {
@@ -1272,7 +1357,14 @@ Below is a practical plugin "manifest" schema supporting capability discovery, p
           "type": "array",
           "items": {
             "type": "string",
-            "enum": ["llm_gateway", "ml_serving", "agent_orchestrator", "feature_store", "vector_db", "knowledge_graph"]
+            "enum": [
+              "llm_gateway",
+              "ml_serving",
+              "agent_orchestrator",
+              "feature_store",
+              "vector_db",
+              "knowledge_graph"
+            ]
           },
           "description": "AI platform services required by this plugin"
         }
@@ -1324,36 +1416,43 @@ Below is a practical plugin "manifest" schema supporting capability discovery, p
 A platform-safe plugin ecosystem requires **repeatable tests** before install/upgrade. This checklist is intended to be automatable.
 
 **1) Package integrity**
+
 - Manifest validates against schema; semver valid.
 - Signed artifact verification (supply chain controls).
 - Dependency graph resolves; no forbidden licenses (if policy applies).
 
 **2) Security**
+
 - Declared permissions are minimal and match observed runtime calls (deny-by-default).
 - Secrets integration uses approved mechanisms only; no plaintext secrets.
 - PII handling: classification tags present; redaction verified in logs.
 - Basic vulnerability scan passes (SCA + container scan).
 
 **3) Operational controls**
+
 - Health checks, timeouts, retries, idempotency for external calls.
 - Backpressure behavior tested (queue limits, rate limiting).
 - Audit logs emitted for all regulated actions (orders, allocations, client changes, ledger postings).
 
 **4) Data correctness**
+
 - Reconciliation hooks: can produce deterministic "as-of" snapshots.
 - Reference data versioning: supports effective-dated changes and replay.
 - If pricing/valuation is involved: reproducible valuation at timestamp with recorded inputs.
 
 **5) Performance and resilience**
+
 - Load test at declared capacity; no resource leaks.
 - Failure-mode tests: downstream outage, partial fills, duplicate events, clock skew.
 - Recovery test: restart/rollback retains consistent state.
 
 **6) Interface conformance**
+
 - If ISO 20022/venue adapter: message validation suite passes (schemas + agreed extensions).
 - If regulatory report plugin: template + validation suite passes against known samples.
 
-**7) AI model governance gates** *(new)*
+**7) AI model governance gates** _(new)_
+
 - If plugin uses AI/ML models:
   - Model card provided with documented purpose, training data, performance metrics, and known limitations.
   - Bias audit report for models that affect client outcomes (KYC decisions, risk scores, trading restrictions).
@@ -1364,6 +1463,7 @@ A platform-safe plugin ecosystem requires **repeatable tests** before install/up
   - Training data lineage: documented provenance of training data with PII handling verification.
 
 **8) Certification tier gates**
+
 - **Self_attested**: passes automated suite + vendor attestation.
 - **Verified**: includes independent security review evidence and BCDR test documents. For AI plugins: independent bias audit and explainability review.
 - **Regulated_critical**: includes regulator/market-infrastructure required conformance artifacts (integration certification, operational resilience evidence), aligned with PFMI expectations for critical FMIs. For AI plugins: regulatory-grade model governance documentation and ongoing monitoring commitments.
@@ -1386,22 +1486,22 @@ flowchart LR
   M --> RET[Retirement]
 ```
 
-| Stage | Requirements | Responsible |
-|---|---|---|
-| **Design** | Problem statement, success metrics, data requirements, ethical assessment, regulatory classification | AI Product Manager + Domain Owner |
-| **Training** | Documented data lineage, bias detection, performance benchmarks, reproducibility | ML Engineer |
-| **Review** | Independent review of model card, bias audit, explainability assessment | AI Governance Committee |
-| **Shadow** | Run alongside production (existing process) for minimum 2 weeks; compare outputs | MLOps + Domain Owner |
-| **Production** | Canary rollout; monitoring dashboards active; human escalation paths verified | MLOps |
-| **Monitoring** | Drift detection, performance tracking, fairness metrics, incident response | MLOps + AI Governance |
-| **Retraining** | Triggered by drift threshold, performance degradation, or data distribution change | ML Engineer + Approval |
-| **Retirement** | Graceful deprecation with fallback to prior version or rule-based system | AI Product Manager |
+| Stage          | Requirements                                                                                         | Responsible                       |
+| -------------- | ---------------------------------------------------------------------------------------------------- | --------------------------------- |
+| **Design**     | Problem statement, success metrics, data requirements, ethical assessment, regulatory classification | AI Product Manager + Domain Owner |
+| **Training**   | Documented data lineage, bias detection, performance benchmarks, reproducibility                     | ML Engineer                       |
+| **Review**     | Independent review of model card, bias audit, explainability assessment                              | AI Governance Committee           |
+| **Shadow**     | Run alongside production (existing process) for minimum 2 weeks; compare outputs                     | MLOps + Domain Owner              |
+| **Production** | Canary rollout; monitoring dashboards active; human escalation paths verified                        | MLOps                             |
+| **Monitoring** | Drift detection, performance tracking, fairness metrics, incident response                           | MLOps + AI Governance             |
+| **Retraining** | Triggered by drift threshold, performance degradation, or data distribution change                   | ML Engineer + Approval            |
+| **Retirement** | Graceful deprecation with fallback to prior version or rule-based system                             | AI Product Manager                |
 
 **Regulatory classification for AI models:**
 
-| Class | Example use cases | Governance level |
-|---|---|---|
-| **Advisory** | Copilot suggestions, report drafting, data visualization | Standard (logging + monitoring) |
-| **Operational** | Reconciliation matching, data enrichment, document classification | Enhanced (+ explainability + shadow testing) |
-| **Decision-support** | Risk scoring, surveillance alerts, margin forecasting | High (+ bias audit + human review threshold) |
+| Class                  | Example use cases                                                                               | Governance level                                                                          |
+| ---------------------- | ----------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------- |
+| **Advisory**           | Copilot suggestions, report drafting, data visualization                                        | Standard (logging + monitoring)                                                           |
+| **Operational**        | Reconciliation matching, data enrichment, document classification                               | Enhanced (+ explainability + shadow testing)                                              |
+| **Decision-support**   | Risk scoring, surveillance alerts, margin forecasting                                           | High (+ bias audit + human review threshold)                                              |
 | **Bounded autonomous** | Auto-resolution of low-risk recon breaks, routine statement dispatch, low-risk enrichment tasks | Critical (+ full governance + explicit scope limits + regulatory approval where required) |

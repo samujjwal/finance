@@ -1,8 +1,8 @@
-EPIC-ID:    EPIC-D-05
-EPIC NAME:  Pricing Engine
-LAYER:      DOMAIN
-MODULE:     D-05 Pricing Engine
-VERSION:    1.0.0
+EPIC-ID: EPIC-D-05
+EPIC NAME: Pricing Engine
+LAYER: DOMAIN
+MODULE: D-05 Pricing Engine
+VERSION: 1.0.1
 
 ---
 
@@ -60,54 +60,54 @@ Deliver the D-05 Pricing Engine, responsible for evaluating and calculating inst
 
 #### Section 6 — Event Model Definition
 
-| Field | Description |
-|---|---|
-| Event Name | `PriceUpdatedEvent` |
-| Schema Version | `v1.0.0` |
-| Trigger Condition | EOD calculation finishes or a significant intra-day pricing threshold is crossed. |
-| Payload | `{ "instrument_id": "...", "price": 245.5, "type": "EOD", "timestamp_bs": "..." }` |
-| Consumers | PMS (NAV calc), Risk Engine (Margin calc) |
-| Idempotency Key | `hash(instrument_id + calculation_timestamp)` |
-| Replay Behavior | Updates materialized view of latest prices. |
-| Retention Policy | Permanent. |
+| Field             | Description                                                                        |
+| ----------------- | ---------------------------------------------------------------------------------- |
+| Event Name        | `PriceUpdatedEvent`                                                                |
+| Schema Version    | `v1.0.0`                                                                           |
+| Trigger Condition | EOD calculation finishes or a significant intra-day pricing threshold is crossed.  |
+| Payload           | `{ "instrument_id": "...", "price": 245.5, "type": "EOD", "timestamp_bs": "..." }` |
+| Consumers         | PMS (NAV calc), Risk Engine (Margin calc)                                          |
+| Idempotency Key   | `hash(instrument_id + calculation_timestamp)`                                      |
+| Replay Behavior   | Updates materialized view of latest prices.                                        |
+| Retention Policy  | Permanent.                                                                         |
 
 ---
 
-#### Section 6.5 — Command Model Definition
+#### Section 7 — Command Model Definition
 
-| Field | Description |
-|---|---|
-| Command Name | `CalculatePriceCommand` |
-| Schema Version | `v1.0.0` |
+| Field            | Description                                                      |
+| ---------------- | ---------------------------------------------------------------- |
+| Command Name     | `CalculatePriceCommand`                                          |
+| Schema Version   | `v1.0.0`                                                         |
 | Validation Rules | Instrument exists, valuation date valid, pricing model available |
-| Handler | `PricingCommandHandler` in D-05 Pricing Engine |
-| Success Event | `PriceCalculated` |
-| Failure Event | `PriceCalculationFailed` |
-| Idempotency | Same instrument + date returns cached price |
+| Handler          | `PricingCommandHandler` in D-05 Pricing Engine                   |
+| Success Event    | `PriceCalculated`                                                |
+| Failure Event    | `PriceCalculationFailed`                                         |
+| Idempotency      | Same instrument + date returns cached price                      |
 
-| Field | Description |
-|---|---|
-| Command Name | `OverridePriceCommand` |
-| Schema Version | `v1.0.0` |
+| Field            | Description                                                                  |
+| ---------------- | ---------------------------------------------------------------------------- |
+| Command Name     | `OverridePriceCommand`                                                       |
+| Schema Version   | `v1.0.0`                                                                     |
 | Validation Rules | Instrument exists, override reason provided, maker-checker approval obtained |
-| Handler | `PricingCommandHandler` in D-05 Pricing Engine |
-| Success Event | `PriceOverridden` |
-| Failure Event | `PriceOverrideFailed` |
-| Idempotency | Command ID must be unique; duplicate commands return original result |
+| Handler          | `PricingCommandHandler` in D-05 Pricing Engine                               |
+| Success Event    | `PriceOverridden`                                                            |
+| Failure Event    | `PriceOverrideFailed`                                                        |
+| Idempotency      | Command ID must be unique; duplicate commands return original result         |
 
-| Field | Description |
-|---|---|
-| Command Name | `BuildYieldCurveCommand` |
-| Schema Version | `v1.0.0` |
+| Field            | Description                                                         |
+| ---------------- | ------------------------------------------------------------------- |
+| Command Name     | `BuildYieldCurveCommand`                                            |
+| Schema Version   | `v1.0.0`                                                            |
 | Validation Rules | Market data available, curve definition valid, valuation date valid |
-| Handler | `YieldCurveHandler` in D-05 Pricing Engine |
-| Success Event | `YieldCurveBuilt` |
-| Failure Event | `YieldCurveBuildFailed` |
-| Idempotency | Same date + curve returns cached result |
+| Handler          | `YieldCurveHandler` in D-05 Pricing Engine                          |
+| Success Event    | `YieldCurveBuilt`                                                   |
+| Failure Event    | `YieldCurveBuildFailed`                                             |
+| Idempotency      | Same date + curve returns cached result                             |
 
 ---
 
-#### Section 7 — AI Integration Requirements
+#### Section 8 — AI Integration Requirements
 
 - **AI Hook Type:** Predictive Model
 - **Workflow Steps Exposed:** Pricing of illiquid or OTC instruments.
@@ -119,59 +119,59 @@ Deliver the D-05 Pricing Engine, responsible for evaluating and calculating inst
 
 ---
 
-#### Section 8 — NFRs
+#### Section 9 — NFRs
 
-| NFR Category | Required Targets |
-|---|---|
-| Latency / Throughput | Price query < 5ms; handle 10,000 queries/sec |
-| Scalability | Horizontally scalable computation |
-| Availability | 99.99% uptime |
-| Consistency Model | Strong consistency for EOD prices |
-| Security | Row-level tenant isolation |
-| Data Residency | Enforced via K-08 |
-| Data Retention | 10 years for official EOD prices |
-| Auditability | Manual price overrides logged |
-| Observability | Metrics: `pricing.calc.latency`, `pricing.error.rate` |
-| Extensibility | New models via T3 packs |
-| Upgrade / Compatibility | N/A |
-| On-Prem Constraints | Fully functional locally |
-| Ledger Integrity | N/A |
-| Dual-Calendar Correctness | EOD timestamps correct |
+| NFR Category              | Required Targets                                      |
+| ------------------------- | ----------------------------------------------------- |
+| Latency / Throughput      | Price query < 5ms; handle 10,000 queries/sec          |
+| Scalability               | Horizontally scalable computation                     |
+| Availability              | 99.99% uptime                                         |
+| Consistency Model         | Strong consistency for EOD prices                     |
+| Security                  | Row-level tenant isolation                            |
+| Data Residency            | Enforced via K-08                                     |
+| Data Retention            | 10 years for official EOD prices                      |
+| Auditability              | Manual price overrides logged                         |
+| Observability             | Metrics: `pricing.calc.latency`, `pricing.error.rate` |
+| Extensibility             | New models via T3 packs                               |
+| Upgrade / Compatibility   | N/A                                                   |
+| On-Prem Constraints       | Fully functional locally                              |
+| Ledger Integrity          | N/A                                                   |
+| Dual-Calendar Correctness | EOD timestamps correct                                |
 
 ---
 
-#### Section 9 — Acceptance Criteria
+#### Section 10 — Acceptance Criteria
 
 1. **Given** a request for the EOD price of a Nepal Mutual Fund, **When** the Pricing Engine is called, **Then** it invokes the specific NAV lookup adapter and returns the price with dual dates.
 2. **Given** an illiquid debenture, **When** requested, **Then** the engine executes the T3 Amortized Cost model and returns the result in < 5ms.
 
 ---
 
-#### Section 10 — Failure Modes & Resilience
+#### Section 11 — Failure Modes & Resilience
 
 - **Model Pack Crash:** Sandbox restarts; if it fails repeatedly, engine falls back to 'Last Known Price' and raises an alert.
 
 ---
 
-#### Section 11 — Observability & Audit
+#### Section 12 — Observability & Audit
 
-| Telemetry Type | Required Details |
-|---|---|
-| Metrics | `price.staleness`, `model.execution.time` |
-| Logs | Calculation errors |
-| Traces | Span `Pricing.calculate` |
-| Audit Events | Action: `ManualPriceOverride` |
-| Regulatory Evidence | Mark-to-market justification trails. |
+| Telemetry Type      | Required Details                          |
+| ------------------- | ----------------------------------------- |
+| Metrics             | `price.staleness`, `model.execution.time` |
+| Logs                | Calculation errors                        |
+| Traces              | Span `Pricing.calculate`                  |
+| Audit Events        | Action: `ManualPriceOverride`             |
+| Regulatory Evidence | Mark-to-market justification trails.      |
 
 ---
 
-#### Section 12 — Compliance & Regulatory Traceability
+#### Section 13 — Compliance & Regulatory Traceability
 
 - Valuation integrity [LCA-AUDIT-001]
 
 ---
 
-#### Section 13 — Extension Points & Contracts
+#### Section 14 — Extension Points & Contracts
 
 - **SDK Contract:** `PricingClient.getPrice(instrumentId)`, `PricingClient.getBatchPrices(instrumentIds[])`, `PricingClient.getGreeks(instrumentId)`.
 - **Jurisdiction Plugin Extension Points:** T3 Pricing Models (e.g., Black-Scholes, Monte Carlo, Nepal-specific fixed-income models).
@@ -191,17 +191,17 @@ Deliver the D-05 Pricing Engine, responsible for evaluating and calculating inst
 
 ---
 
-#### Section 14 — Future-Safe Architecture Evaluation
+#### Section 15 — Future-Safe Architecture Evaluation
 
-| Question | Expected Answer |
-|---|---|
-| Can this module support India/Bangladesh via plugin? | Yes. |
-| Can a new pricing model be added? | Yes, via T3 Pack. |
-| Can this run in an air-gapped deployment? | Yes, with local pricing models. |
+| Question                                             | Expected Answer                 |
+| ---------------------------------------------------- | ------------------------------- |
+| Can this module support India/Bangladesh via plugin? | Yes.                            |
+| Can a new pricing model be added?                    | Yes, via T3 Pack.               |
+| Can this run in an air-gapped deployment?            | Yes, with local pricing models. |
 
 ---
 
-#### Section 14.5 — Threat Model
+#### Section 16 — Threat Model
 
 **Attack Vectors & Mitigations:**
 
@@ -231,6 +231,7 @@ Deliver the D-05 Pricing Engine, responsible for evaluating and calculating inst
    - **Residual Risk:** Sophisticated backdoor evading detection.
 
 **Security Controls:**
+
 - Cryptographic signing of pricing models
 - P-01 certification pipeline
 - Maker-checker for price overrides
@@ -238,3 +239,15 @@ Deliver the D-05 Pricing Engine, responsible for evaluating and calculating inst
 - Independent price verification
 - Audit logging of all pricing operations
 - Encryption of proprietary models
+
+---
+
+## Changelog
+
+### Version 1.0.1 (2026-03-10)
+
+**Type:** PATCH  
+**Changes:**
+
+- Standardized section numbering to the sequential 16-section format.
+- Added changelog metadata for future epic maintenance.

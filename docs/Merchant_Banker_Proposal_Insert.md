@@ -1,8 +1,8 @@
 # Project Siddhanta: Merchant Banker Proposal Insert
 
-Version: 1.0  
-Status: Customer-facing merchant-banker insert derived from verified claims only  
-Last revised: March 1, 2026
+Version: 1.0.1
+Status: Customer-facing merchant-banker insert derived from verified claims only
+Last revised: March 10, 2026
 
 Primary source baseline: [Customer_Facing_Claims_Pack.md](Customer_Facing_Claims_Pack.md)  
 Source register: [Authoritative_Source_Register.md](Authoritative_Source_Register.md)  
@@ -30,6 +30,8 @@ That creates a workflow environment where issue execution depends on:
 ---
 
 ## What Siddhanta Delivers
+
+Siddhanta is built on a **pluggable, extensible architecture** — jurisdiction-specific filing timelines, prospectus schemas, and submission mechanics are implemented as versioned Rule Packs and Config Packs layered on top of a jurisdiction-agnostic Generic Core. When SEBON updates a directive, the corresponding Rule Pack is updated and deployed without core system changes.
 
 For merchant bankers, Siddhanta focuses on:
 

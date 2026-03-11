@@ -1,9 +1,9 @@
-EPIC-ID:    EPIC-D-14
-EPIC NAME:  Sanctions Screening
-LAYER:      DOMAIN
-MODULE:     D-14 Sanctions Screening
-VERSION:    1.0.0
-ARB-REF:    P1-13
+EPIC-ID: EPIC-D-14
+EPIC NAME: Sanctions Screening
+LAYER: DOMAIN
+MODULE: D-14 Sanctions Screening
+VERSION: 1.0.1
+ARB-REF: P1-13
 
 ---
 
@@ -68,44 +68,44 @@ Deliver the D-14 Sanctions Screening module to prevent the platform from facilit
 
 #### Section 6 — Event Model Definition
 
-| Field | Description |
-|---|---|
-| Event Name | `SanctionsMatchDetectedEvent` |
-| Schema Version | `v1.0.0` |
-| Trigger Condition | Fuzzy matching detects a potential sanctions match. |
-| Payload | `{ "screening_id": "...", "entity_name": "...", "matched_entry": "...", "match_score": 0.87, "list_source": "OFAC_SDN", "transaction_id": "...", "held": true }` |
-| Consumers | Compliance Dashboard, K-06 Alerting, D-07 Compliance |
-| Idempotency Key | `hash(entity_name + matched_entry + transaction_id)` |
-| Replay Behavior | Re-creates the match for review. |
-| Retention Policy | Permanent. |
+| Field             | Description                                                                                                                                                      |
+| ----------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Event Name        | `SanctionsMatchDetectedEvent`                                                                                                                                    |
+| Schema Version    | `v1.0.0`                                                                                                                                                         |
+| Trigger Condition | Fuzzy matching detects a potential sanctions match.                                                                                                              |
+| Payload           | `{ "screening_id": "...", "entity_name": "...", "matched_entry": "...", "match_score": 0.87, "list_source": "OFAC_SDN", "transaction_id": "...", "held": true }` |
+| Consumers         | Compliance Dashboard, K-06 Alerting, D-07 Compliance                                                                                                             |
+| Idempotency Key   | `hash(entity_name + matched_entry + transaction_id)`                                                                                                             |
+| Replay Behavior   | Re-creates the match for review.                                                                                                                                 |
+| Retention Policy  | Permanent.                                                                                                                                                       |
 
 ---
 
-#### Section 6.5 — Command Model Definition
+#### Section 7 — Command Model Definition
 
-| Field | Description |
-|---|---|
-| Command Name | `ScreenEntityCommand` |
-| Schema Version | `v1.0.0` |
+| Field            | Description                                                              |
+| ---------------- | ------------------------------------------------------------------------ |
+| Command Name     | `ScreenEntityCommand`                                                    |
+| Schema Version   | `v1.0.0`                                                                 |
 | Validation Rules | Entity details provided, sanctions lists available, requester authorized |
-| Handler | `ScreeningCommandHandler` in D-14 |
-| Success Event | `ScreeningCompleted` |
-| Failure Event | `ScreeningFailed` |
-| Idempotency | Screening ID must be unique; duplicate commands return cached result |
+| Handler          | `ScreeningCommandHandler` in D-14                                        |
+| Success Event    | `ScreeningCompleted`                                                     |
+| Failure Event    | `ScreeningFailed`                                                        |
+| Idempotency      | Screening ID must be unique; duplicate commands return cached result     |
 
-| Field | Description |
-|---|---|
-| Command Name | `ReviewMatchCommand` |
-| Schema Version | `v1.0.0` |
+| Field            | Description                                                            |
+| ---------------- | ---------------------------------------------------------------------- |
+| Command Name     | `ReviewMatchCommand`                                                   |
+| Schema Version   | `v1.0.0`                                                               |
 | Validation Rules | Match exists, reviewer authorized (compliance role), decision provided |
-| Handler | `MatchReviewHandler` in D-14 |
-| Success Event | `MatchReviewed` |
-| Failure Event | `MatchReviewFailed` |
-| Idempotency | Command ID must be unique |
+| Handler          | `MatchReviewHandler` in D-14                                           |
+| Success Event    | `MatchReviewed`                                                        |
+| Failure Event    | `MatchReviewFailed`                                                    |
+| Idempotency      | Command ID must be unique                                              |
 
 ---
 
-#### Section 7 — AI Integration Requirements
+#### Section 8 — AI Integration Requirements
 
 - **AI Hook Type:** Pattern Recognition / NLP
 - **Workflow Steps Exposed:** Entity name matching and alias resolution.
@@ -117,28 +117,28 @@ Deliver the D-14 Sanctions Screening module to prevent the platform from facilit
 
 ---
 
-#### Section 8 — NFRs
+#### Section 9 — NFRs
 
-| NFR Category | Required Targets |
-|---|---|
-| Latency / Throughput | Real-time screening P99 < 50ms; batch screening 100K entities in < 1 hour |
-| Scalability | Horizontally scalable screening workers |
-| Availability | 99.999% uptime (critical compliance path) |
-| Consistency Model | Strong consistency for screening decisions |
-| Security | Sanctions lists encrypted at rest; screening results access-restricted |
-| Data Residency | Screening results follow K-08 residency rules |
-| Data Retention | Screening records retained per audit policy (minimum 10 years) |
-| Auditability | All screening decisions logged to K-07 [LCA-AUDIT-001] |
-| Observability | Metrics: `screening.latency`, `screening.match.rate`, `screening.list.staleness`, `screening.volume` |
-| Extensibility | New list sources via T3 Adapter Packs |
-| Upgrade / Compatibility | Backward compatible screening API |
-| On-Prem Constraints | Local cache with offline list bundles |
-| Ledger Integrity | N/A |
-| Dual-Calendar Correctness | All timestamps use DualDate |
+| NFR Category              | Required Targets                                                                                     |
+| ------------------------- | ---------------------------------------------------------------------------------------------------- |
+| Latency / Throughput      | Real-time screening P99 < 50ms; batch screening 100K entities in < 1 hour                            |
+| Scalability               | Horizontally scalable screening workers                                                              |
+| Availability              | 99.999% uptime (critical compliance path)                                                            |
+| Consistency Model         | Strong consistency for screening decisions                                                           |
+| Security                  | Sanctions lists encrypted at rest; screening results access-restricted                               |
+| Data Residency            | Screening results follow K-08 residency rules                                                        |
+| Data Retention            | Screening records retained per audit policy (minimum 10 years)                                       |
+| Auditability              | All screening decisions logged to K-07 [LCA-AUDIT-001]                                               |
+| Observability             | Metrics: `screening.latency`, `screening.match.rate`, `screening.list.staleness`, `screening.volume` |
+| Extensibility             | New list sources via T3 Adapter Packs                                                                |
+| Upgrade / Compatibility   | Backward compatible screening API                                                                    |
+| On-Prem Constraints       | Local cache with offline list bundles                                                                |
+| Ledger Integrity          | N/A                                                                                                  |
+| Dual-Calendar Correctness | All timestamps use DualDate                                                                          |
 
 ---
 
-#### Section 9 — Acceptance Criteria
+#### Section 10 — Acceptance Criteria
 
 1. **Given** a client named "John Smith", **When** screened against OFAC SDN containing "Jon Smyth", **Then** a potential match is flagged with match score > 0.8 and the transaction is held.
 2. **Given** an updated OFAC list, **When** batch screening runs, **Then** existing client "ABC Corp" newly matching a sanctioned entity triggers an alert and account review.
@@ -148,7 +148,7 @@ Deliver the D-14 Sanctions Screening module to prevent the platform from facilit
 
 ---
 
-#### Section 10 — Failure Modes & Resilience
+#### Section 11 — Failure Modes & Resilience
 
 - **Sanctions Provider Unavailable:** Screen against local cache; alert raised if cache staleness > threshold. Screening continues in degraded mode.
 - **Screening Service Down:** All transactions requiring screening are held pending; circuit breaker prevents cascading failure. CRITICAL alert raised.
@@ -156,19 +156,19 @@ Deliver the D-14 Sanctions Screening module to prevent the platform from facilit
 
 ---
 
-#### Section 11 — Observability & Audit
+#### Section 12 — Observability & Audit
 
-| Telemetry Type | Required Details |
-|---|---|
-| Metrics | `screening.latency.p99`, `screening.match.count`, `screening.clear.count`, `list.staleness.hours` |
-| Logs | Structured: `screening_id`, `entity`, `result`, `match_score` |
-| Traces | Span per screening operation |
-| Audit Events | `ScreeningCompleted`, `MatchReviewed`, `ListUpdated` [LCA-AUDIT-001] |
-| Regulatory Evidence | Screening records for AML/sanctions compliance audit [LCA-SANCTIONS-001] |
+| Telemetry Type      | Required Details                                                                                  |
+| ------------------- | ------------------------------------------------------------------------------------------------- |
+| Metrics             | `screening.latency.p99`, `screening.match.count`, `screening.clear.count`, `list.staleness.hours` |
+| Logs                | Structured: `screening_id`, `entity`, `result`, `match_score`                                     |
+| Traces              | Span per screening operation                                                                      |
+| Audit Events        | `ScreeningCompleted`, `MatchReviewed`, `ListUpdated` [LCA-AUDIT-001]                              |
+| Regulatory Evidence | Screening records for AML/sanctions compliance audit [LCA-SANCTIONS-001]                          |
 
 ---
 
-#### Section 12 — Compliance & Regulatory Traceability
+#### Section 13 — Compliance & Regulatory Traceability
 
 - Sanctions compliance [LCA-SANCTIONS-001]
 - AML/CFT requirements [LCA-AMLKYC-001]
@@ -176,17 +176,76 @@ Deliver the D-14 Sanctions Screening module to prevent the platform from facilit
 
 ---
 
-#### Section 13 — Extension Points & Contracts
+#### Section 14 — Extension Points & Contracts
 
 - **SDK Contract:** `SanctionsClient.screen(entity)`, `SanctionsClient.reviewMatch(matchId, decision)`, `SanctionsClient.getListStatus()`.
 - **Jurisdiction Plugin Extension Points:** T3 Adapter Packs for list providers; T1 Config Packs for thresholds and list selection.
 
 ---
 
-#### Section 14 — Future-Safe Architecture Evaluation
+#### Section 15 — Future-Safe Architecture Evaluation
 
-| Question | Expected Answer |
-|---|---|
+| Question                                             | Expected Answer                                                    |
+| ---------------------------------------------------- | ------------------------------------------------------------------ |
 | Can this module support India/Bangladesh via plugin? | Yes, via jurisdiction-specific list sources and threshold configs. |
-| Can new sanctions lists be added? | Yes, via T3 Adapter Packs. |
-| Can this run in an air-gapped deployment? | Yes, with offline signed list bundles. |
+| Can new sanctions lists be added?                    | Yes, via T3 Adapter Packs.                                         |
+| Can this run in an air-gapped deployment?            | Yes, with offline signed list bundles.                             |
+
+---
+
+#### Section 16 — Threat Model
+
+**Attack Vectors & Mitigations:**
+
+1. **Sanctions Match Evasion**
+
+- **Threat:** Counterparties exploit aliases, transliterations, or sparse identifiers to avoid detection.
+- **Mitigation:** Configurable fuzzy matching; alias expansion; multiple identifier comparisons; periodic batch re-screening; human review for borderline scores.
+- **Residual Risk:** Novel alias structures not yet represented in source lists.
+
+2. **List Freshness Degradation**
+
+- **Threat:** Stale or failed list updates allow newly sanctioned entities to transact.
+- **Mitigation:** Freshness monitoring with alerts; signed update bundles; degraded-mode thresholds; offline bundle validation for air-gapped environments; audit evidence of active list version.
+- **Residual Risk:** Extended provider outage across all configured sources.
+
+3. **False Positive Abuse**
+
+- **Threat:** Excessive false positives create operational pressure to weaken controls or auto-clear risky cases.
+- **Mitigation:** Match-review workflow with evidence capture; threshold tuning via governed config; AI explainability for score drivers; maker-checker for confirmed-match actions.
+- **Residual Risk:** Review fatigue during high-volume screening periods.
+
+4. **Screening Decision Tampering**
+
+- **Threat:** A reviewer alters screening outcomes to release blocked entities improperly.
+- **Mitigation:** Immutable K-07 audit trail; dual approval for true-match outcomes; reviewer attribution retained with timestamps; case-history reconstruction for all overrides.
+- **Residual Risk:** Collusion among privileged reviewers.
+
+5. **Sanctions Data Exfiltration**
+
+- **Threat:** Attackers steal cached list data or screening results to infer control coverage or sensitive investigations.
+- **Mitigation:** Encryption at rest; access-restricted screening stores; masked operational views where possible; network segmentation; access logging and anomaly detection.
+- **Residual Risk:** Insider extraction of legitimate exports.
+
+**Security Controls:**
+
+- Signed sanctions-list ingestion and freshness monitoring
+- Fuzzy matching with governed thresholds
+- Maker-checker for confirmed-match blocking actions
+- Immutable audit trail of screening decisions
+- Encryption of cached lists and screening results
+- RBAC for compliance reviewers
+- Air-gap bundle validation controls
+
+---
+
+## Changelog
+
+### Version 1.0.1 (2026-03-10)
+
+**Type:** PATCH  
+**Changes:**
+
+- Standardized section numbering to the sequential 16-section format.
+- Registered sanctions-screening traceability under the compliance code registry.
+- Added changelog metadata for future epic maintenance.

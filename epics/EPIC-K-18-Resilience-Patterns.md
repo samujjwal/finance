@@ -1,9 +1,9 @@
-EPIC-ID:    EPIC-K-18
-EPIC NAME:  Resilience Patterns Library
-LAYER:      KERNEL
-MODULE:     K-18 Resilience Patterns Library
-VERSION:    1.0.0
-ARB-REF:    P0-02
+EPIC-ID: EPIC-K-18
+EPIC NAME: Resilience Patterns Library
+LAYER: KERNEL
+MODULE: K-18 Resilience Patterns Library
+VERSION: 1.0.1
+ARB-REF: P0-02
 
 ---
 
@@ -66,34 +66,34 @@ Deliver the K-18 Resilience Patterns Library, providing a standardized SDK for c
 
 #### Section 6 — Event Model Definition
 
-| Field | Description |
-|---|---|
-| Event Name | `CircuitBreakerStateChangedEvent` |
-| Schema Version | `v1.0.0` |
-| Trigger Condition | A circuit breaker transitions between CLOSED, OPEN, or HALF_OPEN states. |
-| Payload | `{ "dependency_id": "K-03", "module_id": "D-01", "from_state": "CLOSED", "to_state": "OPEN", "failure_count": 3, "timestamp": "..." }` |
-| Consumers | K-06 Observability, Admin Portal, K-07 Audit |
-| Idempotency Key | `hash(dependency_id + module_id + to_state + timestamp)` |
-| Replay Behavior | Updates the materialized view of dependency health. |
-| Retention Policy | 90 days (operational data). |
+| Field             | Description                                                                                                                            |
+| ----------------- | -------------------------------------------------------------------------------------------------------------------------------------- |
+| Event Name        | `CircuitBreakerStateChangedEvent`                                                                                                      |
+| Schema Version    | `v1.0.0`                                                                                                                               |
+| Trigger Condition | A circuit breaker transitions between CLOSED, OPEN, or HALF_OPEN states.                                                               |
+| Payload           | `{ "dependency_id": "K-03", "module_id": "D-01", "from_state": "CLOSED", "to_state": "OPEN", "failure_count": 3, "timestamp": "..." }` |
+| Consumers         | K-06 Observability, Admin Portal, K-07 Audit                                                                                           |
+| Idempotency Key   | `hash(dependency_id + module_id + to_state + timestamp)`                                                                               |
+| Replay Behavior   | Updates the materialized view of dependency health.                                                                                    |
+| Retention Policy  | 90 days (operational data).                                                                                                            |
 
 ---
 
-#### Section 6.5 — Command Model Definition
+#### Section 7 — Command Model Definition
 
-| Field | Description |
-|---|---|
-| Command Name | `ForceCircuitBreakerCommand` |
-| Schema Version | `v1.0.0` |
+| Field            | Description                                                                  |
+| ---------------- | ---------------------------------------------------------------------------- |
+| Command Name     | `ForceCircuitBreakerCommand`                                                 |
+| Schema Version   | `v1.0.0`                                                                     |
 | Validation Rules | Dependency exists, requester authorized (admin/SRE role), target state valid |
-| Handler | `ResilienceCommandHandler` in K-18 |
-| Success Event | `CircuitBreakerForcedEvent` |
-| Failure Event | `CircuitBreakerForceFailed` |
-| Idempotency | Command ID must be unique |
+| Handler          | `ResilienceCommandHandler` in K-18                                           |
+| Success Event    | `CircuitBreakerForcedEvent`                                                  |
+| Failure Event    | `CircuitBreakerForceFailed`                                                  |
+| Idempotency      | Command ID must be unique                                                    |
 
 ---
 
-#### Section 7 — AI Integration Requirements
+#### Section 8 — AI Integration Requirements
 
 - **AI Hook Type:** Anomaly Detection
 - **Workflow Steps Exposed:** Circuit breaker state monitoring.
@@ -105,28 +105,28 @@ Deliver the K-18 Resilience Patterns Library, providing a standardized SDK for c
 
 ---
 
-#### Section 8 — NFRs
+#### Section 9 — NFRs
 
-| NFR Category | Required Targets |
-|---|---|
-| Latency / Throughput | SDK overhead < 0.1ms per call; zero allocation in hot path |
-| Scalability | In-process library; no external dependencies |
-| Availability | 99.999% (in-process, no network calls) |
-| Consistency Model | Eventual consistency for circuit breaker state across instances (shared state optional) |
-| Security | N/A (library) |
-| Data Residency | N/A |
-| Data Retention | Circuit breaker metrics retained per K-06 retention policy |
-| Auditability | Degraded mode activations logged to K-07 |
-| Observability | Metrics: `circuit_breaker.state`, `circuit_breaker.rejection.count`, `retry.count`, `timeout.count` |
-| Extensibility | Custom resilience patterns via plugin interface |
-| Upgrade / Compatibility | Backward compatible SDK API |
-| On-Prem Constraints | In-process library; no external dependencies |
-| Ledger Integrity | N/A |
-| Dual-Calendar Correctness | N/A |
+| NFR Category              | Required Targets                                                                                    |
+| ------------------------- | --------------------------------------------------------------------------------------------------- |
+| Latency / Throughput      | SDK overhead < 0.1ms per call; zero allocation in hot path                                          |
+| Scalability               | In-process library; no external dependencies                                                        |
+| Availability              | 99.999% (in-process, no network calls)                                                              |
+| Consistency Model         | Eventual consistency for circuit breaker state across instances (shared state optional)             |
+| Security                  | N/A (library)                                                                                       |
+| Data Residency            | N/A                                                                                                 |
+| Data Retention            | Circuit breaker metrics retained per K-06 retention policy                                          |
+| Auditability              | Degraded mode activations logged to K-07                                                            |
+| Observability             | Metrics: `circuit_breaker.state`, `circuit_breaker.rejection.count`, `retry.count`, `timeout.count` |
+| Extensibility             | Custom resilience patterns via plugin interface                                                     |
+| Upgrade / Compatibility   | Backward compatible SDK API                                                                         |
+| On-Prem Constraints       | In-process library; no external dependencies                                                        |
+| Ledger Integrity          | N/A                                                                                                 |
+| Dual-Calendar Correctness | N/A                                                                                                 |
 
 ---
 
-#### Section 9 — Acceptance Criteria
+#### Section 10 — Acceptance Criteria
 
 1. **Given** K-03 Rules Engine returns 3 consecutive errors, **When** the circuit breaker opens, **Then** subsequent calls from D-01 OMS fail fast (< 1ms) and the fallback cached evaluation is returned with `degraded=true`.
 2. **Given** the circuit breaker is OPEN for 30 seconds, **When** the half-open probe succeeds, **Then** the circuit transitions to CLOSED and normal traffic resumes.
@@ -136,7 +136,7 @@ Deliver the K-18 Resilience Patterns Library, providing a standardized SDK for c
 
 ---
 
-#### Section 10 — Failure Modes & Resilience
+#### Section 11 — Failure Modes & Resilience
 
 - **SDK Initialization Failure:** Module starts with default resilience profiles; alert raised.
 - **Config Refresh Failure:** Last-known-good configuration retained; alert raised.
@@ -144,38 +144,50 @@ Deliver the K-18 Resilience Patterns Library, providing a standardized SDK for c
 
 ---
 
-#### Section 11 — Observability & Audit
+#### Section 12 — Observability & Audit
 
-| Telemetry Type | Required Details |
-|---|---|
-| Metrics | `circuit_breaker.state` (gauge), `circuit_breaker.trips` (counter), `retry.attempts` (histogram), `timeout.breaches` (counter) |
-| Logs | Structured: `dependency_id`, `state_change`, `fallback_used` |
-| Traces | Span annotations for retry attempts and circuit breaker state |
-| Audit Events | `DegradedModeActivated`, `DegradedModeDeactivated`, `CircuitBreakerForced` |
-| Regulatory Evidence | Degraded operation records for compliance audit |
+| Telemetry Type      | Required Details                                                                                                               |
+| ------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
+| Metrics             | `circuit_breaker.state` (gauge), `circuit_breaker.trips` (counter), `retry.attempts` (histogram), `timeout.breaches` (counter) |
+| Logs                | Structured: `dependency_id`, `state_change`, `fallback_used`                                                                   |
+| Traces              | Span annotations for retry attempts and circuit breaker state                                                                  |
+| Audit Events        | `DegradedModeActivated`, `DegradedModeDeactivated`, `CircuitBreakerForced`                                                     |
+| Regulatory Evidence | Degraded operation records for compliance audit                                                                                |
 
 ---
 
-#### Section 12 — Compliance & Regulatory Traceability
+#### Section 13 — Compliance & Regulatory Traceability
 
 - Operational resilience evidence [LCA-OPS-001]
 - Degraded mode audit trails [LCA-AUDIT-001]
 
 ---
 
-#### Section 13 — Extension Points & Contracts
+#### Section 14 — Extension Points & Contracts
 
 - **SDK Contract:** `ResilienceClient.withCircuitBreaker(dependencyId, call)`, `ResilienceClient.withRetry(policy, call)`, `ResilienceClient.withBulkhead(poolId, call)`, `ResilienceClient.getHealthStatus()`.
 - **Jurisdiction Plugin Extension Points:** N/A.
 
 ---
 
-#### Section 14 — Future-Safe Architecture Evaluation
+#### Section 15 — Future-Safe Architecture Evaluation
 
-| Question | Expected Answer |
-|---|---|
-| Can this module support India/Bangladesh via plugin? | Yes, infrastructure is jurisdiction-agnostic. |
-| Can new resilience patterns be added? | Yes, via SDK extension interface. |
-| Can this run in an air-gapped deployment? | Yes, in-process library with no external dependencies. |
+| Question                                                              | Expected Answer                                                                                     |
+| --------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------- |
+| Can this module support India/Bangladesh via plugin?                  | Yes, infrastructure is jurisdiction-agnostic.                                                       |
+| Can new resilience patterns be added?                                 | Yes, via SDK extension interface.                                                                   |
+| Can this run in an air-gapped deployment?                             | Yes, in-process library with no external dependencies.                                              |
 | Can this module handle digital assets (tokenized securities, crypto)? | Yes. Circuit breakers and retry policies protect blockchain RPC calls and token transfer endpoints. |
-| Is the design ready for CBDC integration or T+0 settlement? | Yes. Bulkhead isolation and adaptive timeouts prevent T+0 settlement failures from cascading. |
+| Is the design ready for CBDC integration or T+0 settlement?           | Yes. Bulkhead isolation and adaptive timeouts prevent T+0 settlement failures from cascading.       |
+
+---
+
+## Changelog
+
+### Version 1.0.1 (2026-03-10)
+
+**Type:** PATCH  
+**Changes:**
+
+- Standardized section numbering to the sequential 16-section format.
+- Added changelog metadata for future epic maintenance.

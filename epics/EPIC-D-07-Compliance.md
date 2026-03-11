@@ -1,8 +1,8 @@
-EPIC-ID:    EPIC-D-07
-EPIC NAME:  Compliance & Controls
-LAYER:      DOMAIN
-MODULE:     D-07 Compliance & Controls
-VERSION:    1.1.0
+EPIC-ID: EPIC-D-07
+EPIC NAME: Compliance & Controls
+LAYER: DOMAIN
+MODULE: D-07 Compliance & Controls
+VERSION: 1.1.1
 
 ---
 
@@ -62,54 +62,54 @@ Deliver the D-07 Compliance & Controls module, acting as the regulatory gatekeep
 
 #### Section 6 — Event Model Definition
 
-| Field | Description |
-|---|---|
-| Event Name | `ComplianceCheckFailed` |
-| Schema Version | `v1.0.0` |
-| Trigger Condition | An order or operation is blocked by a compliance rule. |
-| Payload | `{ "resource_id": "...", "rule_pack": "np.sebon.compliance.v2", "reason": "LOCK_IN_ACTIVE", "timestamp_bs": "..." }` |
-| Consumers | OMS, Audit Framework, Admin Portal |
-| Idempotency Key | `hash(resource_id + rule_pack + timestamp)` |
-| Replay Behavior | Updates compliance dashboard views. |
-| Retention Policy | Permanent. |
+| Field             | Description                                                                                                          |
+| ----------------- | -------------------------------------------------------------------------------------------------------------------- |
+| Event Name        | `ComplianceCheckFailed`                                                                                              |
+| Schema Version    | `v1.0.0`                                                                                                             |
+| Trigger Condition | An order or operation is blocked by a compliance rule.                                                               |
+| Payload           | `{ "resource_id": "...", "rule_pack": "np.sebon.compliance.v2", "reason": "LOCK_IN_ACTIVE", "timestamp_bs": "..." }` |
+| Consumers         | OMS, Audit Framework, Admin Portal                                                                                   |
+| Idempotency Key   | `hash(resource_id + rule_pack + timestamp)`                                                                          |
+| Replay Behavior   | Updates compliance dashboard views.                                                                                  |
+| Retention Policy  | Permanent.                                                                                                           |
 
 ---
 
-#### Section 6.5 — Command Model Definition
+#### Section 7 — Command Model Definition
 
-| Field | Description |
-|---|---|
-| Command Name | `CheckComplianceCommand` |
-| Schema Version | `v1.0.0` |
+| Field            | Description                                                 |
+| ---------------- | ----------------------------------------------------------- |
+| Command Name     | `CheckComplianceCommand`                                    |
+| Schema Version   | `v1.0.0`                                                    |
 | Validation Rules | Order exists, compliance rules configured, client KYC valid |
-| Handler | `ComplianceCommandHandler` in D-07 Compliance |
-| Success Event | `ComplianceCheckPassed` or `ComplianceCheckFailed` |
-| Failure Event | `ComplianceCheckError` |
-| Idempotency | Same order context returns cached check result |
+| Handler          | `ComplianceCommandHandler` in D-07 Compliance               |
+| Success Event    | `ComplianceCheckPassed` or `ComplianceCheckFailed`          |
+| Failure Event    | `ComplianceCheckError`                                      |
+| Idempotency      | Same order context returns cached check result              |
 
-| Field | Description |
-|---|---|
-| Command Name | `ApproveExceptionCommand` |
-| Schema Version | `v1.0.0` |
+| Field            | Description                                                               |
+| ---------------- | ------------------------------------------------------------------------- |
+| Command Name     | `ApproveExceptionCommand`                                                 |
+| Schema Version   | `v1.0.0`                                                                  |
 | Validation Rules | Exception exists, maker-checker approval obtained, justification provided |
-| Handler | `ExceptionCommandHandler` in D-07 Compliance |
-| Success Event | `ExceptionApproved` |
-| Failure Event | `ExceptionApprovalFailed` |
-| Idempotency | Command ID must be unique; duplicate commands return original result |
+| Handler          | `ExceptionCommandHandler` in D-07 Compliance                              |
+| Success Event    | `ExceptionApproved`                                                       |
+| Failure Event    | `ExceptionApprovalFailed`                                                 |
+| Idempotency      | Command ID must be unique; duplicate commands return original result      |
 
-| Field | Description |
-|---|---|
-| Command Name | `BlockClientCommand` |
-| Schema Version | `v1.0.0` |
-| Validation Rules | Client exists, reason provided, requester authorized |
-| Handler | `ClientCommandHandler` in D-07 Compliance |
-| Success Event | `ClientBlocked` |
-| Failure Event | `ClientBlockFailed` |
-| Idempotency | Command ID must be unique; duplicate commands return original result |
+| Field            | Description                                                          |
+| ---------------- | -------------------------------------------------------------------- |
+| Command Name     | `BlockClientCommand`                                                 |
+| Schema Version   | `v1.0.0`                                                             |
+| Validation Rules | Client exists, reason provided, requester authorized                 |
+| Handler          | `ClientCommandHandler` in D-07 Compliance                            |
+| Success Event    | `ClientBlocked`                                                      |
+| Failure Event    | `ClientBlockFailed`                                                  |
+| Idempotency      | Command ID must be unique; duplicate commands return original result |
 
 ---
 
-#### Section 7 — AI Integration Requirements
+#### Section 8 — AI Integration Requirements
 
 - **AI Hook Type:** Copilot Assist
 - **Workflow Steps Exposed:** Maker-checker exception review.
@@ -121,28 +121,28 @@ Deliver the D-07 Compliance & Controls module, acting as the regulatory gatekeep
 
 ---
 
-#### Section 8 — NFRs
+#### Section 9 — NFRs
 
-| NFR Category | Required Targets |
-|---|---|
-| Latency / Throughput | Pre-trade compliance evaluation < 5ms P99 (this is additive to D-01 OMS processing; total pre-trade path including D-06 risk + D-07 compliance via K-03 must be < 10ms P99) |
-| Scalability | Horizontally scalable |
-| Availability | 99.999% uptime |
-| Consistency Model | Strong consistency for blocks |
-| Security | Highest RBAC tier for overrides |
-| Data Residency | Enforced via K-08 |
-| Data Retention | 10 years for compliance logs (SEBON/SEBI cross-jurisdiction safety margin) |
-| Auditability | Core function [LCA-AUDIT-001] |
-| Observability | Metrics: `compliance.eval.latency`, `compliance.block.rate` |
-| Extensibility | New rules via T2 Packs |
-| Upgrade / Compatibility | N/A |
-| On-Prem Constraints | Supported |
-| Ledger Integrity | N/A |
-| Dual-Calendar Correctness | Correct lock-in date evaluations |
+| NFR Category              | Required Targets                                                                                                                                                            |
+| ------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Latency / Throughput      | Pre-trade compliance evaluation < 5ms P99 (this is additive to D-01 OMS processing; total pre-trade path including D-06 risk + D-07 compliance via K-03 must be < 10ms P99) |
+| Scalability               | Horizontally scalable                                                                                                                                                       |
+| Availability              | 99.999% uptime                                                                                                                                                              |
+| Consistency Model         | Strong consistency for blocks                                                                                                                                               |
+| Security                  | Highest RBAC tier for overrides                                                                                                                                             |
+| Data Residency            | Enforced via K-08                                                                                                                                                           |
+| Data Retention            | 10 years for compliance logs (SEBON/SEBI cross-jurisdiction safety margin)                                                                                                  |
+| Auditability              | Core function [LCA-AUDIT-001]                                                                                                                                               |
+| Observability             | Metrics: `compliance.eval.latency`, `compliance.block.rate`                                                                                                                 |
+| Extensibility             | New rules via T2 Packs                                                                                                                                                      |
+| Upgrade / Compatibility   | N/A                                                                                                                                                                         |
+| On-Prem Constraints       | Supported                                                                                                                                                                   |
+| Ledger Integrity          | N/A                                                                                                                                                                         |
+| Dual-Calendar Correctness | Correct lock-in date evaluations                                                                                                                                            |
 
 ---
 
-#### Section 9 — Acceptance Criteria
+#### Section 10 — Acceptance Criteria
 
 1. **Given** an order to sell promoter shares locked until BS 2083-04-01, **When** submitted on BS 2082-01-01, **Then** D-07 synchronously rejects the order via K-03 evaluation and logs the denial.
 2. **Given** a user whose KYC status is `PENDING`, **When** they attempt to trade, **Then** D-07 blocks the action based on the KYC rule pack.
@@ -150,26 +150,26 @@ Deliver the D-07 Compliance & Controls module, acting as the regulatory gatekeep
 
 ---
 
-#### Section 10 — Failure Modes & Resilience
+#### Section 11 — Failure Modes & Resilience
 
 - **Rules Engine Down:** Fails closed (blocks all regulated actions) to ensure compliance.
 - **Audit Framework Down:** Buffers logs locally; if buffer fills, blocks new actions.
 
 ---
 
-#### Section 11 — Observability & Audit
+#### Section 12 — Observability & Audit
 
-| Telemetry Type | Required Details |
-|---|---|
-| Metrics | `compliance.checks.count`, `maker_checker.queue.size` |
-| Logs | Evaluation results |
-| Traces | Span `Compliance.check` |
-| Audit Events | Action: `ComplianceOverride`, `ManualApproval` |
-| Regulatory Evidence | Rule evaluation trails [LCA-COMP-001]. |
+| Telemetry Type      | Required Details                                      |
+| ------------------- | ----------------------------------------------------- |
+| Metrics             | `compliance.checks.count`, `maker_checker.queue.size` |
+| Logs                | Evaluation results                                    |
+| Traces              | Span `Compliance.check`                               |
+| Audit Events        | Action: `ComplianceOverride`, `ManualApproval`        |
+| Regulatory Evidence | Rule evaluation trails [LCA-COMP-001].                |
 
 ---
 
-#### Section 12 — Compliance & Regulatory Traceability
+#### Section 13 — Compliance & Regulatory Traceability
 
 - AML/KYC readiness [LCA-AMLKYC-001]
 - Pre-trade compliance [LCA-COMP-001]
@@ -177,7 +177,7 @@ Deliver the D-07 Compliance & Controls module, acting as the regulatory gatekeep
 
 ---
 
-#### Section 13 — Extension Points & Contracts
+#### Section 14 — Extension Points & Contracts
 
 - **SDK Contract:** `ComplianceClient.evaluate(action, context)` → `ComplianceResult`, `ComplianceClient.getCases(filter?)` → `ComplianceCase[]`, `ComplianceClient.approveException(caseId, justification)` → `ExceptionApproved`, `ComplianceClient.blockClient(clientId, reason)` → `ClientBlocked`
 - **REST API:** Exposed via K-11 API Gateway at `/api/v1/compliance/*`
@@ -188,17 +188,17 @@ Deliver the D-07 Compliance & Controls module, acting as the regulatory gatekeep
 
 ---
 
-#### Section 14 — Future-Safe Architecture Evaluation
+#### Section 15 — Future-Safe Architecture Evaluation
 
-| Question | Expected Answer |
-|---|---|
-| Can this module support India/Bangladesh via plugin? | Yes. |
-| Can tax rules change without redeploy? | N/A (Compliance, not tax). |
-| Can this run in an air-gapped deployment? | Yes, with local compliance rules. |
+| Question                                             | Expected Answer                   |
+| ---------------------------------------------------- | --------------------------------- |
+| Can this module support India/Bangladesh via plugin? | Yes.                              |
+| Can tax rules change without redeploy?               | N/A (Compliance, not tax).        |
+| Can this run in an air-gapped deployment?            | Yes, with local compliance rules. |
 
 ---
 
-#### Section 14.5 — Threat Model
+#### Section 16 — Threat Model
 
 **Attack Vectors & Mitigations:**
 
@@ -228,6 +228,7 @@ Deliver the D-07 Compliance & Controls module, acting as the regulatory gatekeep
    - **Residual Risk:** Database-level privilege escalation.
 
 **Security Controls:**
+
 - Maker-checker for all exceptions
 - Immutable audit trail (K-07)
 - National ID verification
@@ -235,3 +236,15 @@ Deliver the D-07 Compliance & Controls module, acting as the regulatory gatekeep
 - Segregation of duties
 - AI-based anomaly detection
 - Periodic re-screening
+
+---
+
+## Changelog
+
+### Version 1.1.1 (2026-03-10)
+
+**Type:** PATCH  
+**Changes:**
+
+- Standardized section numbering to the sequential 16-section format.
+- Added changelog metadata for future epic maintenance.

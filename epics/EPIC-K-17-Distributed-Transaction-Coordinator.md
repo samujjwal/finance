@@ -1,9 +1,9 @@
-EPIC-ID:    EPIC-K-17
-EPIC NAME:  Distributed Transaction Coordinator
-LAYER:      KERNEL
-MODULE:     K-17 Distributed Transaction Coordinator
-VERSION:    1.0.0
-ARB-REF:    P0-01
+EPIC-ID: EPIC-K-17
+EPIC NAME: Distributed Transaction Coordinator
+LAYER: KERNEL
+MODULE: K-17 Distributed Transaction Coordinator
+VERSION: 1.0.1
+ARB-REF: P0-01
 
 ---
 
@@ -69,44 +69,44 @@ Deliver the K-17 Distributed Transaction Coordinator to guarantee cross-stream s
 
 #### Section 6 — Event Model Definition
 
-| Field | Description |
-|---|---|
-| Event Name | `SagaCompensationFailedEvent` |
-| Schema Version | `v1.0.0` |
-| Trigger Condition | A saga compensation action fails after exhausting all retries. |
-| Payload | `{ "saga_id": "...", "step_name": "...", "failure_reason": "...", "retry_count": 5, "requires_manual_intervention": true }` |
-| Consumers | Admin Portal, K-06 Alerting, On-Call Escalation |
-| Idempotency Key | `hash(saga_id + step_name + retry_count)` |
-| Replay Behavior | N/A (alert event). |
-| Retention Policy | Permanent. |
+| Field             | Description                                                                                                                 |
+| ----------------- | --------------------------------------------------------------------------------------------------------------------------- |
+| Event Name        | `SagaCompensationFailedEvent`                                                                                               |
+| Schema Version    | `v1.0.0`                                                                                                                    |
+| Trigger Condition | A saga compensation action fails after exhausting all retries.                                                              |
+| Payload           | `{ "saga_id": "...", "step_name": "...", "failure_reason": "...", "retry_count": 5, "requires_manual_intervention": true }` |
+| Consumers         | Admin Portal, K-06 Alerting, On-Call Escalation                                                                             |
+| Idempotency Key   | `hash(saga_id + step_name + retry_count)`                                                                                   |
+| Replay Behavior   | N/A (alert event).                                                                                                          |
+| Retention Policy  | Permanent.                                                                                                                  |
 
 ---
 
-#### Section 6.5 — Command Model Definition
+#### Section 7 — Command Model Definition
 
-| Field | Description |
-|---|---|
-| Command Name | `StartDistributedSagaCommand` |
-| Schema Version | `v1.0.0` |
-| Validation Rules | Saga definition exists, initial context valid, caller authorized |
-| Handler | `SagaCoordinatorHandler` in K-17 |
-| Success Event | `SagaStarted` |
-| Failure Event | `SagaStartFailed` |
-| Idempotency | Saga ID must be unique; duplicate commands return original saga state |
+| Field            | Description                                                           |
+| ---------------- | --------------------------------------------------------------------- |
+| Command Name     | `StartDistributedSagaCommand`                                         |
+| Schema Version   | `v1.0.0`                                                              |
+| Validation Rules | Saga definition exists, initial context valid, caller authorized      |
+| Handler          | `SagaCoordinatorHandler` in K-17                                      |
+| Success Event    | `SagaStarted`                                                         |
+| Failure Event    | `SagaStartFailed`                                                     |
+| Idempotency      | Saga ID must be unique; duplicate commands return original saga state |
 
-| Field | Description |
-|---|---|
-| Command Name | `ResolveSagaManuallyCommand` |
-| Schema Version | `v1.0.0` |
+| Field            | Description                                                                                    |
+| ---------------- | ---------------------------------------------------------------------------------------------- |
+| Command Name     | `ResolveSagaManuallyCommand`                                                                   |
+| Schema Version   | `v1.0.0`                                                                                       |
 | Validation Rules | Saga in STUCK state, requester authorized (compliance/admin role), resolution action specified |
-| Handler | `SagaCoordinatorHandler` in K-17 |
-| Success Event | `SagaManuallyResolved` |
-| Failure Event | `SagaManualResolutionFailed` |
-| Idempotency | Command ID must be unique |
+| Handler          | `SagaCoordinatorHandler` in K-17                                                               |
+| Success Event    | `SagaManuallyResolved`                                                                         |
+| Failure Event    | `SagaManualResolutionFailed`                                                                   |
+| Idempotency      | Command ID must be unique                                                                      |
 
 ---
 
-#### Section 7 — AI Integration Requirements
+#### Section 8 — AI Integration Requirements
 
 - **AI Hook Type:** Anomaly Detection
 - **Workflow Steps Exposed:** Saga execution monitoring.
@@ -118,28 +118,28 @@ Deliver the K-17 Distributed Transaction Coordinator to guarantee cross-stream s
 
 ---
 
-#### Section 8 — NFRs
+#### Section 9 — NFRs
 
-| NFR Category | Required Targets |
-|---|---|
-| Latency / Throughput | Outbox relay lag < 100ms P99; 50,000 sagas/second |
-| Scalability | Horizontally scalable relay workers; partitioned by aggregate type |
-| Availability | 99.999% uptime |
-| Consistency Model | Causal consistency across aggregates; strong within aggregate |
-| Security | Transaction log encrypted at rest; access restricted to system accounts |
-| Data Residency | Transaction logs follow K-08 residency rules |
-| Data Retention | Transaction logs retained per audit policy (minimum 10 years) |
-| Auditability | All saga state changes logged to K-07 |
-| Observability | Metrics: `saga.duration`, `saga.compensation.rate`, `outbox.relay.lag`, `saga.stuck.count` |
-| Extensibility | New saga definitions via registry without code changes |
-| Upgrade / Compatibility | Saga definition versioning supports rolling upgrades |
-| On-Prem Constraints | Operates with local database outbox; no external dependencies |
-| Ledger Integrity | Guarantees ledger postings are either fully committed or fully compensated |
-| Dual-Calendar Correctness | All timestamps use DualDate |
+| NFR Category              | Required Targets                                                                           |
+| ------------------------- | ------------------------------------------------------------------------------------------ |
+| Latency / Throughput      | Outbox relay lag < 100ms P99; 50,000 sagas/second                                          |
+| Scalability               | Horizontally scalable relay workers; partitioned by aggregate type                         |
+| Availability              | 99.999% uptime                                                                             |
+| Consistency Model         | Causal consistency across aggregates; strong within aggregate                              |
+| Security                  | Transaction log encrypted at rest; access restricted to system accounts                    |
+| Data Residency            | Transaction logs follow K-08 residency rules                                               |
+| Data Retention            | Transaction logs retained per audit policy (minimum 10 years)                              |
+| Auditability              | All saga state changes logged to K-07                                                      |
+| Observability             | Metrics: `saga.duration`, `saga.compensation.rate`, `outbox.relay.lag`, `saga.stuck.count` |
+| Extensibility             | New saga definitions via registry without code changes                                     |
+| Upgrade / Compatibility   | Saga definition versioning supports rolling upgrades                                       |
+| On-Prem Constraints       | Operates with local database outbox; no external dependencies                              |
+| Ledger Integrity          | Guarantees ledger postings are either fully committed or fully compensated                 |
+| Dual-Calendar Correctness | All timestamps use DualDate                                                                |
 
 ---
 
-#### Section 9 — Acceptance Criteria
+#### Section 10 — Acceptance Criteria
 
 1. **Given** an Order→Position→Ledger saga, **When** the Ledger step fails, **Then** Position and Order steps are compensated in reverse order within 5 seconds.
 2. **Given** two concurrent sagas modifying the same account, **When** a version conflict occurs, **Then** one saga retries with exponential backoff and the other succeeds.
@@ -149,7 +149,7 @@ Deliver the K-17 Distributed Transaction Coordinator to guarantee cross-stream s
 
 ---
 
-#### Section 10 — Failure Modes & Resilience
+#### Section 11 — Failure Modes & Resilience
 
 - **Outbox Relay Failure:** Events queue in local DB; relay resumes on recovery; `OutboxRelayLagEvent` emitted if lag > threshold.
 - **Version Conflict:** Retry with backoff; compensate after max retries.
@@ -158,19 +158,19 @@ Deliver the K-17 Distributed Transaction Coordinator to guarantee cross-stream s
 
 ---
 
-#### Section 11 — Observability & Audit
+#### Section 12 — Observability & Audit
 
-| Telemetry Type | Required Details |
-|---|---|
-| Metrics | `saga.active.count`, `saga.duration.p99`, `saga.compensation.rate`, `outbox.lag.ms` |
-| Logs | Structured: `saga_id`, `step_name`, `status`, `version_vector` |
-| Traces | Parent span per saga; child span per step; propagated via K-06 |
-| Audit Events | `SagaStarted`, `SagaCompleted`, `SagaCompensated`, `SagaStuck` [LCA-AUDIT-001] |
-| Regulatory Evidence | Transaction log for settlement dispute resolution |
+| Telemetry Type      | Required Details                                                                    |
+| ------------------- | ----------------------------------------------------------------------------------- |
+| Metrics             | `saga.active.count`, `saga.duration.p99`, `saga.compensation.rate`, `outbox.lag.ms` |
+| Logs                | Structured: `saga_id`, `step_name`, `status`, `version_vector`                      |
+| Traces              | Parent span per saga; child span per step; propagated via K-06                      |
+| Audit Events        | `SagaStarted`, `SagaCompleted`, `SagaCompensated`, `SagaStuck` [LCA-AUDIT-001]      |
+| Regulatory Evidence | Transaction log for settlement dispute resolution                                   |
 
 ---
 
-#### Section 12 — Compliance & Regulatory Traceability
+#### Section 13 — Compliance & Regulatory Traceability
 
 - Settlement finality guarantees [LCA-SETTL-001]
 - Audit trails for all financial state changes [LCA-AUDIT-001]
@@ -178,19 +178,31 @@ Deliver the K-17 Distributed Transaction Coordinator to guarantee cross-stream s
 
 ---
 
-#### Section 13 — Extension Points & Contracts
+#### Section 14 — Extension Points & Contracts
 
 - **SDK Contract:** `SagaClient.start(sagaDefinitionId, context)`, `SagaClient.getStatus(sagaId)`, `SagaClient.resolve(sagaId, resolution)`.
 - **Jurisdiction Plugin Extension Points:** N/A.
 
 ---
 
-#### Section 14 — Future-Safe Architecture Evaluation
+#### Section 15 — Future-Safe Architecture Evaluation
 
-| Question | Expected Answer |
-|---|---|
-| Can this module support India/Bangladesh via plugin? | Yes, saga infrastructure is jurisdiction-agnostic. |
-| Can new saga types be added? | Yes, via saga definition registry. |
-| Can this run in an air-gapped deployment? | Yes, uses local DB outbox. |
+| Question                                                              | Expected Answer                                                                                                    |
+| --------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------ |
+| Can this module support India/Bangladesh via plugin?                  | Yes, saga infrastructure is jurisdiction-agnostic.                                                                 |
+| Can new saga types be added?                                          | Yes, via saga definition registry.                                                                                 |
+| Can this run in an air-gapped deployment?                             | Yes, uses local DB outbox.                                                                                         |
 | Can this module handle digital assets (tokenized securities, crypto)? | Yes. Saga orchestration supports cross-chain atomic swaps and DvP (Delivery vs. Payment) for tokenized securities. |
-| Is the design ready for CBDC integration or T+0 settlement? | Yes. Synchronous saga mode with sub-second timeout supports atomic T+0 settlement finality. |
+| Is the design ready for CBDC integration or T+0 settlement?           | Yes. Synchronous saga mode with sub-second timeout supports atomic T+0 settlement finality.                        |
+
+---
+
+## Changelog
+
+### Version 1.0.1 (2026-03-10)
+
+**Type:** PATCH  
+**Changes:**
+
+- Standardized section numbering to the sequential 16-section format.
+- Added changelog metadata for future epic maintenance.

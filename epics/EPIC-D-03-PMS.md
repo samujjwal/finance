@@ -1,8 +1,8 @@
-EPIC-ID:    EPIC-D-03
-EPIC NAME:  Portfolio Management System (PMS)
-LAYER:      DOMAIN
-MODULE:     D-03 Portfolio Management System
-VERSION:    1.0.0
+EPIC-ID: EPIC-D-03
+EPIC NAME: Portfolio Management System (PMS)
+LAYER: DOMAIN
+MODULE: D-03 Portfolio Management System
+VERSION: 1.0.1
 
 ---
 
@@ -62,54 +62,54 @@ Deliver the D-03 Portfolio Management System (PMS), responsible for portfolio co
 
 #### Section 6 — Event Model Definition
 
-| Field | Description |
-|---|---|
-| Event Name | `RebalanceProposed` |
-| Schema Version | `v1.0.0` |
-| Trigger Condition | Portfolio drift exceeds the configured tolerance threshold. |
-| Payload | `{ "portfolio_id": "...", "drift_pct": 5.2, "proposed_orders": [...] }` |
-| Consumers | Operator Dashboard (for approval), Compliance (D-07) |
-| Idempotency Key | `hash(portfolio_id + calculation_timestamp)` |
-| Replay Behavior | Suppressed; purely informative. |
-| Retention Policy | 10 years. |
+| Field             | Description                                                             |
+| ----------------- | ----------------------------------------------------------------------- |
+| Event Name        | `RebalanceProposed`                                                     |
+| Schema Version    | `v1.0.0`                                                                |
+| Trigger Condition | Portfolio drift exceeds the configured tolerance threshold.             |
+| Payload           | `{ "portfolio_id": "...", "drift_pct": 5.2, "proposed_orders": [...] }` |
+| Consumers         | Operator Dashboard (for approval), Compliance (D-07)                    |
+| Idempotency Key   | `hash(portfolio_id + calculation_timestamp)`                            |
+| Replay Behavior   | Suppressed; purely informative.                                         |
+| Retention Policy  | 10 years.                                                               |
 
 ---
 
-#### Section 6.5 — Command Model Definition
+#### Section 7 — Command Model Definition
 
-| Field | Description |
-|---|---|
-| Command Name | `RebalanceCommand` |
-| Schema Version | `v1.0.0` |
+| Field            | Description                                                                |
+| ---------------- | -------------------------------------------------------------------------- |
+| Command Name     | `RebalanceCommand`                                                         |
+| Schema Version   | `v1.0.0`                                                                   |
 | Validation Rules | Portfolio exists, target allocation valid, maker-checker approval obtained |
-| Handler | `RebalanceCommandHandler` in D-03 PMS |
-| Success Event | `RebalanceInitiated` |
-| Failure Event | `RebalanceFailed` |
-| Idempotency | Command ID must be unique; duplicate commands return original result |
+| Handler          | `RebalanceCommandHandler` in D-03 PMS                                      |
+| Success Event    | `RebalanceInitiated`                                                       |
+| Failure Event    | `RebalanceFailed`                                                          |
+| Idempotency      | Command ID must be unique; duplicate commands return original result       |
 
-| Field | Description |
-|---|---|
-| Command Name | `CalculateNAVCommand` |
-| Schema Version | `v1.0.0` |
+| Field            | Description                                                    |
+| ---------------- | -------------------------------------------------------------- |
+| Command Name     | `CalculateNAVCommand`                                          |
+| Schema Version   | `v1.0.0`                                                       |
 | Validation Rules | Portfolio exists, valuation date valid, pricing data available |
-| Handler | `NAVCommandHandler` in D-03 PMS |
-| Success Event | `NAVCalculated` |
-| Failure Event | `NAVCalculationFailed` |
-| Idempotency | Same valuation date returns cached NAV |
+| Handler          | `NAVCommandHandler` in D-03 PMS                                |
+| Success Event    | `NAVCalculated`                                                |
+| Failure Event    | `NAVCalculationFailed`                                         |
+| Idempotency      | Same valuation date returns cached NAV                         |
 
-| Field | Description |
-|---|---|
-| Command Name | `CreatePortfolioCommand` |
-| Schema Version | `v1.0.0` |
-| Validation Rules | Portfolio name unique, strategy valid, requester authorized |
-| Handler | `PortfolioCommandHandler` in D-03 PMS |
-| Success Event | `PortfolioCreated` |
-| Failure Event | `PortfolioCreationFailed` |
-| Idempotency | Command ID must be unique; duplicate commands return original result |
+| Field            | Description                                                          |
+| ---------------- | -------------------------------------------------------------------- |
+| Command Name     | `CreatePortfolioCommand`                                             |
+| Schema Version   | `v1.0.0`                                                             |
+| Validation Rules | Portfolio name unique, strategy valid, requester authorized          |
+| Handler          | `PortfolioCommandHandler` in D-03 PMS                                |
+| Success Event    | `PortfolioCreated`                                                   |
+| Failure Event    | `PortfolioCreationFailed`                                            |
+| Idempotency      | Command ID must be unique; duplicate commands return original result |
 
 ---
 
-#### Section 7 — AI Integration Requirements
+#### Section 8 — AI Integration Requirements
 
 - **AI Hook Type:** Copilot Assist / Optimizer
 - **Workflow Steps Exposed:** Target model construction and rebalance order generation.
@@ -121,28 +121,28 @@ Deliver the D-03 Portfolio Management System (PMS), responsible for portfolio co
 
 ---
 
-#### Section 8 — NFRs
+#### Section 9 — NFRs
 
-| NFR Category | Required Targets |
-|---|---|
-| Latency / Throughput | NAV calc < 10ms for 1000 positions; 5000 calc/sec |
-| Scalability | Horizontally scalable computation tier |
-| Availability | 99.99% uptime |
-| Consistency Model | Eventual consistency for real-time NAV; strong consistency for EOD NAV |
-| Security | Row-level tenant isolation |
-| Data Residency | Handled via K-08 |
-| Data Retention | Retain historical NAV permanently |
-| Auditability | Rebalance approvals logged [LCA-AUDIT-001] |
-| Observability | Metrics: `nav.calc.latency`, `rebalance.count` |
-| Extensibility | Custom rebalancing algorithms via T3 Packs |
-| Upgrade / Compatibility | N/A |
-| On-Prem Constraints | Fully functional locally |
-| Ledger Integrity | Relies strictly on K-16 for accounting |
-| Dual-Calendar Correctness | EOD NAV timestamps |
+| NFR Category              | Required Targets                                                       |
+| ------------------------- | ---------------------------------------------------------------------- |
+| Latency / Throughput      | NAV calc < 10ms for 1000 positions; 5000 calc/sec                      |
+| Scalability               | Horizontally scalable computation tier                                 |
+| Availability              | 99.99% uptime                                                          |
+| Consistency Model         | Eventual consistency for real-time NAV; strong consistency for EOD NAV |
+| Security                  | Row-level tenant isolation                                             |
+| Data Residency            | Handled via K-08                                                       |
+| Data Retention            | Retain historical NAV permanently                                      |
+| Auditability              | Rebalance approvals logged [LCA-AUDIT-001]                             |
+| Observability             | Metrics: `nav.calc.latency`, `rebalance.count`                         |
+| Extensibility             | Custom rebalancing algorithms via T3 Packs                             |
+| Upgrade / Compatibility   | N/A                                                                    |
+| On-Prem Constraints       | Fully functional locally                                               |
+| Ledger Integrity          | Relies strictly on K-16 for accounting                                 |
+| Dual-Calendar Correctness | EOD NAV timestamps                                                     |
 
 ---
 
-#### Section 9 — Acceptance Criteria
+#### Section 10 — Acceptance Criteria
 
 1. **Given** a portfolio with a target model of 50% Equity, **When** market price movements cause Equity to hit 56% (above 5% tolerance), **Then** the PMS emits a `RebalanceProposed` event.
 2. **Given** a generated rebalancing basket for a SEBON-regulated Mutual Fund, **When** the fund manager hits "Execute", **Then** the system requires a checker to approve before sending orders to D-01.
@@ -150,32 +150,32 @@ Deliver the D-03 Portfolio Management System (PMS), responsible for portfolio co
 
 ---
 
-#### Section 10 — Failure Modes & Resilience
+#### Section 11 — Failure Modes & Resilience
 
 - **Pricing Engine Lag:** PMS flags NAV as "Stale" if price updates are older than a configured threshold.
 - **Ledger Divergence:** Runs continuous reconciliation between K-05 trade events and K-16 ledger positions; alerts on drift.
 
 ---
 
-#### Section 11 — Observability & Audit
+#### Section 12 — Observability & Audit
 
-| Telemetry Type | Required Details |
-|---|---|
-| Metrics | `nav.stale.count`, `rebalance.approval.latency` |
-| Logs | Calculation exceptions |
-| Traces | Span `PMS.calcNav` |
-| Audit Events | Action: `ApproveRebalance` |
-| Regulatory Evidence | Daily NAV history [ASR-RPT-001]. |
+| Telemetry Type      | Required Details                                |
+| ------------------- | ----------------------------------------------- |
+| Metrics             | `nav.stale.count`, `rebalance.approval.latency` |
+| Logs                | Calculation exceptions                          |
+| Traces              | Span `PMS.calcNav`                              |
+| Audit Events        | Action: `ApproveRebalance`                      |
+| Regulatory Evidence | Daily NAV history [ASR-RPT-001].                |
 
 ---
 
-#### Section 12 — Compliance & Regulatory Traceability
+#### Section 13 — Compliance & Regulatory Traceability
 
 - Maker-checker on fund operations [LCA-SOD-001]
 
 ---
 
-#### Section 13 — Extension Points & Contracts
+#### Section 14 — Extension Points & Contracts
 
 - **SDK Contract:** `PMSClient.getNav(portfolioId)`, `PMSClient.getPositions(portfolioId)`, `PMSClient.getPerformance(portfolioId, period)`.
 - **Jurisdiction Plugin Extension Points:** T2 Rule Packs for holding limits (e.g., SEBON single-stock concentration limits).
@@ -196,17 +196,17 @@ Deliver the D-03 Portfolio Management System (PMS), responsible for portfolio co
 
 ---
 
-#### Section 14 — Future-Safe Architecture Evaluation
+#### Section 15 — Future-Safe Architecture Evaluation
 
-| Question | Expected Answer |
-|---|---|
-| Can this module support India/Bangladesh via plugin? | Yes. |
-| Can a new instrument type be added? | Yes, transparent to PMS if D-05 provides price. |
-| Can this run in an air-gapped deployment? | Yes, with local pricing feeds. |
+| Question                                             | Expected Answer                                 |
+| ---------------------------------------------------- | ----------------------------------------------- |
+| Can this module support India/Bangladesh via plugin? | Yes.                                            |
+| Can a new instrument type be added?                  | Yes, transparent to PMS if D-05 provides price. |
+| Can this run in an air-gapped deployment?            | Yes, with local pricing feeds.                  |
 
 ---
 
-#### Section 14.5 — Threat Model
+#### Section 16 — Threat Model
 
 **Attack Vectors & Mitigations:**
 
@@ -236,9 +236,22 @@ Deliver the D-03 Portfolio Management System (PMS), responsible for portfolio co
    - **Residual Risk:** Timing analysis reveals patterns.
 
 **Security Controls:**
+
 - Maker-checker for all rebalancing
 - Encryption of portfolio data at rest
 - Immutable ledger integration (K-16)
 - Audit logging of all NAV calculations
 - RBAC with principle of least privilege
 - Independent performance verification
+
+---
+
+## Changelog
+
+### Version 1.0.1 (2026-03-10)
+
+**Type:** PATCH  
+**Changes:**
+
+- Standardized section numbering to the sequential 16-section format.
+- Added changelog metadata for future epic maintenance.

@@ -1,8 +1,8 @@
 # Project Siddhanta: Issuer Proposal Insert
 
-Version: 1.0  
-Status: Customer-facing issuer insert derived from verified claims only  
-Last revised: March 1, 2026
+Version: 1.0.1
+Status: Customer-facing issuer insert derived from verified claims only
+Last revised: March 10, 2026
 
 Primary source baseline: [Customer_Facing_Claims_Pack.md](Customer_Facing_Claims_Pack.md)  
 Source register: [Authoritative_Source_Register.md](Authoritative_Source_Register.md)  
@@ -25,6 +25,8 @@ The current documentation set now treats issuer workflows as a control problem:
 ---
 
 ## What Siddhanta Delivers
+
+Siddhanta's disclosure and filing workflows are governed by **versioned Rule Packs** — disclosure timelines, price-sensitive event triggers, and filing schema are all externalized from the core platform and configurable per jurisdiction. When SEBON or NEPSE updates a disclosure requirement, only the Rule Pack changes, not the platform. This design means the same platform can serve issuers across multiple jurisdictions as the platform expands regionally.
 
 For issuers, Siddhanta focuses on:
 

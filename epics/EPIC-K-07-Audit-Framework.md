@@ -1,8 +1,8 @@
-EPIC-ID:    EPIC-K-07
-EPIC NAME:  Audit Framework
-LAYER:      KERNEL
-MODULE:     K-07 Audit Framework
-VERSION:    1.1.0
+EPIC-ID: EPIC-K-07
+EPIC NAME: Audit Framework
+LAYER: KERNEL
+MODULE: K-07 Audit Framework
+VERSION: 1.1.1
 
 ---
 
@@ -62,54 +62,54 @@ Deploy the K-07 Audit Framework, an immutable, tamper-evident logging system for
 
 #### Section 6 — Event Model Definition
 
-| Field | Description |
-|---|---|
-| Event Name | `AuditIntegrityCompromisedEvent` |
-| Schema Version | `v1.0.0` |
+| Field             | Description                                                                      |
+| ----------------- | -------------------------------------------------------------------------------- |
+| Event Name        | `AuditIntegrityCompromisedEvent`                                                 |
+| Schema Version    | `v1.0.0`                                                                         |
 | Trigger Condition | Background process detects a broken cryptographic hash chain in the audit store. |
-| Payload | `{ "block_id": "...", "detected_at": "...", "severity": "CRITICAL" }` |
-| Consumers | Security Operations Center, K-06 Alerting |
-| Idempotency Key | `hash(block_id + detection_window)` |
-| Replay Behavior | N/A |
-| Retention Policy | Permanent. |
+| Payload           | `{ "block_id": "...", "detected_at": "...", "severity": "CRITICAL" }`            |
+| Consumers         | Security Operations Center, K-06 Alerting                                        |
+| Idempotency Key   | `hash(block_id + detection_window)`                                              |
+| Replay Behavior   | N/A                                                                              |
+| Retention Policy  | Permanent.                                                                       |
 
 ---
 
-#### Section 6.5 — Command Model Definition
+#### Section 7 — Command Model Definition
 
-| Field | Description |
-|---|---|
-| Command Name | `LogAuditEventCommand` |
-| Schema Version | `v1.0.0` |
+| Field            | Description                                                  |
+| ---------------- | ------------------------------------------------------------ |
+| Command Name     | `LogAuditEventCommand`                                       |
+| Schema Version   | `v1.0.0`                                                     |
 | Validation Rules | Event schema valid, actor identity verified, timestamp valid |
-| Handler | `AuditCommandHandler` in K-07 Audit Framework |
-| Success Event | `AuditEventLogged` |
-| Failure Event | `AuditEventLogFailed` |
-| Idempotency | Event hash must be unique; duplicate events are rejected |
+| Handler          | `AuditCommandHandler` in K-07 Audit Framework                |
+| Success Event    | `AuditEventLogged`                                           |
+| Failure Event    | `AuditEventLogFailed`                                        |
+| Idempotency      | Event hash must be unique; duplicate events are rejected     |
 
-| Field | Description |
-|---|---|
-| Command Name | `ExportEvidenceCommand` |
-| Schema Version | `v1.0.0` |
-| Validation Rules | Date range valid, requester authorized, export format supported |
-| Handler | `EvidenceCommandHandler` in K-07 Audit Framework |
-| Success Event | `EvidenceExported` |
-| Failure Event | `EvidenceExportFailed` |
-| Idempotency | Command ID must be unique; duplicate commands return cached export |
+| Field            | Description                                                        |
+| ---------------- | ------------------------------------------------------------------ |
+| Command Name     | `ExportEvidenceCommand`                                            |
+| Schema Version   | `v1.0.0`                                                           |
+| Validation Rules | Date range valid, requester authorized, export format supported    |
+| Handler          | `EvidenceCommandHandler` in K-07 Audit Framework                   |
+| Success Event    | `EvidenceExported`                                                 |
+| Failure Event    | `EvidenceExportFailed`                                             |
+| Idempotency      | Command ID must be unique; duplicate commands return cached export |
 
-| Field | Description |
-|---|---|
-| Command Name | `VerifyAuditChainCommand` |
-| Schema Version | `v1.0.0` |
-| Validation Rules | Chain segment specified, requester authorized |
-| Handler | `AuditVerificationHandler` in K-07 Audit Framework |
-| Success Event | `AuditChainVerified` |
-| Failure Event | `AuditChainVerificationFailed` |
-| Idempotency | Command ID must be unique; duplicate commands return cached result |
+| Field            | Description                                                        |
+| ---------------- | ------------------------------------------------------------------ |
+| Command Name     | `VerifyAuditChainCommand`                                          |
+| Schema Version   | `v1.0.0`                                                           |
+| Validation Rules | Chain segment specified, requester authorized                      |
+| Handler          | `AuditVerificationHandler` in K-07 Audit Framework                 |
+| Success Event    | `AuditChainVerified`                                               |
+| Failure Event    | `AuditChainVerificationFailed`                                     |
+| Idempotency      | Command ID must be unique; duplicate commands return cached result |
 
 ---
 
-#### Section 7 — AI Integration Requirements
+#### Section 8 — AI Integration Requirements
 
 - **AI Hook Type:** Autonomous Agent / Pattern Recognition
 - **Workflow Steps Exposed:** Continuous background scanning of audit records.
@@ -121,28 +121,28 @@ Deploy the K-07 Audit Framework, an immutable, tamper-evident logging system for
 
 ---
 
-#### Section 8 — NFRs
+#### Section 9 — NFRs
 
-| NFR Category | Required Targets |
-|---|---|
-| Latency / Throughput | Async write overhead < 1ms; 20,000 TPS |
-| Scalability | Horizontally scalable storage |
-| Availability | 99.999% uptime |
-| Consistency Model | Strong consistency for chain integrity |
-| Security | Write-once-read-many (WORM) storage implementation |
-| Data Residency | Strict enforcement per jurisdiction |
-| Data Retention | Enforced minimums (e.g., 10 years) |
-| Auditability | N/A (This is the audit system) |
-| Observability | Metrics: `audit.write.latency`, `audit.chain.verified` |
-| Extensibility | N/A |
-| Upgrade / Compatibility | Hash algorithms versioned to allow future upgrades (e.g., to post-quantum crypto) |
-| On-Prem Constraints | Uses local WORM-compliant storage |
-| Ledger Integrity | Provides the metadata backing ledger changes |
-| Dual-Calendar Correctness | Dual dates indexed for querying |
+| NFR Category              | Required Targets                                                                  |
+| ------------------------- | --------------------------------------------------------------------------------- |
+| Latency / Throughput      | Async write overhead < 1ms; 20,000 TPS                                            |
+| Scalability               | Horizontally scalable storage                                                     |
+| Availability              | 99.999% uptime                                                                    |
+| Consistency Model         | Strong consistency for chain integrity                                            |
+| Security                  | Write-once-read-many (WORM) storage implementation                                |
+| Data Residency            | Strict enforcement per jurisdiction                                               |
+| Data Retention            | Enforced minimums (e.g., 10 years)                                                |
+| Auditability              | N/A (This is the audit system)                                                    |
+| Observability             | Metrics: `audit.write.latency`, `audit.chain.verified`                            |
+| Extensibility             | N/A                                                                               |
+| Upgrade / Compatibility   | Hash algorithms versioned to allow future upgrades (e.g., to post-quantum crypto) |
+| On-Prem Constraints       | Uses local WORM-compliant storage                                                 |
+| Ledger Integrity          | Provides the metadata backing ledger changes                                      |
+| Dual-Calendar Correctness | Dual dates indexed for querying                                                   |
 
 ---
 
-#### Section 9 — Acceptance Criteria
+#### Section 10 — Acceptance Criteria
 
 1. **Given** a domain module state change, **When** `AuditClient.record()` is called, **Then** the entry is saved with `before_state`, `after_state`, and dual-calendar timestamps.
 2. **Given** an audit table, **When** a database administrator manually alters a row, **Then** the background verification job detects the broken hash chain and fires `AuditIntegrityCompromisedEvent`.
@@ -151,7 +151,7 @@ Deploy the K-07 Audit Framework, an immutable, tamper-evident logging system for
 
 ---
 
-#### Section 10 — Failure Modes & Resilience
+#### Section 11 — Failure Modes & Resilience
 
 - **Storage Outage:** SDK buffers audit records locally in persistent queue (max 10,000 records / 100MB per FR8); domain operations block if buffer fills to ensure no audit loss.
 - **Hash Verification Failure:** System enters locked-down investigation mode; alerts SEC-OPS immediately.
@@ -159,38 +159,50 @@ Deploy the K-07 Audit Framework, an immutable, tamper-evident logging system for
 
 ---
 
-#### Section 11 — Observability & Audit
+#### Section 12 — Observability & Audit
 
-| Telemetry Type | Required Details |
-|---|---|
-| Metrics | `audit.queue.size`, `audit.write.errors` |
-| Logs | Internal errors |
-| Traces | N/A (Audit records carry trace IDs) |
-| Audit Events | N/A |
-| Regulatory Evidence | Core system for [LCA-AUDIT-001] |
+| Telemetry Type      | Required Details                         |
+| ------------------- | ---------------------------------------- |
+| Metrics             | `audit.queue.size`, `audit.write.errors` |
+| Logs                | Internal errors                          |
+| Traces              | N/A (Audit records carry trace IDs)      |
+| Audit Events        | N/A                                      |
+| Regulatory Evidence | Core system for [LCA-AUDIT-001]          |
 
 ---
 
-#### Section 12 — Compliance & Regulatory Traceability
+#### Section 13 — Compliance & Regulatory Traceability
 
 - System of record for [LCA-AUDIT-001]
 - Record retention enforcement [LCA-RET-001]
 
 ---
 
-#### Section 13 — Extension Points & Contracts
+#### Section 14 — Extension Points & Contracts
 
 - **SDK Contract:** `AuditClient.record(AuditEntry)`.
 - **Jurisdiction Plugin Extension Points:** Retention Config Packs.
 
 ---
 
-#### Section 14 — Future-Safe Architecture Evaluation
+#### Section 15 — Future-Safe Architecture Evaluation
 
-| Question | Expected Answer |
-|---|---|
-| Can this module support India/Bangladesh via plugin? | Yes. |
-| Can a new regulator be added? | Yes, via new report templates. |
-| Can this run in an air-gapped deployment? | Yes. |
+| Question                                                              | Expected Answer                                                                                                  |
+| --------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------- |
+| Can this module support India/Bangladesh via plugin?                  | Yes.                                                                                                             |
+| Can a new regulator be added?                                         | Yes, via new report templates.                                                                                   |
+| Can this run in an air-gapped deployment?                             | Yes.                                                                                                             |
 | Can this module handle digital assets (tokenized securities, crypto)? | Yes. Wallet addresses, token transfers, and smart-contract interactions are captured in the immutable audit log. |
-| Is the design ready for CBDC integration or T+0 settlement? | Yes. Real-time audit event streaming ensures T+0 settlement actions are logged with sub-second latency. |
+| Is the design ready for CBDC integration or T+0 settlement?           | Yes. Real-time audit event streaming ensures T+0 settlement actions are logged with sub-second latency.          |
+
+---
+
+## Changelog
+
+### Version 1.1.1 (2026-03-10)
+
+**Type:** PATCH  
+**Changes:**
+
+- Standardized section numbering to the sequential 16-section format.
+- Added changelog metadata for future epic maintenance.

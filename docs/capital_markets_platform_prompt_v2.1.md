@@ -1,4 +1,5 @@
 # AI-NATIVE CAPITAL MARKETS PLATFORM
+
 ## Master Epic Generation Prompt — v2.1
 
 **Platform-First · Event-Sourced · AI-as-Substrate · Jurisdiction-Plugin Architecture**
@@ -6,8 +7,8 @@
 
 > **LIVING ARTIFACT:** This prompt evolves with the platform. Update STEP 0 decomposition first when adding new kernel modules or domain subsystems. Propagate changes to capability inventories (Steps 1B/1C/1D), then to affected epics. Never update an epic without first updating the capability inventory. All changes to this prompt are themselves versioned and auditable.
 
-**Document Version:** 2.1  
-**Date:** March 9, 2026  
+**Document Version:** 2.1.1  
+**Date:** March 10, 2026  
 **Status:** Current (Aligned with Siddhanta v2.1)
 
 ---
@@ -110,11 +111,11 @@ Every domain module MUST separate write models (commands → events → aggregat
 
 The Platform Kernel is the sole foundation. Nothing is built in Layer 1 or Layer 2 until all relevant Kernel modules reach Platform Stable status. Build order is strictly:
 
-| Layer | Name | Contents | Prerequisite |
-|---|---|---|---|
-| LAYER 0 | Platform Kernel | Identity/AuthZ, Config Engine, Policy/Rules Engine, Plugin Runtime, Event Bus + Event Store, Observability, Audit, Data Governance, AI Governance, Deployment Abstraction, Dual-Calendar Service, Ledger Framework | None — built first |
-| LAYER 1 | Domain Subsystems | OMS, EMS, PMS, Market Data, Pricing, Risk, Compliance, Surveillance, Post-Trade/Settlement, Regulatory Reporting, Reference Data, Corp Actions | All Kernel modules at Platform Stable |
-| LAYER 2 | Extension Packs | Jurisdiction Plugins, Operator Packs, Asset-Class Packs, Strategy Packs, AI Packs, Exchange/Depository Adapters | Relevant Domain Subsystems stable |
+| Layer   | Name              | Contents                                                                                                                                                                                                           | Prerequisite                          |
+| ------- | ----------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------- |
+| LAYER 0 | Platform Kernel   | Identity/AuthZ, Config Engine, Policy/Rules Engine, Plugin Runtime, Event Bus + Event Store, Observability, Audit, Data Governance, AI Governance, Deployment Abstraction, Dual-Calendar Service, Ledger Framework | None — built first                    |
+| LAYER 1 | Domain Subsystems | OMS, EMS, PMS, Market Data, Pricing, Risk, Compliance, Surveillance, Post-Trade/Settlement, Regulatory Reporting, Reference Data, Corp Actions                                                                     | All Kernel modules at Platform Stable |
+| LAYER 2 | Extension Packs   | Jurisdiction Plugins, Operator Packs, Asset-Class Packs, Strategy Packs, AI Packs, Exchange/Depository Adapters                                                                                                    | Relevant Domain Subsystems stable     |
 
 ### Principle 10 — Domain Subsystems Are First-Party Integrated Subsystems
 
@@ -157,11 +158,13 @@ Every workflow with regulatory significance MUST support maker-checker (four-eye
 
 ### Principle 16 — Regulatory Traceability
 
-Every compliance and audit requirement in every epic MUST be tagged with a regulatory reference placeholder:
+Every compliance and audit requirement in every epic MUST be tagged with the correct regulatory reference type:
 
-- `[LCA-XXX]` — Legal/Compliance/Audit requirement reference
-- `[ASR-XXX]` — Audit, Surveillance, or Reporting requirement reference
+- Semantic epic/control identifiers such as `[LCA-AUDIT-001]`, `[LCA-AMLKYC-001]`, or `[ASR-SURV-001]` when the requirement maps to the authoritative control-code registry
+- Numeric legal-claim identifiers such as `[LCA-001]` through `[LCA-032]` when the requirement cites a broader source-backed legal claim maintained outside the epic/control registry
 - `[VERIFY]` — Requirement whose exact regulatory citation needs legal team confirmation
+
+Do not collapse the semantic control-code namespace and the numeric legal-claim namespace into a single placeholder family. Use the identifier family that matches the underlying authority source.
 
 Do not invent regulatory citations as facts. Use placeholders and flag all uncertain items with `[VERIFY]`.
 
@@ -181,11 +184,11 @@ Every module must be evaluated against the Future-Safe Architecture Check (STEP 
 
 All extension packs are classified by trust tier. Tier determines security review, sandbox requirements, benchmarking, and approval gates:
 
-| Tier | Name | Execution Model | Examples | Code Execution? |
-|---|---|---|---|---|
-| T1 | Config Packs | Data-only; schema-validated on load; zero execution | Tax tables, market calendars, trading sessions, reporting templates, BS/Gregorian calendar data, margin rates, circuit breaker thresholds | No |
-| T2 | Rule Packs | Declarative logic in platform policy DSL; sandboxed by Rules Engine (K-03) | Compliance rules, validation rules, fee calc rules, routing prefs, margin rules, circuit breaker rules, tax withholding rules | No |
-| T3 | Executable Packs | Signed + sandboxed code modules; process/container isolation; resource limits enforced | Pricing models, risk models, execution strategies, AI model adapters, exchange/depository adapters, data connectors, operator workflow packs | Yes — signed + sandboxed |
+| Tier | Name             | Execution Model                                                                        | Examples                                                                                                                                     | Code Execution?          |
+| ---- | ---------------- | -------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------ |
+| T1   | Config Packs     | Data-only; schema-validated on load; zero execution                                    | Tax tables, market calendars, trading sessions, reporting templates, BS/Gregorian calendar data, margin rates, circuit breaker thresholds    | No                       |
+| T2   | Rule Packs       | Declarative logic in platform policy DSL; sandboxed by Rules Engine (K-03)             | Compliance rules, validation rules, fee calc rules, routing prefs, margin rules, circuit breaker rules, tax withholding rules                | No                       |
+| T3   | Executable Packs | Signed + sandboxed code modules; process/container isolation; resource limits enforced | Pricing models, risk models, execution strategies, AI model adapters, exchange/depository adapters, data connectors, operator workflow packs | Yes — signed + sandboxed |
 
 ---
 
@@ -346,7 +349,7 @@ The Ledger Framework provides an immutable, double-entry ledger primitive shared
 
 - Dead-letter classification, RCA workflow, quarantine, and replay controls
 - Safe replay with idempotency enforcement and dry-run validation
-- Poison-pill detection and escalation hooks into observability and operator workflows
+- Poison-pill detection and escalation hooks into observability and operator console workflows
 - Required before production use of event-sourced domain pipelines
 
 ---
@@ -448,32 +451,32 @@ Before producing the capability inventory or any epic, classify the module being
 
 Identify which category or categories the module belongs to:
 
-| Category | Description | Examples |
-|---|---|---|
-| Generic Core | Jurisdiction-agnostic; deployable in any country without modification | Event Bus, Config Engine, Dual-Calendar Service, Ledger Framework, Audit Framework |
-| Jurisdiction Plugin | Implements jurisdiction-specific regulatory, tax, market, or reporting logic | Nepal SEBON compliance pack, Nepal tax calc pack, NEPSE trading session pack, CDSC settlement adapter |
-| Operator Pack | Implements operator-specific customizations (branding, workflow, reporting) without regulatory specificity | Custom dashboard pack, white-label report pack, custom notification templates |
-| AI Service Layer | AI-specific capabilities governed by K-09 AI Governance | Trade intent classifier, risk anomaly detector, surveillance pattern model, copilot prompt packs |
-| Integration Adapter | Connectivity to specific external systems; implements exchange/depository protocols (Principle 3) | NEPSE FIX adapter, CDSC settlement API adapter, NRB data feed adapter, Bloomberg market data connector |
-| Config/Policy Engine | Platform-level configuration and rule evaluation infrastructure | K-02 Config Engine, K-03 Rules Engine — not domain modules |
+| Category             | Description                                                                                                | Examples                                                                                               |
+| -------------------- | ---------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------ |
+| Generic Core         | Jurisdiction-agnostic; deployable in any country without modification                                      | Event Bus, Config Engine, Dual-Calendar Service, Ledger Framework, Audit Framework                     |
+| Jurisdiction Plugin  | Implements jurisdiction-specific regulatory, tax, market, or reporting logic                               | Nepal SEBON compliance pack, Nepal tax calc pack, NEPSE trading session pack, CDSC settlement adapter  |
+| Operator Pack        | Implements operator-specific customizations (branding, workflow, reporting) without regulatory specificity | Custom dashboard pack, white-label report pack, custom notification templates                          |
+| AI Service Layer     | AI-specific capabilities governed by K-09 AI Governance                                                    | Trade intent classifier, risk anomaly detector, surveillance pattern model, copilot prompt packs       |
+| Integration Adapter  | Connectivity to specific external systems; implements exchange/depository protocols (Principle 3)          | NEPSE FIX adapter, CDSC settlement API adapter, NRB data feed adapter, Bloomberg market data connector |
+| Config/Policy Engine | Platform-level configuration and rule evaluation infrastructure                                            | K-02 Config Engine, K-03 Rules Engine — not domain modules                                             |
 
 ### 1.2 Regulatory & Operational Sensitivity Matrix
 
 For each module being specified, evaluate all dimensions below. For any dimension marked YES, the corresponding plugin/config separation MUST be implemented:
 
-| Dimension | Question to Answer | Separation Required If YES |
-|---|---|---|
-| Regulatory Impact | Does this module enforce or implement rules from SEBON, NRB, Beema Samiti, CDSC, NEPSE, or equivalent bodies in other jurisdictions? | Jurisdiction Rule Pack (T2) or Exchange/Depository Adapter (T3) |
-| Calendar Sensitivity | Does this module use dates that have BS/Gregorian significance? (trading days, settlement days, reporting deadlines) | Dual-Calendar Service (K-15); Calendar Pack (T1) |
-| Settlement Sensitivity | Does this module depend on T+n settlement cycles that vary by jurisdiction or instrument? | Settlement Config Pack (T1); Settlement Rule Pack (T2) |
-| Tax Sensitivity | Does this module calculate, withhold, or report taxes? | Tax Rule Pack (T2); Tax Config Pack (T1) |
-| Margin Sensitivity | Does this module calculate or enforce margin requirements? | Margin Rule Pack (T2); Margin Config Pack (T1) |
-| Circuit Breaker Sensitivity | Does this module trigger or respond to market halt conditions? | Circuit Breaker Rule Pack (T2); Trading Session Config Pack (T1) |
-| Identity Sensitivity | Does this module use National ID, KYC status, or identity verification? | National ID Adapter via K-01 extension point; KYC Rule Pack (T2) |
-| AI Governance Impact | Does this module make or assist with decisions that could affect investor/market outcomes? | Register in K-09 AI Governance; HITL override required |
-| Ledger Impact | Does this module create financial entries (cash, securities, fees, taxes)? | K-16 Ledger Framework — no local ledger |
-| Maker-Checker Requirement | Is this workflow regulated or high-risk enough to require four-eyes approval? | Maker-Checker Rule Pack (T2); K-07 Audit Framework |
-| Exchange/Depository Dependency | Does this module interact with a specific exchange or depository? | Exchange/Depository Adapter Pack (T3) — Principle 3 |
+| Dimension                      | Question to Answer                                                                                                                   | Separation Required If YES                                       |
+| ------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------ | ---------------------------------------------------------------- |
+| Regulatory Impact              | Does this module enforce or implement rules from SEBON, NRB, Beema Samiti, CDSC, NEPSE, or equivalent bodies in other jurisdictions? | Jurisdiction Rule Pack (T2) or Exchange/Depository Adapter (T3)  |
+| Calendar Sensitivity           | Does this module use dates that have BS/Gregorian significance? (trading days, settlement days, reporting deadlines)                 | Dual-Calendar Service (K-15); Calendar Pack (T1)                 |
+| Settlement Sensitivity         | Does this module depend on T+n settlement cycles that vary by jurisdiction or instrument?                                            | Settlement Config Pack (T1); Settlement Rule Pack (T2)           |
+| Tax Sensitivity                | Does this module calculate, withhold, or report taxes?                                                                               | Tax Rule Pack (T2); Tax Config Pack (T1)                         |
+| Margin Sensitivity             | Does this module calculate or enforce margin requirements?                                                                           | Margin Rule Pack (T2); Margin Config Pack (T1)                   |
+| Circuit Breaker Sensitivity    | Does this module trigger or respond to market halt conditions?                                                                       | Circuit Breaker Rule Pack (T2); Trading Session Config Pack (T1) |
+| Identity Sensitivity           | Does this module use National ID, KYC status, or identity verification?                                                              | National ID Adapter via K-01 extension point; KYC Rule Pack (T2) |
+| AI Governance Impact           | Does this module make or assist with decisions that could affect investor/market outcomes?                                           | Register in K-09 AI Governance; HITL override required           |
+| Ledger Impact                  | Does this module create financial entries (cash, securities, fees, taxes)?                                                           | K-16 Ledger Framework — no local ledger                          |
+| Maker-Checker Requirement      | Is this workflow regulated or high-risk enough to require four-eyes approval?                                                        | Maker-Checker Rule Pack (T2); K-07 Audit Framework               |
+| Exchange/Depository Dependency | Does this module interact with a specific exchange or depository?                                                                    | Exchange/Depository Adapter Pack (T3) — Principle 3              |
 
 ---
 
@@ -483,22 +486,22 @@ After completing the Alignment Check, produce a complete capability inventory fo
 
 For each kernel capability, populate all fields:
 
-| Field | Description |
-|---|---|
-| Capability ID | Stable identifier, e.g. CAP-K-01-001 |
-| Capability Name | Concise descriptive name |
-| Business Purpose | The business or operational problem this capability solves |
-| Owner Module | Kernel module that owns this capability (K-01 through K-19) |
-| Primary Personas / Actors | Who uses or depends on this capability |
-| Key Workflows | Top 3–5 workflows exercising this capability |
-| Data Inputs | Structured inputs consumed — provide JSON/YAML example for primary inputs |
-| Data Outputs | Structured outputs produced — provide JSON/YAML example for primary outputs |
-| Event Types Emitted | All events this capability emits (name + schema ref) |
-| Extension Points Required | Interfaces, hooks, or events this capability must expose |
+| Field                         | Description                                                                                                           |
+| ----------------------------- | --------------------------------------------------------------------------------------------------------------------- |
+| Capability ID                 | Stable identifier, e.g. CAP-K-01-001                                                                                  |
+| Capability Name               | Concise descriptive name                                                                                              |
+| Business Purpose              | The business or operational problem this capability solves                                                            |
+| Owner Module                  | Kernel module that owns this capability (K-01 through K-19)                                                           |
+| Primary Personas / Actors     | Who uses or depends on this capability                                                                                |
+| Key Workflows                 | Top 3–5 workflows exercising this capability                                                                          |
+| Data Inputs                   | Structured inputs consumed — provide JSON/YAML example for primary inputs                                             |
+| Data Outputs                  | Structured outputs produced — provide JSON/YAML example for primary outputs                                           |
+| Event Types Emitted           | All events this capability emits (name + schema ref)                                                                  |
+| Extension Points Required     | Interfaces, hooks, or events this capability must expose                                                              |
 | Jurisdiction-Variability Flag | Does this capability have jurisdiction-specific behavior? Yes/No + what varies + where the variation lives (T1/T2/T3) |
-| AI Touchpoints | Where AI hooks are exposed in this capability |
-| Data Residency Requirement | Which data must stay in-jurisdiction; cross-border transfer constraints |
-| Cross-Module Dependency | Which other kernel modules or domain modules does this capability depend on? |
+| AI Touchpoints                | Where AI hooks are exposed in this capability                                                                         |
+| Data Residency Requirement    | Which data must stay in-jurisdiction; cross-border transfer constraints                                               |
+| Cross-Module Dependency       | Which other kernel modules or domain modules does this capability depend on?                                          |
 
 > **COMPLETENESS RULE:** Every capability listed here must map to at least one epic in STEP 2A. Run a gap check at the end of STEP 2A before proceeding.
 
@@ -508,19 +511,19 @@ For each kernel capability, populate all fields:
 
 Repeat the capability inventory for all relevant Layer 1 Domain Subsystems using the same field structure, plus the additional domain-specific fields below:
 
-| Additional Field | Description |
-|---|---|
-| Business Purpose | The business problem this capability solves for investors, operators, or regulators |
-| Kernel Services Consumed | List which kernel modules (K-XX) this capability depends on and specific SDK calls used |
-| Jurisdiction Plugin Touchpoints | Which Jurisdiction Plugin extension points does this capability invoke? What would change per jurisdiction? |
-| Sub-Extension Points | Extension points this domain module exposes for Layer 2 packs to override without modifying the domain module |
-| Event Types Emitted | All events this capability emits — name, topic, schema version, payload example |
-| Event Types Consumed | All events this capability subscribes to — name, topic, handler behavior |
-| Dual-Calendar Fields | Which date fields require BS + Gregorian dual storage? |
-| Ledger Impact | Which ledger entries (debit/credit) does this capability create via K-16? |
-| Maker-Checker Applicability | Does this capability require maker-checker? What is the approval rule source? |
-| Regulatory Traceability | LCA-* and ASR-* placeholder references applicable to this capability |
-| Cross-Module Dependency | Which other domain modules or kernel modules does this capability depend on? |
+| Additional Field                | Description                                                                                                   |
+| ------------------------------- | ------------------------------------------------------------------------------------------------------------- |
+| Business Purpose                | The business problem this capability solves for investors, operators, or regulators                           |
+| Kernel Services Consumed        | List which kernel modules (K-XX) this capability depends on and specific SDK calls used                       |
+| Jurisdiction Plugin Touchpoints | Which Jurisdiction Plugin extension points does this capability invoke? What would change per jurisdiction?   |
+| Sub-Extension Points            | Extension points this domain module exposes for Layer 2 packs to override without modifying the domain module |
+| Event Types Emitted             | All events this capability emits — name, topic, schema version, payload example                               |
+| Event Types Consumed            | All events this capability subscribes to — name, topic, handler behavior                                      |
+| Dual-Calendar Fields            | Which date fields require BS + Gregorian dual storage?                                                        |
+| Ledger Impact                   | Which ledger entries (debit/credit) does this capability create via K-16?                                     |
+| Maker-Checker Applicability     | Does this capability require maker-checker? What is the approval rule source?                                 |
+| Regulatory Traceability         | LCA-_ and ASR-_ placeholder references applicable to this capability                                          |
+| Cross-Module Dependency         | Which other domain modules or kernel modules does this capability depend on?                                  |
 
 > **ISOLATION RULE:** No domain capability entry may list "direct call to another domain module" as an integration pattern. All cross-domain integration must be via K-05 Event Bus events or K-11 API Gateway calls.
 
@@ -530,19 +533,19 @@ Repeat the capability inventory for all relevant Layer 1 Domain Subsystems using
 
 Identify every significant business workflow that spans more than one Domain Subsystem. For each workflow, define:
 
-| Field | Description |
-|---|---|
-| Workflow ID | e.g. WF-001 |
-| Workflow Name | e.g. Order Lifecycle — Equity DMA |
-| Trigger Event | What initiates this workflow (event name + source) |
-| Participating Subsystems | Ordered list of subsystems involved — producer/consumer roles only |
-| Saga / Compensation Steps | Compensation action for each step on failure |
-| Jurisdiction-Variant Axes | Which aspects differ by jurisdiction — settlement cycle, tax treatment, approval rules, calendar |
-| Dual-Calendar Touch Points | Which steps involve BS/Gregorian date handling |
-| Maker-Checker Steps | Which steps require four-eyes approval and what governs the rule |
-| Regulatory Traceability | LCA-* and ASR-* placeholders applicable to this workflow |
-| Idempotency Strategy | How duplicate events/replays are handled across subsystem boundaries |
-| Audit Correlation | How a single correlated trace is stitched across all participating subsystems |
+| Field                      | Description                                                                                        |
+| -------------------------- | -------------------------------------------------------------------------------------------------- |
+| Workflow ID                | e.g. WF-001                                                                                        |
+| Workflow Name              | e.g. Order Lifecycle — Equity DMA                                                                  |
+| Trigger Event              | What initiates this workflow (event name + source)                                                 |
+| Participating Subsystems   | Ordered list of subsystems involved — producer/consumer roles only                                 |
+| Saga / Compensation Steps  | Compensation action for each step on failure                                                       |
+| Jurisdiction-Variant Axes  | Which aspects differ by jurisdiction — settlement cycle, tax treatment, approval rules, calendar   |
+| Dual-Calendar Touch Points | Which steps involve BS/Gregorian date handling                                                     |
+| Maker-Checker Steps        | Which steps require four-eyes approval and what governs the rule                                   |
+| Regulatory Traceability    | Applicable semantic control IDs, numeric legal-claim IDs, and `[VERIFY]` markers for this workflow |
+| Idempotency Strategy       | How duplicate events/replays are handled across subsystem boundaries                               |
+| Audit Correlation          | How a single correlated trace is stitched across all participating subsystems                      |
 
 **Minimum workflows that MUST appear in this inventory:**
 
@@ -553,7 +556,7 @@ Identify every significant business workflow that spans more than one Domain Sub
 5. Pre-Trade Risk + Compliance Check (OMS → Risk → Compliance → OMS response) — with maker-checker if required
 6. Settlement Fails & Reconciliation (Post-Trade → Ledger → Reference Data → Reporting → Notifications)
 7. Margin Call Lifecycle (Risk → OMS → Compliance → Client Notification → Ledger)
-8. Tax Withholding & Remittance (Post-Trade → Tax Rule Pack → Ledger → Reporting) `[LCA-TAX-001]`
+8. Tax Withholding & Remittance (Post-Trade → Tax Rule Pack → Ledger → Reporting) `[LCA-029/LCA-030/LCA-031/LCA-032]`
 
 > **OWNERSHIP RULE:** Each cross-subsystem workflow has a dedicated Workflow Epic owned by K-05 Event Bus/Orchestration. Domain subsystems have sub-epics but orchestration lives at the kernel level.
 
@@ -583,8 +586,8 @@ Every Domain Subsystem epic MUST list in Section 2 (Scope → Dependencies) the 
 - K-07 Audit Framework SDK — stable + published
 - K-11 API Gateway (routing registration protocol) — stable + published
 - K-12 Platform SDK (composite) — stable + published
-- K-15 Dual-Calendar Service SDK — stable + published *(required for any date-bearing domain module)*
-- K-16 Ledger Framework SDK — stable + published *(required for any ledger-impacting domain module)*
+- K-15 Dual-Calendar Service SDK — stable + published _(required for any date-bearing domain module)_
+- K-16 Ledger Framework SDK — stable + published _(required for any ledger-impacting domain module)_
 
 > **GATE ENFORCEMENT:** If any required kernel gate is not cleared, the domain epic MUST be blocked in Jira/Linear with a blocker link to the specific kernel epic ID. No workarounds.
 
@@ -671,16 +674,16 @@ Provide a JSON/YAML example of the primary new or modified entity.
 
 Define all events introduced or modified by this epic. For each event provide:
 
-| Field | Description |
-|---|---|
-| Event Name | e.g. OrderPlaced, SettlementFailed, MarginCallIssued |
-| Schema Version | e.g. v1.0.0 — registered in Event Schema Registry (K-05) |
-| Trigger Condition | Exact condition that causes this event to be emitted |
-| Payload (example) | JSON/YAML of the event payload including both BS and Gregorian dates where applicable |
-| Consumers | Which modules/services subscribe to this event and what they do with it |
-| Idempotency Key | How duplicate events are detected and safely ignored on replay |
-| Replay Behavior | What happens when this event is replayed: state reconstruction, side-effects suppressed? |
-| Retention Policy | How long this event is retained in the event store (jurisdiction config pack) |
+| Field             | Description                                                                              |
+| ----------------- | ---------------------------------------------------------------------------------------- |
+| Event Name        | e.g. OrderPlaced, SettlementFailed, MarginCallIssued                                     |
+| Schema Version    | e.g. v1.0.0 — registered in Event Schema Registry (K-05)                                 |
+| Trigger Condition | Exact condition that causes this event to be emitted                                     |
+| Payload (example) | JSON/YAML of the event payload including both BS and Gregorian dates where applicable    |
+| Consumers         | Which modules/services subscribe to this event and what they do with it                  |
+| Idempotency Key   | How duplicate events are detected and safely ignored on replay                           |
+| Replay Behavior   | What happens when this event is replayed: state reconstruction, side-effects suppressed? |
+| Retention Policy  | How long this event is retained in the event store (jurisdiction config pack)            |
 
 ---
 
@@ -705,22 +708,22 @@ For every domain module and workflow epic, AI hooks MUST be defined even if the 
 
 Every NFR must have a specific, measurable target. "Fast", "reliable", or "secure" are not acceptable. All categories below are required:
 
-| NFR Category | Required Targets |
-|---|---|
-| Latency / Throughput | P50, P95, P99 latency in ms; TPS or events/sec; batch processing window size |
-| Scalability | Max concurrent users/sessions; horizontal scale-out trigger; partition strategy |
-| Availability | Target uptime %; RPO; RTO; degraded-mode behavior definition |
-| Consistency Model | Strong / eventual / causal per operation type; conflict resolution strategy |
-| Security | Zero-trust requirements; least-privilege roles; tenant isolation guarantees; mTLS between services |
-| Data Residency | Jurisdiction(s) where data may be stored; cross-border transfer prohibition or conditions |
-| Data Retention | Minimum retention period; archival strategy; deletion timeline per jurisdiction config |
-| Auditability | Immutability guarantee method; tamper-evidence mechanism; retention period for audit records |
-| Observability | Required metric names + dimensions; log fields; trace spans; SLO targets; alert thresholds |
-| Extensibility | Max time to add a new jurisdiction/asset/strategy via pack — zero core code changes; target: < 1 day config, < 1 sprint new pack |
-| Upgrade / Compatibility | Plugin API versioning policy; schema evolution rules; min deprecation notice period |
-| On-Prem Constraints | Offline operation duration; air-gapped sync frequency; max resource footprint; data egress constraints |
-| Ledger Integrity | Reconciliation SLA; max tolerable ledger divergence; replay correctness guarantee |
-| Dual-Calendar Correctness | BS/Gregorian conversion error rate target (e.g., 0 mismatches per 1M conversions); mismatch detection latency |
+| NFR Category              | Required Targets                                                                                                                 |
+| ------------------------- | -------------------------------------------------------------------------------------------------------------------------------- |
+| Latency / Throughput      | P50, P95, P99 latency in ms; TPS or events/sec; batch processing window size                                                     |
+| Scalability               | Max concurrent users/sessions; horizontal scale-out trigger; partition strategy                                                  |
+| Availability              | Target uptime %; RPO; RTO; degraded-mode behavior definition                                                                     |
+| Consistency Model         | Strong / eventual / causal per operation type; conflict resolution strategy                                                      |
+| Security                  | Zero-trust requirements; least-privilege roles; tenant isolation guarantees; mTLS between services                               |
+| Data Residency            | Jurisdiction(s) where data may be stored; cross-border transfer prohibition or conditions                                        |
+| Data Retention            | Minimum retention period; archival strategy; deletion timeline per jurisdiction config                                           |
+| Auditability              | Immutability guarantee method; tamper-evidence mechanism; retention period for audit records                                     |
+| Observability             | Required metric names + dimensions; log fields; trace spans; SLO targets; alert thresholds                                       |
+| Extensibility             | Max time to add a new jurisdiction/asset/strategy via pack — zero core code changes; target: < 1 day config, < 1 sprint new pack |
+| Upgrade / Compatibility   | Plugin API versioning policy; schema evolution rules; min deprecation notice period                                              |
+| On-Prem Constraints       | Offline operation duration; air-gapped sync frequency; max resource footprint; data egress constraints                           |
+| Ledger Integrity          | Reconciliation SLA; max tolerable ledger divergence; replay correctness guarantee                                                |
+| Dual-Calendar Correctness | BS/Gregorian conversion error rate target (e.g., 0 mismatches per 1M conversions); mismatch detection latency                    |
 
 ---
 
@@ -766,19 +769,25 @@ Define behavior for each failure mode:
 
 #### Section 11 — Observability & Audit
 
-| Telemetry Type | Required Details |
-|---|---|
-| Metrics | Metric names, unit, dimensions (`tenant_id`, `jurisdiction`, `module`, `operation`, `calendar_type`); alert thresholds and SLO targets |
-| Logs | Structured fields: `timestamp_gregorian`, `timestamp_bs`, `trace_id`, `tenant_id`, `user_id`, `jurisdiction`, `operation`, `result`, `duration_ms`, `event_id` |
-| Traces | Key spans with parent-child relationships; sampling strategy; cross-service correlation |
-| Audit Events | Event name, actor, resource, action, `before_state`, `after_state`, `timestamp_gregorian`, `timestamp_bs`, `jurisdiction`, immutability guarantee method `[LCA-AUDIT-001]` |
-| Regulatory Evidence | List all reports, audit trails, and evidence artifacts produced — with LCA-* or ASR-* reference placeholders |
+| Telemetry Type      | Required Details                                                                                                                                                           |
+| ------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Metrics             | Metric names, unit, dimensions (`tenant_id`, `jurisdiction`, `module`, `operation`, `calendar_type`); alert thresholds and SLO targets                                     |
+| Logs                | Structured fields: `timestamp_gregorian`, `timestamp_bs`, `trace_id`, `tenant_id`, `user_id`, `jurisdiction`, `operation`, `result`, `duration_ms`, `event_id`             |
+| Traces              | Key spans with parent-child relationships; sampling strategy; cross-service correlation                                                                                    |
+| Audit Events        | Event name, actor, resource, action, `before_state`, `after_state`, `timestamp_gregorian`, `timestamp_bs`, `jurisdiction`, immutability guarantee method `[LCA-AUDIT-001]` |
+| Regulatory Evidence | List all reports, audit trails, and evidence artifacts produced — with LCA-_ or ASR-_ reference placeholders                                                               |
 
 ---
 
 #### Section 12 — Compliance & Regulatory Traceability
 
-For every compliance requirement, tag with the applicable reference placeholder (`[LCA-XXX]`, `[ASR-XXX]`, `[VERIFY]`).
+For every compliance requirement, tag with the applicable semantic control ID, numeric legal-claim ID, or `[VERIFY]` marker.
+
+Namespace rule:
+
+- Use semantic control identifiers from the authoritative compliance-code registry for epic/control obligations such as audit, surveillance, AML/KYC, retention, maker-checker, security, reporting, margin operations, circuit breakers, and similar implementation-governing controls.
+- Use numeric legal-claim identifiers when the reference is a broader source-backed legal assertion maintained in the legal-claim appendix and claim traceability matrix.
+- If the exact authority is still unresolved, use `[VERIFY]` and state what remains to be pinned.
 
 Required coverage:
 
@@ -787,7 +796,7 @@ Required coverage:
 - AML/KYC readiness — counterparty screening integration points `[LCA-AMLKYC-001]`
 - Record retention — minimum retention periods met per applicable jurisdiction config pack `[LCA-RET-001]`
 - Segregation of duties — maker-checker controls for sensitive operations `[LCA-SOD-001]`
-- Tax compliance — tax calculation and remittance evidence artifacts `[LCA-TAX-001]` `[VERIFY]`
+- Tax compliance — tax calculation and remittance evidence artifacts `[LCA-029/LCA-030/LCA-031/LCA-032]`
 - Reporting accuracy — dual-calendar timestamp on all regulatory submissions `[ASR-RPT-001]`
 - Evidence artifacts — explicit list of all reports, logs, and audit trails produced as regulatory evidence
 
@@ -812,17 +821,17 @@ Define every interface, hook, event, and SDK contract this epic introduces or mo
 
 Explicitly evaluate this epic against each question below. A "No" answer requires redesign before this epic is finalized:
 
-| Question | Expected Answer | If No — Action Required |
-|---|---|---|
-| Can this module support a second jurisdiction (e.g., India, Bangladesh) by adding a plugin only — zero Generic Core changes? | Yes | Identify which logic must move to Jurisdiction Plugin layer |
-| Can a new regulator (e.g., IRDAI, SEC) be added without modifying core code? | Yes | Extract all regulator-name-specific logic to T2 Rule Pack |
-| Can a new instrument type (e.g., green bonds, crypto) be added without schema rewrite? | Yes | Ensure instrument schema uses extensible attribute model |
-| Can tax rules change without service redeploy? | Yes | Confirm tax logic is in T1 Config Pack or T2 Rule Pack with hot-reload |
-| Can settlement cycle change to T+1 or T+0 without code change? | Yes | Confirm settlement cycle is Config Pack value — never hardcoded |
-| Can a new AI model safely replace the current one? | Yes | Confirm model is swappable via K-09 model registry with rollback |
-| Can this run in an on-prem air-gapped deployment? | Yes | Confirm no hard external dependencies; offline bundle distribution works |
-| Can a new calendar system be added without kernel changes? | Yes | Confirm CalendarClient abstraction supports new calendar via Calendar Pack (T1) |
-| Can a new exchange or depository be connected without modifying Generic Core or Domain Subsystems? | Yes | Confirm exchange/depository logic is exclusively in T3 Adapter Pack (Principle 3) |
+| Question                                                                                                                     | Expected Answer | If No — Action Required                                                           |
+| ---------------------------------------------------------------------------------------------------------------------------- | --------------- | --------------------------------------------------------------------------------- |
+| Can this module support a second jurisdiction (e.g., India, Bangladesh) by adding a plugin only — zero Generic Core changes? | Yes             | Identify which logic must move to Jurisdiction Plugin layer                       |
+| Can a new regulator (e.g., IRDAI, SEC) be added without modifying core code?                                                 | Yes             | Extract all regulator-name-specific logic to T2 Rule Pack                         |
+| Can a new instrument type (e.g., green bonds, crypto) be added without schema rewrite?                                       | Yes             | Ensure instrument schema uses extensible attribute model                          |
+| Can tax rules change without service redeploy?                                                                               | Yes             | Confirm tax logic is in T1 Config Pack or T2 Rule Pack with hot-reload            |
+| Can settlement cycle change to T+1 or T+0 without code change?                                                               | Yes             | Confirm settlement cycle is Config Pack value — never hardcoded                   |
+| Can a new AI model safely replace the current one?                                                                           | Yes             | Confirm model is swappable via K-09 model registry with rollback                  |
+| Can this run in an on-prem air-gapped deployment?                                                                            | Yes             | Confirm no hard external dependencies; offline bundle distribution works          |
+| Can a new calendar system be added without kernel changes?                                                                   | Yes             | Confirm CalendarClient abstraction supports new calendar via Calendar Pack (T1)   |
+| Can a new exchange or depository be connected without modifying Generic Core or Domain Subsystems?                           | Yes             | Confirm exchange/depository logic is exclusively in T3 Adapter Pack (Principle 3) |
 
 ---
 
@@ -850,19 +859,19 @@ Each level may override any key from a lower-precedence level. Overrides are tra
 ```yaml
 config_pack:
   id: "jurisdiction-pack-np-equities-v2.3.1"
-  jurisdiction: "NP"                         # Nepal
+  jurisdiction: "NP" # Nepal
   asset_class: "EQ"
   effective_date_gregorian: "2025-01-01"
-  effective_date_bs: "2081-09-17"            # dual-calendar
+  effective_date_bs: "2081-09-17" # dual-calendar
   schema_version: "4.2"
   values:
-    settlement_cycle: "T+3"                  # NEPSE standard [VERIFY]
+    settlement_cycle: "T+2" # Working operating assumption; revalidate before production (`Ref: ASR-NEP-NEPSE-SETTLEMENT-OPS-ASSUMPTION`)
     trading_calendar: "NEPSE_2081"
-    capital_gains_tax_rate: 0.05             # 5% for individuals [LCA-TAX-001] [VERIFY]
-    circuit_breaker_limit_pct: 10            # ±10% intraday limit [ASR-CB-001] [VERIFY]
+    capital_gains_tax_rate: 0.05 # Provisional working assumption (`Ref: LCA-029`)
+    circuit_breaker_limit_pct: 10 # Working operating assumption; revalidate before production (`Ref: ASR-NEP-NEPSE-CB-OPS-ASSUMPTION`)
     reporting_template: "SEBON_MONTHLY_v2025"
     settlement_currency: "NPR"
-    margin_initial_rate: 0.50                # [ASR-MARG-001] [VERIFY]
+    margin_initial_rate: 0.30 # Clause-verified minimum (`Ref: LCA-011`)
 ```
 
 ### 3.3 Resolution Algorithm
@@ -906,8 +915,8 @@ Define the complete lifecycle governance for all extension packs. This drives Pl
 plugin_manifest:
   id: "np.sebon.compliance-rules-v3.1.0"
   name: "Nepal SEBON Compliance Rule Pack"
-  tier: 2                                  # T2 — declarative rule pack
-  plugin_type: "jurisdiction"              # jurisdiction | operator | ai | adapter
+  tier: 2 # T2 — declarative rule pack
+  plugin_type: "jurisdiction" # jurisdiction | operator | ai | adapter
   jurisdiction: "NP"
   version: "3.1.0"
   platform_min_version: "2.0.0"
@@ -926,7 +935,7 @@ plugin_manifest:
     algorithm: "Ed25519"
     issuer: "platform-cert-authority"
   sandbox:
-    engine: "rules_engine"               # T2 uses Rules Engine sandbox
+    engine: "rules_engine" # T2 uses Rules Engine sandbox
 ```
 
 ### 4.2 Security Isolation by Tier
@@ -973,17 +982,17 @@ Exchange/Depository Adapters are a specialized class of T3 Executable Packs with
 
 This check is run against EVERY epic before it is finalized. Any "No" answer requires the epic to be redesigned. **Do not finalize epics with unresolved "No" answers.**
 
-| Question | Pass Condition | Failure Action |
-|---|---|---|
-| Can this module support India or Bangladesh by adding a Jurisdiction Plugin only — zero Generic Core modification? | All jurisdiction logic in T1/T2/T3 packs; Generic Core has no jurisdiction conditionals | Move jurisdiction logic to plugin layer; add extension point to Generic Core |
-| Can a new regulator (e.g., IRDAI, SEC) be added without modifying core code? | Regulator-specific rules are T2 Rule Pack; core has no regulator name references | Extract all regulator-name-specific logic to Rule Pack |
-| Can a new instrument type (e.g., green bonds, crypto) be added without schema rewrite? | Instrument schema uses extensible attribute model; no enum-constrained type list in core schema | Refactor instrument schema to open attribute model |
-| Can tax rules change without service redeploy? | Tax rates and logic in T1 Config Pack or T2 Rule Pack with hot-reload; no tax constants in code | Externalize all tax constants to Config Pack |
-| Can settlement cycle change to T+1 or T+0 without code change? | Settlement cycle value sourced from Config Pack; no hardcoded T+n in any module | Replace hardcoded value with Config Pack lookup |
-| Can a new AI model safely replace the current one? | Model swappable via K-09 model registry; version pinning and rollback tested | Ensure model is referenced by registry ID; no direct model file imports in domain code |
-| Can this run in an on-prem air-gapped environment? | No mandatory external internet dependencies in critical path; offline bundle distribution tested | Identify external dependencies; provide offline fallback or cached local copy |
-| Can a new calendar system be added without kernel changes? | Dual-Calendar Service (K-15) supports new calendars via Calendar Pack (T1); no calendar-specific code in domain modules | Ensure all calendar operations use CalendarClient; no direct BS conversion logic in domain modules |
-| Can a new exchange or depository be connected without modifying Generic Core or Domain Subsystems? | Exchange/depository logic exclusively in T3 Adapter Pack; domain modules call adapter via extension point only | Extract all exchange-specific logic to Adapter Pack; add extension point to relevant domain module |
+| Question                                                                                                           | Pass Condition                                                                                                          | Failure Action                                                                                     |
+| ------------------------------------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------- |
+| Can this module support India or Bangladesh by adding a Jurisdiction Plugin only — zero Generic Core modification? | All jurisdiction logic in T1/T2/T3 packs; Generic Core has no jurisdiction conditionals                                 | Move jurisdiction logic to plugin layer; add extension point to Generic Core                       |
+| Can a new regulator (e.g., IRDAI, SEC) be added without modifying core code?                                       | Regulator-specific rules are T2 Rule Pack; core has no regulator name references                                        | Extract all regulator-name-specific logic to Rule Pack                                             |
+| Can a new instrument type (e.g., green bonds, crypto) be added without schema rewrite?                             | Instrument schema uses extensible attribute model; no enum-constrained type list in core schema                         | Refactor instrument schema to open attribute model                                                 |
+| Can tax rules change without service redeploy?                                                                     | Tax rates and logic in T1 Config Pack or T2 Rule Pack with hot-reload; no tax constants in code                         | Externalize all tax constants to Config Pack                                                       |
+| Can settlement cycle change to T+1 or T+0 without code change?                                                     | Settlement cycle value sourced from Config Pack; no hardcoded T+n in any module                                         | Replace hardcoded value with Config Pack lookup                                                    |
+| Can a new AI model safely replace the current one?                                                                 | Model swappable via K-09 model registry; version pinning and rollback tested                                            | Ensure model is referenced by registry ID; no direct model file imports in domain code             |
+| Can this run in an on-prem air-gapped environment?                                                                 | No mandatory external internet dependencies in critical path; offline bundle distribution tested                        | Identify external dependencies; provide offline fallback or cached local copy                      |
+| Can a new calendar system be added without kernel changes?                                                         | Dual-Calendar Service (K-15) supports new calendars via Calendar Pack (T1); no calendar-specific code in domain modules | Ensure all calendar operations use CalendarClient; no direct BS conversion logic in domain modules |
+| Can a new exchange or depository be connected without modifying Generic Core or Domain Subsystems?                 | Exchange/depository logic exclusively in T3 Adapter Pack; domain modules call adapter via extension point only          | Extract all exchange-specific logic to Adapter Pack; add extension point to relevant domain module |
 
 ---
 
@@ -993,12 +1002,12 @@ Define deployment requirements for each mode. These requirements drive K-10 Depl
 
 ### 6.1 Deployment Modes
 
-| Mode | Description | Key Constraints |
-|---|---|---|
-| SaaS Multi-Tenant | Shared infrastructure, logical tenant isolation | Strict data isolation; shared kernel; per-tenant config packs; customer-managed key option; data residency per jurisdiction config |
-| Dedicated Tenant | Dedicated infrastructure per tenant (cloud or co-lo) | Full isolation; tenant controls upgrade timing; separate plugin store; jurisdiction data never leaves defined boundary |
-| On-Prem | Customer-operated infrastructure running platform software | Air-gapped support; offline config/plugin bundle distribution; customer HSM/KMS; no mandatory external internet dependency |
-| Hybrid | Mix of cloud and on-prem for a single tenant | Defined data sync boundaries; residency enforcement per jurisdiction config pack; latency budgets for sync; event-driven sync with exactly-once guarantee |
+| Mode              | Description                                                | Key Constraints                                                                                                                                           |
+| ----------------- | ---------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| SaaS Multi-Tenant | Shared infrastructure, logical tenant isolation            | Strict data isolation; shared kernel; per-tenant config packs; customer-managed key option; data residency per jurisdiction config                        |
+| Dedicated Tenant  | Dedicated infrastructure per tenant (cloud or co-lo)       | Full isolation; tenant controls upgrade timing; separate plugin store; jurisdiction data never leaves defined boundary                                    |
+| On-Prem           | Customer-operated infrastructure running platform software | Air-gapped support; offline config/plugin bundle distribution; customer HSM/KMS; no mandatory external internet dependency                                |
+| Hybrid            | Mix of cloud and on-prem for a single tenant               | Defined data sync boundaries; residency enforcement per jurisdiction config pack; latency budgets for sync; event-driven sync with exactly-once guarantee |
 
 ### 6.2 Jurisdiction Data Residency in Hybrid Mode
 
@@ -1023,12 +1032,12 @@ Define deployment requirements for each mode. These requirements drive K-10 Depl
 
 ### 6.5 Config & Plugin Distribution Per Mode
 
-| Mode | Config Distribution | Plugin Distribution |
-|---|---|---|
-| SaaS | Config Engine serves live; hot-reload via K-05 event notification | Plugin registry in cloud; install/upgrade via K-13 Admin Portal |
-| Dedicated | Same as SaaS; tenant controls rollout timing per jurisdiction | Tenant-scoped plugin registry; optional air-gapped bundle export |
-| On-Prem | Signed config bundle imported by operator; verified on load; delta sync on reconnect | Signed + certified plugin bundle imported by operator; pipeline-certified bundles only |
-| Hybrid | Cloud components use live Config Engine; on-prem uses synced bundle with TTL; jurisdiction rules determine which data flows where | Cloud plugins from registry; on-prem plugins from certified bundle; same plugin versions across both |
+| Mode      | Config Distribution                                                                                                               | Plugin Distribution                                                                                  |
+| --------- | --------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------- |
+| SaaS      | Config Engine serves live; hot-reload via K-05 event notification                                                                 | Plugin registry in cloud; install/upgrade via K-13 Admin Portal                                      |
+| Dedicated | Same as SaaS; tenant controls rollout timing per jurisdiction                                                                     | Tenant-scoped plugin registry; optional air-gapped bundle export                                     |
+| On-Prem   | Signed config bundle imported by operator; verified on load; delta sync on reconnect                                              | Signed + certified plugin bundle imported by operator; pipeline-certified bundles only               |
+| Hybrid    | Cloud components use live Config Engine; on-prem uses synced bundle with TTL; jurisdiction rules determine which data flows where | Cloud plugins from registry; on-prem plugins from certified bundle; same plugin versions across both |
 
 ---
 
@@ -1040,12 +1049,12 @@ This is the final quality gate. It MUST be completed after all epics are generat
 
 Map every capability from Steps 1B, 1C, and 1D to at least one epic. Any capability with no epic mapping is an immediate gap that must be resolved before output is complete.
 
-| Capability ID | Capability Name | Epic ID(s) | Gap? |
-|---|---|---|---|
-| CAP-K-01-001 | (example) SSO Authentication | EPIC-K-01-001 | No |
-| CAP-K-15-001 | (example) BS/Gregorian Date Conversion | EPIC-K-15-001 | No |
-| CAP-D-07-001 | (example) Pre-Trade Compliance Check | EPIC-D-07-001 | No |
-| ... | ... | ... | ... |
+| Capability ID | Capability Name                        | Epic ID(s)    | Gap? |
+| ------------- | -------------------------------------- | ------------- | ---- |
+| CAP-K-01-001  | (example) SSO Authentication           | EPIC-K-01-001 | No   |
+| CAP-K-15-001  | (example) BS/Gregorian Date Conversion | EPIC-K-15-001 | No   |
+| CAP-D-07-001  | (example) Pre-Trade Compliance Check   | EPIC-D-07-001 | No   |
+| ...           | ...                                    | ...           | ...  |
 
 ### 7.2 Missing Requirements List
 
@@ -1055,35 +1064,35 @@ If any capability has no epic, list it here with a proposed epic title and assig
 
 For every jurisdiction-specific behavior in any generated epic, verify and confirm:
 
-| Check | Verification Statement |
-|---|---|
-| Tax / Fee Logic | No tax rates or fee amounts in any core code path. All sourced from T1 Config Pack or evaluated by T2 Rule Pack. |
-| Market Calendars | No calendar dates hardcoded. All calendar data loaded from Market Calendar Config Pack (T1) via K-15 CalendarClient. |
-| Trading Session Times | No session open/close times hardcoded. All session data from Trading Session Config Pack (T1). |
-| Instrument Classification | No asset classification rules hardcoded. Classification logic is T2 Rule Pack or T1 Config Pack. |
-| Reporting Templates | No regulatory report formats hardcoded. All templates loaded from Reporting Template Config Pack (T1). |
-| Settlement Cycles | No T+N values hardcoded. Settlement cycle resolved from Jurisdiction Config Pack per instrument + jurisdiction. |
-| Margin & Circuit Breakers | No margin % or circuit breaker thresholds hardcoded. All in T1 Config Pack or T2 Rule Pack. |
-| Order Validation Rules | No jurisdiction-specific order rules hardcoded in OMS/EMS core. All validation delegated to T2 Rule Pack. |
-| National ID Scheme | No specific National ID format (e.g., Nepal NID format) hardcoded in K-01 core. All via K-01 extension point + Jurisdiction Plugin. |
-| BS Calendar Conversion | No BS/Gregorian conversion tables hardcoded in any domain module. All via K-15 CalendarClient + Calendar Pack (T1). |
+| Check                       | Verification Statement                                                                                                                                    |
+| --------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Tax / Fee Logic             | No tax rates or fee amounts in any core code path. All sourced from T1 Config Pack or evaluated by T2 Rule Pack.                                          |
+| Market Calendars            | No calendar dates hardcoded. All calendar data loaded from Market Calendar Config Pack (T1) via K-15 CalendarClient.                                      |
+| Trading Session Times       | No session open/close times hardcoded. All session data from Trading Session Config Pack (T1).                                                            |
+| Instrument Classification   | No asset classification rules hardcoded. Classification logic is T2 Rule Pack or T1 Config Pack.                                                          |
+| Reporting Templates         | No regulatory report formats hardcoded. All templates loaded from Reporting Template Config Pack (T1).                                                    |
+| Settlement Cycles           | No T+N values hardcoded. Settlement cycle resolved from Jurisdiction Config Pack per instrument + jurisdiction.                                           |
+| Margin & Circuit Breakers   | No margin % or circuit breaker thresholds hardcoded. All in T1 Config Pack or T2 Rule Pack.                                                               |
+| Order Validation Rules      | No jurisdiction-specific order rules hardcoded in OMS/EMS core. All validation delegated to T2 Rule Pack.                                                 |
+| National ID Scheme          | No specific National ID format (e.g., Nepal NID format) hardcoded in K-01 core. All via K-01 extension point + Jurisdiction Plugin.                       |
+| BS Calendar Conversion      | No BS/Gregorian conversion tables hardcoded in any domain module. All via K-15 CalendarClient + Calendar Pack (T1).                                       |
 | Exchange / Depository Logic | No exchange name, depository name, FIX variant, or protocol detail hardcoded in Generic Core or Domain Subsystems. All via T3 Adapter Pack (Principle 3). |
-| AI Model Behavior | No AI model used without K-09 registration. No prompts hardcoded in domain code — all versioned in K-09 AI Governance. |
-| Regulatory References | All LCA-* and ASR-* references are placeholders with `[VERIFY]` tags where citation is uncertain. |
+| AI Model Behavior           | No AI model used without K-09 registration. No prompts hardcoded in domain code — all versioned in K-09 AI Governance.                                    |
+| Regulatory References       | All LCA-_ and ASR-_ references are placeholders with `[VERIFY]` tags where citation is uncertain.                                                         |
 
 ### 7.4 No Kernel Duplication Verification
 
-| Kernel Concern | Verification Statement |
-|---|---|
-| Authentication / AuthZ | Domain modules call K-01 SDK only. No local auth logic in any domain module. |
-| Configuration Management | Domain modules call K-02 SDK only. No local config files or local config parsing in any domain module. |
-| Policy / Rules Evaluation | Domain modules invoke K-03 Rules Engine only. No local rule evaluation engines. |
-| Audit Logging | Domain modules call K-07 SDK only. No local audit log files or local audit aggregation. |
-| Observability | Domain modules call K-06 SDK only. No domain-specific log sinks, metric exporters, or trace collectors. |
-| AI Model Calls | All AI usage registered in K-09 registry. No unregistered model calls anywhere in domain code. |
-| Event / Workflow Integration | All cross-domain integration via K-05 Event Bus. No direct module-to-module HTTP/gRPC calls. |
-| Calendar Conversion | All date conversion via K-15 CalendarClient. No domain-local BS/Gregorian arithmetic. |
-| Ledger Operations | All ledger entries via K-16 LedgerClient. No domain-local ledger or account tracking. |
+| Kernel Concern               | Verification Statement                                                                                  |
+| ---------------------------- | ------------------------------------------------------------------------------------------------------- |
+| Authentication / AuthZ       | Domain modules call K-01 SDK only. No local auth logic in any domain module.                            |
+| Configuration Management     | Domain modules call K-02 SDK only. No local config files or local config parsing in any domain module.  |
+| Policy / Rules Evaluation    | Domain modules invoke K-03 Rules Engine only. No local rule evaluation engines.                         |
+| Audit Logging                | Domain modules call K-07 SDK only. No local audit log files or local audit aggregation.                 |
+| Observability                | Domain modules call K-06 SDK only. No domain-specific log sinks, metric exporters, or trace collectors. |
+| AI Model Calls               | All AI usage registered in K-09 registry. No unregistered model calls anywhere in domain code.          |
+| Event / Workflow Integration | All cross-domain integration via K-05 Event Bus. No direct module-to-module HTTP/gRPC calls.            |
+| Calendar Conversion          | All date conversion via K-15 CalendarClient. No domain-local BS/Gregorian arithmetic.                   |
+| Ledger Operations            | All ledger entries via K-16 LedgerClient. No domain-local ledger or account tracking.                   |
 
 ### 7.5 Generic Core Purity Verification
 
@@ -1110,18 +1119,18 @@ Confirm Generic Core contains no jurisdiction-specific logic:
 
 These rules apply to every output. Violations are disqualifying defects.
 
-| Rule | Requirement |
-|---|---|
-| No fluff | Every sentence must carry information. Remove preamble, filler, and hedges. |
-| No generic language | "Should be secure", "will be performant", "needs to scale" are not acceptable. All requirements are specific and measurable. |
-| No invented regulatory citations | Use LCA-*/ASR-* placeholders + `[VERIFY]`. Never state a regulation as fact unless it appears in the input documents. |
-| Siddhanta alignment | Every epic must be traceable to siddhanta.md or Siddhanta_Platform_Specification.md. If neither document covers a requirement, mark it `[ASSUMPTION]`. |
-| Generic Core purity | Every epic explicitly declares which parts are Generic Core vs Jurisdiction Plugin vs Operator Pack. No ambiguity. |
-| Nepal-logic externalization | All Nepal-specific logic (SEBON, NRB, NEPSE, CDSC, BS calendar, NPR, Nepal tax) lives in Jurisdiction Plugins or Config Packs — never in Generic Core. |
-| AI-native evolution | Every domain epic defines AI hooks even when AI implementation is deferred. |
-| Dual-calendar | All date-bearing data models and event payloads show both BS and Gregorian representations in examples. |
-| Ledger immutability | No epic proposes mutable ledger entries. All ledger operations are append-only events via K-16. |
-| Reconciliation readiness | Any module touching financial values must define its reconciliation strategy explicitly. |
+| Rule                             | Requirement                                                                                                                                            |
+| -------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| No fluff                         | Every sentence must carry information. Remove preamble, filler, and hedges.                                                                            |
+| No generic language              | "Should be secure", "will be performant", "needs to scale" are not acceptable. All requirements are specific and measurable.                           |
+| No invented regulatory citations | Use LCA-_/ASR-_ placeholders + `[VERIFY]`. Never state a regulation as fact unless it appears in the input documents.                                  |
+| Siddhanta alignment              | Every epic must be traceable to siddhanta.md or Siddhanta_Platform_Specification.md. If neither document covers a requirement, mark it `[ASSUMPTION]`. |
+| Generic Core purity              | Every epic explicitly declares which parts are Generic Core vs Jurisdiction Plugin vs Operator Pack. No ambiguity.                                     |
+| Nepal-logic externalization      | All Nepal-specific logic (SEBON, NRB, NEPSE, CDSC, BS calendar, NPR, Nepal tax) lives in Jurisdiction Plugins or Config Packs — never in Generic Core. |
+| AI-native evolution              | Every domain epic defines AI hooks even when AI implementation is deferred.                                                                            |
+| Dual-calendar                    | All date-bearing data models and event payloads show both BS and Gregorian representations in examples.                                                |
+| Ledger immutability              | No epic proposes mutable ledger entries. All ledger operations are append-only events via K-16.                                                        |
+| Reconciliation readiness         | Any module touching financial values must define its reconciliation strategy explicitly.                                                               |
 
 ---
 
@@ -1139,7 +1148,7 @@ These rules apply to every output. Violations are disqualifying defects.
 ### Content
 
 - High information density, no filler text
-- Do not invent regulatory citations — use LCA-*/ASR-* placeholders with `[VERIFY]` tags
+- Do not invent regulatory citations — use LCA-_/ASR-_ placeholders with `[VERIFY]` tags
 - Do not reference specific vendor products as requirements unless input specifies approved vendors
 - Layer 1 domain epics must not describe kernel concerns as work to be done — reference the kernel epic IDs
 - Every compliance statement must have a regulatory reference placeholder
@@ -1168,35 +1177,36 @@ Output is only complete when ALL of the following are true:
 
 ## APPENDIX A — EPIC ID SCHEME
 
-| Epic Type | ID Format | Example |
-|---|---|---|
-| Kernel — Layer 0 | EPIC-K-{module_num}-{seq} | EPIC-K-02-001 (Config Engine epic 1), EPIC-K-15-001 (Dual-Calendar Service) |
-| Domain Subsystem — Layer 1 | EPIC-D-{module_num}-{seq} | EPIC-D-01-003 (OMS epic 3), EPIC-D-09-001 (Post-Trade epic 1) |
-| Cross-Subsystem Workflow | EPIC-WF-{seq} | EPIC-WF-001 (Order Lifecycle), EPIC-WF-007 (Tax Withholding Cycle) |
-| Extension Packs — Jurisdiction Plugin | EPIC-JP-{jurisdiction}-{seq} | EPIC-JP-NP-001 (Nepal SEBON Compliance Pack) |
-| Extension Packs — Operator Pack | EPIC-OP-{seq} | EPIC-OP-001 (White-label Report Pack) |
-| Extension Packs — AI Pack | EPIC-AP-{seq} | EPIC-AP-001 (Trade Surveillance AI Pack) |
-| Extension Packs — Exchange/Depository Adapter | EPIC-EA-{exchange}-{seq} | EPIC-EA-NEPSE-001 (NEPSE FIX Adapter), EPIC-EA-CDSC-001 (CDSC Settlement Adapter) |
-| Platform Unity | EPIC-PU-{seq} | EPIC-PU-004 (Platform Manifest) |
+| Epic Type                                     | ID Format                    | Example                                                                           |
+| --------------------------------------------- | ---------------------------- | --------------------------------------------------------------------------------- |
+| Kernel — Layer 0                              | EPIC-K-{module_num}-{seq}    | EPIC-K-02-001 (Config Engine epic 1), EPIC-K-15-001 (Dual-Calendar Service)       |
+| Domain Subsystem — Layer 1                    | EPIC-D-{module_num}-{seq}    | EPIC-D-01-003 (OMS epic 3), EPIC-D-09-001 (Post-Trade epic 1)                     |
+| Cross-Subsystem Workflow                      | EPIC-WF-{seq}                | EPIC-WF-001 (Order Lifecycle), EPIC-WF-007 (Tax Withholding Cycle)                |
+| Extension Packs — Jurisdiction Plugin         | EPIC-JP-{jurisdiction}-{seq} | EPIC-JP-NP-001 (Nepal SEBON Compliance Pack)                                      |
+| Extension Packs — Operator Pack               | EPIC-OP-{seq}                | EPIC-OP-001 (White-label Report Pack)                                             |
+| Extension Packs — AI Pack                     | EPIC-AP-{seq}                | EPIC-AP-001 (Trade Surveillance AI Pack)                                          |
+| Extension Packs — Exchange/Depository Adapter | EPIC-EA-{exchange}-{seq}     | EPIC-EA-NEPSE-001 (NEPSE FIX Adapter), EPIC-EA-CDSC-001 (CDSC Settlement Adapter) |
+| Platform Unity                                | EPIC-PU-{seq}                | EPIC-PU-004 (Platform Manifest)                                                   |
 
 ---
 
-## APPENDIX B — REGULATORY TRACEABILITY PLACEHOLDER SCHEME
+## APPENDIX B — REGULATORY TRACEABILITY REFERENCE SCHEME
 
-Use these placeholder prefixes for all regulatory references. All citations must be confirmed with legal/compliance team and marked `[VERIFY]` until confirmed:
+Use these reference namespaces for regulatory traceability. All citations must be confirmed with legal/compliance team and marked `[VERIFY]` until confirmed:
 
-| Prefix | Scope | Example |
-|---|---|---|
-| LCA-AUDIT-* | Audit record-keeping requirements | LCA-AUDIT-001: Trade record retention minimum period |
-| LCA-SOD-* | Segregation of duties requirements | LCA-SOD-001: Maker-checker for trade approval above threshold |
-| LCA-TAX-* | Tax calculation and remittance requirements | LCA-TAX-001: Capital gains tax on equity disposition `[VERIFY]` |
-| LCA-BESTEX-* | Best execution obligations | LCA-BESTEX-001: TCA evidence retention |
-| LCA-AMLKYC-* | AML/KYC screening requirements | LCA-AMLKYC-001: Counterparty screening before order entry |
-| LCA-RET-* | Data retention requirements | LCA-RET-001: Order audit trail retention period |
-| ASR-SURV-* | Surveillance and monitoring requirements | ASR-SURV-001: Wash trade pattern detection |
-| ASR-CB-* | Circuit breaker and market halt requirements | ASR-CB-001: Intraday price band halt rules `[VERIFY]` |
-| ASR-RPT-* | Regulatory reporting requirements | ASR-RPT-001: SEBON monthly portfolio disclosure |
-| ASR-MARG-* | Margin and collateral requirements | ASR-MARG-001: Minimum initial margin rate `[VERIFY]` |
+| Prefix        | Scope                                        | Example                                                                                                                                             |
+| ------------- | -------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
+| LCA-AUDIT-\*  | Audit record-keeping requirements            | LCA-AUDIT-001: Trade record retention minimum period                                                                                                |
+| LCA-SOD-\*    | Segregation of duties requirements           | LCA-SOD-001: Maker-checker for trade approval above threshold                                                                                       |
+| LCA-TAX-\*    | Semantic tax-control requirements            | Use registry-backed semantic identifiers when a tax control is modeled in the epic/control namespace                                                |
+| LCA-000       | Numeric legal-claim identifiers              | Example: `LCA-029` to `LCA-032` for provisional tax-rate anchors pending clause extraction                                                          |
+| LCA-BESTEX-\* | Best execution obligations                   | LCA-BESTEX-001: TCA evidence retention                                                                                                              |
+| LCA-AMLKYC-\* | AML/KYC screening requirements               | LCA-AMLKYC-001: Counterparty screening before order entry                                                                                           |
+| LCA-RET-\*    | Data retention requirements                  | LCA-RET-001: Order audit trail retention period                                                                                                     |
+| ASR-SURV-\*   | Surveillance and monitoring requirements     | ASR-SURV-001: Wash trade pattern detection                                                                                                          |
+| ASR-CB-\*     | Circuit breaker and market halt requirements | Example: `ASR-NEP-NEPSE-CB-OPS-ASSUMPTION` for revalidation-required circuit-breaker assumptions                                                    |
+| ASR-RPT-\*    | Regulatory reporting requirements            | ASR-RPT-001: SEBON monthly portfolio disclosure                                                                                                     |
+| ASR-MARG-\*   | Margin and collateral requirements           | Prefer clause-backed legal references such as `LCA-011` for verified margin minima; use ASR only for operating assumptions that lack clause anchors |
 
 ---
 
@@ -1207,10 +1217,10 @@ Every date-bearing entity in the platform stores both calendar representations. 
 ```yaml
 # Entity date field convention
 settlement_date:
-  gregorian: "2025-04-14"          # ISO 8601
-  bs: "2082-01-01"                 # BS year-month-day
-  source: "CalendarService-v1.2"   # which service version performed conversion
-  calendar_pack_version: "NP-2082-v1"  # which Calendar Pack was used
+  gregorian: "2025-04-14" # ISO 8601
+  bs: "2082-01-01" # BS year-month-day
+  source: "CalendarService-v1.2" # which service version performed conversion
+  calendar_pack_version: "NP-2082-v1" # which Calendar Pack was used
 
 # Event payload convention (all events with dates)
 event:
@@ -1227,4 +1237,4 @@ event:
 
 ---
 
-*This prompt is the authoritative epic generation standard for Project Siddhanta. It must be kept synchronized with siddhanta.md and Siddhanta_Platform_Specification.md. Version this file alongside those documents. Never update an epic without first updating the capability inventory in Steps 1B/1C/1D.*
+_This prompt is the authoritative epic generation standard for Project Siddhanta. It must be kept synchronized with siddhanta.md and Siddhanta_Platform_Specification.md. Version this file alongside those documents. Never update an epic without first updating the capability inventory in Steps 1B/1C/1D._

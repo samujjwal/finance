@@ -1,6 +1,6 @@
 # Epic Versioning Strategy
 
-**Generated:** March 2, 2026  
+**Generated:** March 10, 2026  
 **Purpose:** Define versioning strategy for epic specifications to manage evolution and backward compatibility
 
 ---
@@ -16,9 +16,11 @@ Epic specifications are living documents that evolve as requirements change, imp
 Epics follow **semantic versioning (MAJOR.MINOR.PATCH)** similar to software releases:
 
 ### MAJOR Version (X.0.0)
+
 **When to increment:** Breaking changes that fundamentally alter the epic's scope, architecture, or contracts.
 
 **Examples:**
+
 - Complete redesign of module architecture
 - Removal of major functional requirements
 - Breaking changes to API contracts or event schemas
@@ -28,6 +30,7 @@ Epics follow **semantic versioning (MAJOR.MINOR.PATCH)** similar to software rel
 **Impact:** Requires re-implementation or significant refactoring of existing code.
 
 **Process:**
+
 1. Create new epic file: `EPIC-{ID}-{NAME}-v{MAJOR}.md`
 2. Mark old version as deprecated with migration guide
 3. Update dependency matrix
@@ -35,9 +38,11 @@ Epics follow **semantic versioning (MAJOR.MINOR.PATCH)** similar to software rel
 5. Provide 6-month transition period (both versions supported)
 
 ### MINOR Version (x.Y.0)
+
 **When to increment:** Backward-compatible additions or enhancements.
 
 **Examples:**
+
 - New functional requirements (FR11, FR12, etc.)
 - Additional acceptance criteria
 - New NFR categories or enhanced targets
@@ -48,6 +53,7 @@ Epics follow **semantic versioning (MAJOR.MINOR.PATCH)** similar to software rel
 **Impact:** Existing implementations remain valid; new features are optional additions.
 
 **Process:**
+
 1. Update epic file in place
 2. Increment VERSION field in header
 3. Document changes in changelog section
@@ -55,9 +61,11 @@ Epics follow **semantic versioning (MAJOR.MINOR.PATCH)** similar to software rel
 5. Notify affected teams
 
 ### PATCH Version (x.y.Z)
+
 **When to increment:** Bug fixes, clarifications, or non-functional updates.
 
 **Examples:**
+
 - Typo corrections
 - Clarification of ambiguous requirements
 - Updated compliance code references
@@ -68,6 +76,7 @@ Epics follow **semantic versioning (MAJOR.MINOR.PATCH)** similar to software rel
 **Impact:** No implementation changes required; informational only.
 
 **Process:**
+
 1. Update epic file in place
 2. Increment VERSION field in header
 3. Add note to changelog
@@ -77,45 +86,24 @@ Epics follow **semantic versioning (MAJOR.MINOR.PATCH)** similar to software rel
 
 ## Current Version Status
 
-All epics are currently at **v1.0.0** (initial release).
+Epic versions are no longer uniform across the active set. Several epics have already received minor updates during ARB remediation, metadata-governance alignment, and currentness maintenance, while others remain at `v1.0.0`.
 
-| Epic ID | Current Version | Status | Last Updated |
-|---------|----------------|--------|--------------|
-| K-01 | 1.0.0 | Active | 2026-03-02 |
-| K-02 | 1.0.0 | Active | 2026-03-02 |
-| K-03 | 1.0.0 | Active | 2026-03-02 |
-| K-04 | 1.0.0 | Active | 2026-03-02 |
-| K-05 | 1.0.0 | Active | 2026-03-02 |
-| K-06 | 1.0.0 | Active | 2026-03-02 |
-| K-07 | 1.0.0 | Active | 2026-03-02 |
-| K-08 | 1.0.0 | Active | 2026-03-02 |
-| K-09 | 1.0.0 | Active | 2026-03-02 |
-| K-10 | 1.0.0 | Active | 2026-03-02 |
-| K-11 | 1.0.0 | Active | 2026-03-02 |
-| K-12 | 1.0.0 | Active | 2026-03-02 |
-| K-13 | 1.0.0 | Active | 2026-03-02 |
-| K-14 | 1.0.0 | Active | 2026-03-02 |
-| K-15 | 1.0.0 | Active | 2026-03-02 |
-| K-16 | 1.0.0 | Active | 2026-03-02 |
-| D-01 | 1.0.0 | Active | 2026-03-02 |
-| D-02 | 1.0.0 | Active | 2026-03-02 |
-| D-03 | 1.0.0 | Active | 2026-03-02 |
-| D-04 | 1.0.0 | Active | 2026-03-02 |
-| D-05 | 1.0.0 | Active | 2026-03-02 |
-| D-06 | 1.0.0 | Active | 2026-03-02 |
-| D-07 | 1.0.0 | Active | 2026-03-02 |
-| D-08 | 1.0.0 | Active | 2026-03-02 |
-| D-09 | 1.0.0 | Active | 2026-03-02 |
-| D-10 | 1.0.0 | Active | 2026-03-02 |
-| D-11 | 1.0.0 | Active | 2026-03-02 |
-| D-12 | 1.0.0 | Active | 2026-03-02 |
-| W-01 | 1.0.0 | Active | 2026-03-02 |
-| W-02 | 1.0.0 | Active | 2026-03-02 |
-| O-01 | 1.0.0 | Active | 2026-03-02 |
-| P-01 | 1.0.0 | Active | 2026-03-02 |
-| R-01 | 1.0.0 | Active | 2026-03-02 |
-| T-01 | 1.0.0 | Active | 2026-03-02 |
-| PU-004 | 1.0.0 | Active | 2026-03-02 |
+Treat the `VERSION:` header in each epic file as the source of truth. This strategy document should not maintain a duplicate exhaustive version matrix unless it is refreshed in the same pass as epic edits.
+
+Representative active examples as of March 10, 2026:
+
+| Epic ID | Current Version | Status | Notes                                                           |
+| ------- | --------------- | ------ | --------------------------------------------------------------- |
+| K-01    | 1.1.1           | Active | Currentness and section-standardization patch applied           |
+| K-02    | 1.1.1           | Active | Metadata-governance enhancements plus patch maintenance         |
+| K-05    | 1.1.1           | Active | Event/replay baseline refined and normalized                    |
+| D-06    | 1.1.1           | Active | Risk evidence references and numbering aligned                  |
+| O-01    | 1.1.1           | Active | Operator Console expanded and normalized                        |
+| R-01    | 1.0.1           | Active | Sequential numbering and changelog added                        |
+| R-02    | 1.1.1           | Active | Incident-response alignment and numbering normalization applied |
+| PU-004  | 1.0.1           | Active | Platform manifest threat-model and changelog added              |
+
+Most active epics now carry at least one patch or minor revision, and the active set includes changelog sections as a baseline expectation.
 
 ---
 
@@ -124,18 +112,18 @@ All epics are currently at **v1.0.0** (initial release).
 Each epic must include a version header:
 
 ```markdown
-EPIC-ID:    EPIC-K-01
-EPIC NAME:  Identity & Access Management (IAM)
-LAYER:      KERNEL
-MODULE:     K-01 Identity & Access Management
-VERSION:    1.2.3
+EPIC-ID: EPIC-K-01
+EPIC NAME: Identity & Access Management (IAM)
+LAYER: KERNEL
+MODULE: K-01 Identity & Access Management
+VERSION: 1.2.3
 ```
 
 ---
 
 ## Changelog Section
 
-Each epic should include a changelog section at the end (before or after Section 14.5):
+Each epic should include a changelog section at the end of the document, after the numbered specification sections:
 
 ```markdown
 ---
@@ -143,30 +131,38 @@ Each epic should include a changelog section at the end (before or after Section
 ## Changelog
 
 ### Version 1.2.3 (2026-06-15)
+
 **Type:** PATCH  
 **Changes:**
+
 - Corrected NFR target for P99 latency (was 100ms, now 50ms)
 - Updated compliance code reference from LCA-AUTH-001 to LCA-AUDIT-001
-- Fixed typo in Section 9 acceptance criteria
+- Fixed typo in Section 10 acceptance criteria
 
 ### Version 1.2.0 (2026-05-01)
+
 **Type:** MINOR  
 **Changes:**
+
 - Added FR11: Support for hardware security keys (YubiKey, FIDO2)
-- Added Section 14.5: Threat Model with 8 attack vectors
+- Added Section 16: Threat Model with 8 attack vectors
 - Enhanced NFR table with additional security requirements
 - Added 3 new acceptance criteria for hardware token support
 
 ### Version 1.1.0 (2026-03-15)
+
 **Type:** MINOR  
 **Changes:**
+
 - Added FR10: Biometric authentication support
-- Updated Section 7 AI Integration with anomaly detection details
+- Updated Section 8 AI Integration with anomaly detection details
 - Added dependency on K-09 AI Governance
 
 ### Version 1.0.0 (2026-01-10)
+
 **Type:** MAJOR  
 **Changes:**
+
 - Initial release
 ```
 
@@ -179,11 +175,13 @@ Each epic should include a changelog section at the end (before or after Section
 When an epic is superseded by a new major version:
 
 1. **Update Header:**
+
 ```markdown
-VERSION:    1.5.2 (DEPRECATED - Use v2.0.0)
+VERSION: 1.5.2 (DEPRECATED - Use v2.0.0)
 ```
 
 2. **Add Deprecation Notice:**
+
 ```markdown
 ---
 
@@ -219,26 +217,28 @@ VERSION:    1.5.2 (DEPRECATED - Use v2.0.0)
 
 ### Epic-to-Implementation Compatibility
 
-| Epic Version | Implementation Status | Support Level |
-|--------------|----------------------|---------------|
-| 1.0.0 | Initial implementation | Full support |
-| 1.x.x | Minor updates | Full support |
-| 2.0.0 | Breaking changes | Parallel support during transition |
-| Deprecated | Legacy | Critical bugs only |
-| Archived | Historical reference | No support |
+| Epic Version | Implementation Status  | Support Level                      |
+| ------------ | ---------------------- | ---------------------------------- |
+| 1.0.0        | Initial implementation | Full support                       |
+| 1.x.x        | Minor updates          | Full support                       |
+| 2.0.0        | Breaking changes       | Parallel support during transition |
+| Deprecated   | Legacy                 | Critical bugs only                 |
+| Archived     | Historical reference   | No support                         |
 
 ### Cross-Epic Version Dependencies
 
 When Epic A depends on Epic B:
 
 ```markdown
-**Dependencies:** 
+**Dependencies:**
+
 - EPIC-K-05 (Event Bus) v1.2.0+
 - EPIC-K-07 (Audit Framework) v1.0.0+
 - EPIC-K-01 (IAM) v2.0.0+
 ```
 
 **Rules:**
+
 - Specify minimum required version
 - Use `+` to indicate "or higher"
 - Update dependency matrix when versions change
@@ -274,11 +274,11 @@ When Epic A depends on Epic B:
 
 ### Approval Authority
 
-| Change Type | Approver |
-|-------------|----------|
-| PATCH | Epic Owner |
-| MINOR | Epic Owner + Tech Lead |
-| MAJOR | Epic Owner + Architecture Team + CTO |
+| Change Type | Approver                             |
+| ----------- | ------------------------------------ |
+| PATCH       | Epic Owner                           |
+| MINOR       | Epic Owner + Tech Lead               |
+| MAJOR       | Epic Owner + Architecture Team + CTO |
 
 ---
 
@@ -287,11 +287,13 @@ When Epic A depends on Epic B:
 ### Git Workflow
 
 **Branch Strategy:**
+
 - `main` branch contains current epic versions
 - `epic/EPIC-ID-vX.Y.Z` branches for major version work
 - Tag releases: `epic-K-01-v1.2.0`
 
 **Commit Messages:**
+
 ```
 [EPIC-K-01] v1.2.0: Add hardware token support (MINOR)
 
@@ -301,6 +303,7 @@ When Epic A depends on Epic B:
 ```
 
 **Pull Request Template:**
+
 ```markdown
 ## Epic Version Update
 
@@ -310,16 +313,19 @@ When Epic A depends on Epic B:
 **Change Type:** MINOR
 
 ### Changes
+
 - [ ] Added FR11: Hardware token support
 - [ ] Updated NFR table
 - [ ] Added acceptance criteria
 
 ### Impact Analysis
+
 - **Affected Epics:** None
 - **Breaking Changes:** No
 - **Migration Required:** No
 
 ### Checklist
+
 - [ ] Version header updated
 - [ ] Changelog entry added
 - [ ] Dependency matrix updated (if needed)
@@ -332,22 +338,24 @@ When Epic A depends on Epic B:
 ## Versioning Best Practices
 
 ### DO:
+
 ✅ Increment version for every substantive change  
 ✅ Document all changes in changelog  
 ✅ Maintain backward compatibility in MINOR versions  
 ✅ Provide migration guides for MAJOR versions  
 ✅ Test compatibility with dependent epics  
 ✅ Communicate changes to affected teams  
-✅ Archive deprecated versions properly  
+✅ Archive deprecated versions properly
 
 ### DON'T:
+
 ❌ Skip version increments  
 ❌ Make breaking changes in MINOR versions  
 ❌ Remove deprecated versions immediately  
 ❌ Change versions without updating changelog  
 ❌ Forget to update dependency matrix  
 ❌ Make changes without approval  
-❌ Use inconsistent version formats  
+❌ Use inconsistent version formats
 
 ---
 
@@ -425,10 +433,12 @@ echo "✓ Version $VERSION is valid"
 ## Changelog
 
 ### Version 1.2.3 (2026-06-15)
+
 **Type:** PATCH  
 **Author:** John Doe  
 **Reviewer:** Jane Smith  
 **Changes:**
+
 - Corrected P99 latency target from 100ms to 50ms
 - Updated compliance code reference
 - Fixed typo in acceptance criteria
@@ -441,7 +451,7 @@ echo "✓ Version $VERSION is valid"
 ---
 
 **Strategy Status:** ✅ ACTIVE  
-**Last Updated:** March 2, 2026  
-**Next Review:** June 2, 2026  
+**Last Updated:** March 10, 2026  
+**Next Review:** June 10, 2026  
 **Owner:** Platform Architecture Team  
 **Approver:** Chief Technology Officer

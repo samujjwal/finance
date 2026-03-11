@@ -1,8 +1,8 @@
-EPIC-ID:    EPIC-PU-004
-EPIC NAME:  Platform Manifest
-LAYER:      PLATFORM-UNITY
-MODULE:     PU-004 Platform Manifest
-VERSION:    1.0.0
+EPIC-ID: EPIC-PU-004
+EPIC NAME: Platform Manifest
+LAYER: PLATFORM-UNITY
+MODULE: PU-004 Platform Manifest
+VERSION: 1.0.1
 
 ---
 
@@ -61,54 +61,54 @@ Deliver the Platform Manifest (PU-004), providing a single, immutable source of 
 
 #### Section 6 — Event Model Definition
 
-| Field | Description |
-|---|---|
-| Event Name | `ManifestUpdatedEvent` |
-| Schema Version | `v1.0.0` |
-| Trigger Condition | A new platform manifest version is approved and activated. |
-| Payload | `{ "new_version": 42, "previous_version": 41, "activated_at_bs": "...", "diff_summary": {...} }` |
-| Consumers | Plugin Runtime, Config Engine, Audit Framework |
-| Idempotency Key | `hash(new_version)` |
-| Replay Behavior | Ignored. |
-| Retention Policy | Permanent. |
+| Field             | Description                                                                                      |
+| ----------------- | ------------------------------------------------------------------------------------------------ |
+| Event Name        | `ManifestUpdatedEvent`                                                                           |
+| Schema Version    | `v1.0.0`                                                                                         |
+| Trigger Condition | A new platform manifest version is approved and activated.                                       |
+| Payload           | `{ "new_version": 42, "previous_version": 41, "activated_at_bs": "...", "diff_summary": {...} }` |
+| Consumers         | Plugin Runtime, Config Engine, Audit Framework                                                   |
+| Idempotency Key   | `hash(new_version)`                                                                              |
+| Replay Behavior   | Ignored.                                                                                         |
+| Retention Policy  | Permanent.                                                                                       |
 
 ---
 
-#### Section 6.5 — Command Model Definition
+#### Section 7 — Command Model Definition
 
-| Field | Description |
-|---|---|
-| Command Name | `UpdateManifestCommand` |
-| Schema Version | `v1.0.0` |
+| Field            | Description                                                            |
+| ---------------- | ---------------------------------------------------------------------- |
+| Command Name     | `UpdateManifestCommand`                                                |
+| Schema Version   | `v1.0.0`                                                               |
 | Validation Rules | Manifest version incremented, compatibility validated, signature valid |
-| Handler | `ManifestCommandHandler` in PU-004 Platform Manifest |
-| Success Event | `ManifestUpdated` |
-| Failure Event | `ManifestUpdateFailed` |
-| Idempotency | Command ID must be unique; duplicate commands return original result |
+| Handler          | `ManifestCommandHandler` in PU-004 Platform Manifest                   |
+| Success Event    | `ManifestUpdated`                                                      |
+| Failure Event    | `ManifestUpdateFailed`                                                 |
+| Idempotency      | Command ID must be unique; duplicate commands return original result   |
 
-| Field | Description |
-|---|---|
-| Command Name | `ValidateCompatibilityCommand` |
-| Schema Version | `v1.0.0` |
-| Validation Rules | Proposed manifest provided, current manifest exists |
-| Handler | `CompatibilityValidator` in PU-004 Platform Manifest |
-| Success Event | `CompatibilityValidated` |
-| Failure Event | `CompatibilityValidationFailed` |
-| Idempotency | Same input returns cached validation result |
+| Field            | Description                                          |
+| ---------------- | ---------------------------------------------------- |
+| Command Name     | `ValidateCompatibilityCommand`                       |
+| Schema Version   | `v1.0.0`                                             |
+| Validation Rules | Proposed manifest provided, current manifest exists  |
+| Handler          | `CompatibilityValidator` in PU-004 Platform Manifest |
+| Success Event    | `CompatibilityValidated`                             |
+| Failure Event    | `CompatibilityValidationFailed`                      |
+| Idempotency      | Same input returns cached validation result          |
 
-| Field | Description |
-|---|---|
-| Command Name | `RollbackManifestCommand` |
-| Schema Version | `v1.0.0` |
-| Validation Rules | Target version exists, requester authorized, rollback safe |
-| Handler | `ManifestCommandHandler` in PU-004 Platform Manifest |
-| Success Event | `ManifestRolledBack` |
-| Failure Event | `ManifestRollbackFailed` |
-| Idempotency | Command ID must be unique; duplicate commands return original result |
+| Field            | Description                                                          |
+| ---------------- | -------------------------------------------------------------------- |
+| Command Name     | `RollbackManifestCommand`                                            |
+| Schema Version   | `v1.0.0`                                                             |
+| Validation Rules | Target version exists, requester authorized, rollback safe           |
+| Handler          | `ManifestCommandHandler` in PU-004 Platform Manifest                 |
+| Success Event    | `ManifestRolledBack`                                                 |
+| Failure Event    | `ManifestRollbackFailed`                                             |
+| Idempotency      | Command ID must be unique; duplicate commands return original result |
 
 ---
 
-#### Section 7 — AI Integration Requirements
+#### Section 8 — AI Integration Requirements
 
 - **AI Hook Type:** Copilot Assist
 - **Workflow Steps Exposed:** Manifest diff review before deployment.
@@ -120,28 +120,28 @@ Deliver the Platform Manifest (PU-004), providing a single, immutable source of 
 
 ---
 
-#### Section 8 — NFRs
+#### Section 9 — NFRs
 
-| NFR Category | Required Targets |
-|---|---|
-| Latency / Throughput | Validation of new manifest < 100ms |
-| Scalability | N/A (low volume control plane operation) |
-| Availability | 99.999% uptime |
-| Consistency Model | Strong consistency |
-| Security | Manifest updates require Maker-Checker and cryptographic signing |
-| Data Residency | Global control plane data |
-| Data Retention | Permanent |
-| Auditability | Every manifest change is an audited event [LCA-AUDIT-001] |
-| Observability | Metrics: `manifest.version`, `manifest.update.latency` |
-| Extensibility | N/A |
-| Upgrade / Compatibility | Core enabler of platform upgrades |
-| On-Prem Constraints | Manifest updates bundled in offline sync files |
-| Ledger Integrity | N/A |
-| Dual-Calendar Correctness | Correct `DualDate` activation logging |
+| NFR Category              | Required Targets                                                 |
+| ------------------------- | ---------------------------------------------------------------- |
+| Latency / Throughput      | Validation of new manifest < 100ms                               |
+| Scalability               | N/A (low volume control plane operation)                         |
+| Availability              | 99.999% uptime                                                   |
+| Consistency Model         | Strong consistency                                               |
+| Security                  | Manifest updates require Maker-Checker and cryptographic signing |
+| Data Residency            | Global control plane data                                        |
+| Data Retention            | Permanent                                                        |
+| Auditability              | Every manifest change is an audited event [LCA-AUDIT-001]        |
+| Observability             | Metrics: `manifest.version`, `manifest.update.latency`           |
+| Extensibility             | N/A                                                              |
+| Upgrade / Compatibility   | Core enabler of platform upgrades                                |
+| On-Prem Constraints       | Manifest updates bundled in offline sync files                   |
+| Ledger Integrity          | N/A                                                              |
+| Dual-Calendar Correctness | Correct `DualDate` activation logging                            |
 
 ---
 
-#### Section 9 — Acceptance Criteria
+#### Section 10 — Acceptance Criteria
 
 1. **Given** a proposed manifest updating the SEBON Rule Pack from v1 to v2, **When** the diff API is called, **Then** it accurately highlights the single component change.
 2. **Given** a proposed manifest including a Plugin version that violates the compatibility matrix, **When** submitted for activation, **Then** it is synchronously rejected with a compatibility error.
@@ -149,41 +149,99 @@ Deliver the Platform Manifest (PU-004), providing a single, immutable source of 
 
 ---
 
-#### Section 10 — Failure Modes & Resilience
+#### Section 11 — Failure Modes & Resilience
 
 - **Validation Failure:** Manifest update aborted safely.
 - **Downstream Sync Failure:** If Plugin Runtime fails to apply the new manifest, the manifest engine initiates an automatic rollback and alerts operators.
 
 ---
 
-#### Section 11 — Observability & Audit
+#### Section 12 — Observability & Audit
 
-| Telemetry Type | Required Details |
-|---|---|
-| Metrics | `manifest.updates.count`, `manifest.rollback.count` |
-| Logs | Structured: `manifest_version`, `status` |
-| Traces | N/A |
-| Audit Events | `ManifestUpdatedEvent` |
+| Telemetry Type      | Required Details                                                                               |
+| ------------------- | ---------------------------------------------------------------------------------------------- |
+| Metrics             | `manifest.updates.count`, `manifest.rollback.count`                                            |
+| Logs                | Structured: `manifest_version`, `status`                                                       |
+| Traces              | N/A                                                                                            |
+| Audit Events        | `ManifestUpdatedEvent`                                                                         |
 | Regulatory Evidence | Proof of exact system state (code versions) at the time of a historical trade [LCA-AUDIT-001]. |
 
 ---
 
-#### Section 12 — Compliance & Regulatory Traceability
+#### Section 13 — Compliance & Regulatory Traceability
 
 - Software change control and integrity [LCA-AUDIT-001]
 
 ---
 
-#### Section 13 — Extension Points & Contracts
+#### Section 14 — Extension Points & Contracts
 
 - **SDK Contract:** `ManifestClient.getCurrent()`, `ManifestClient.propose(newManifest)`.
 - **Jurisdiction Plugin Extension Points:** N/A
 
 ---
 
-#### Section 14 — Future-Safe Architecture Evaluation
+#### Section 15 — Future-Safe Architecture Evaluation
 
-| Question | Expected Answer |
-|---|---|
-| Can this module support India/Bangladesh via plugin? | Yes. |
-| Can this run in an air-gapped deployment? | Yes, manifest tracks offline bundles. |
+| Question                                             | Expected Answer                       |
+| ---------------------------------------------------- | ------------------------------------- |
+| Can this module support India/Bangladesh via plugin? | Yes.                                  |
+| Can this run in an air-gapped deployment?            | Yes, manifest tracks offline bundles. |
+
+---
+
+#### Section 16 — Threat Model
+
+**Attack Vectors & Mitigations:**
+
+1. **Manifest Forgery**
+
+- **Threat:** An attacker proposes or activates a forged manifest to deploy unauthorized components.
+- **Mitigation:** Cryptographic signing, maker-checker approval, version monotonicity checks, and audit logging of manifest proposals and activations.
+- **Residual Risk:** Compromise of signing credentials.
+
+2. **Rollback Abuse**
+
+- **Threat:** A rollback is triggered to an insecure or incompatible historical state.
+- **Mitigation:** Safe-rollback validation, authorization controls, compatibility checks against target state, and operator alerts for rollback actions.
+- **Residual Risk:** Approved rollback to a historically vulnerable but operationally necessary version.
+
+3. **Compatibility Bypass**
+
+- **Threat:** Components are activated despite violating compatibility rules, causing unsafe runtime behavior.
+- **Mitigation:** Mandatory compatibility validation before activation, automated rejection of invalid diffs, and downstream sync verification with rollback on failure.
+- **Residual Risk:** Logic defects in the compatibility engine.
+
+4. **Historical State Tampering**
+
+- **Threat:** Past manifests are altered to conceal what was active during an audit window.
+- **Mitigation:** Append-only history, signed manifests, immutable audit trails, and reproducible diff tooling for historical comparisons.
+- **Residual Risk:** Storage-layer compromise bypassing immutability controls.
+
+5. **Control-Plane Availability Loss**
+
+- **Threat:** Manifest services are unavailable during critical deployment or rollback operations.
+- **Mitigation:** Low-volume hardened control plane, offline sync bundles for on-prem, downstream cache coordination, and automatic rollback handling for partial sync failures.
+- **Residual Risk:** Coordinated outage across manifest and dependent control-plane services.
+
+**Security Controls:**
+
+- Cryptographic signing and maker-checker for manifest changes
+- Mandatory compatibility validation
+- Append-only manifest history
+- Audit logging for proposals, activations, and rollbacks
+- Safe-rollback checks and downstream sync verification
+- Offline bundle support for resilient control-plane operations
+
+---
+
+## Changelog
+
+### Version 1.0.1 (2026-03-10)
+
+**Type:** PATCH  
+**Changes:**
+
+- Standardized section numbering to the sequential 16-section format.
+- Added a threat-model section for manifest integrity and rollback risks.
+- Added changelog metadata for future epic maintenance.

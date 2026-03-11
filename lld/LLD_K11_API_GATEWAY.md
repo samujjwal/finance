@@ -6,7 +6,7 @@
 **Status**: Implementation-Ready  
 **Owner**: Platform Architecture Team
 
-> **Implementation alignment**: Per [ADR-008_API_GATEWAY_TECHNOLOGY.md](ADR-008_API_GATEWAY_TECHNOLOGY.md) and [ADR-011_STACK_STANDARDIZATION_AND_GHATANA_PLATFORM_ALIGNMENT.md](ADR-011_STACK_STANDARDIZATION_AND_GHATANA_PLATFORM_ALIGNMENT.md), this service standardizes on Envoy/Istio ingress with a custom K-11 control plane.
+> **Implementation alignment**: Per [../adr/ADR-008_API_GATEWAY_TECHNOLOGY.md](../adr/ADR-008_API_GATEWAY_TECHNOLOGY.md) and [../adr/ADR-011_STACK_STANDARDIZATION_AND_GHATANA_PLATFORM_ALIGNMENT.md](../adr/ADR-011_STACK_STANDARDIZATION_AND_GHATANA_PLATFORM_ALIGNMENT.md), this service standardizes on Envoy/Istio ingress with a custom K-11 control plane.
 
 ---
 
@@ -17,6 +17,7 @@
 The API Gateway Service provides a **single secure entry point for all platform traffic** with authentication validation, rate limiting, dynamic routing, jurisdiction-based routing, and telemetry injection.
 
 **Core Responsibilities**:
+
 - Single ingress point for all external API traffic
 - Authentication validation (JWT verification via K-01, mTLS via Istio)
 - Rate limiting per tenant, per endpoint, per API key
@@ -29,6 +30,7 @@ The API Gateway Service provides a **single secure entry point for all platform 
 - API versioning and deprecation management
 
 **Invariants**:
+
 1. All external traffic MUST pass through the API Gateway
 2. Every request MUST have a valid authentication token or API key
 3. Rate limits MUST be enforced before request forwarding
@@ -43,13 +45,13 @@ The API Gateway Service provides a **single secure entry point for all platform 
 
 ### 1.3 Dependencies
 
-| Dependency | Purpose | Readiness Gate |
-|------------|---------|----------------|
-| K-01 IAM | JWT validation, API key verification | K-01 stable |
-| K-02 Config Engine | Rate limit configs, routing rules | K-02 stable |
-| K-05 Event Bus | Gateway events (quota exceeded, etc.) | K-05 stable |
-| K-06 Observability | Gateway metrics, access logs | K-06 stable |
-| K-07 Audit Framework | API access audit trail | K-07 stable |
+| Dependency           | Purpose                               | Readiness Gate |
+| -------------------- | ------------------------------------- | -------------- |
+| K-01 IAM             | JWT validation, API key verification  | K-01 stable    |
+| K-02 Config Engine   | Rate limit configs, routing rules     | K-02 stable    |
+| K-05 Event Bus       | Gateway events (quota exceeded, etc.) | K-05 stable    |
+| K-06 Observability   | Gateway metrics, access logs          | K-06 stable    |
+| K-07 Audit Framework | API access audit trail                | K-07 stable    |
 
 ---
 
@@ -253,6 +255,7 @@ CREATE INDEX idx_access_log_tenant ON api_access_log(tenant_id, timestamp_gregor
 ## 4. CONTROL FLOW
 
 ### 4.1 Rate Limiting Algorithm (Token Bucket)
+
 ```
 function checkRateLimit(tenantId, endpoint):
   bucket = getRateLimitBucket(tenantId, endpoint)
@@ -262,11 +265,12 @@ function checkRateLimit(tenantId, endpoint):
   else:
     publish ApiQuotaExceededEvent
     return REJECT(429 Too Many Requests)
-  
+
   // Token refill: rate_limit_rps tokens added per second
 ```
 
 ### 4.2 Jurisdiction Routing
+
 ```
 function resolveTarget(request, route):
   jurisdiction = extractJurisdiction(request)  // from header, token, or path
@@ -280,6 +284,7 @@ function resolveTarget(request, route):
 ## 5. ALGORITHMS & POLICIES
 
 ### 5.1 Authentication Pipeline
+
 ```
 function authenticate(request):
   if hasHeader('Authorization: Bearer'):
@@ -299,13 +304,13 @@ function authenticate(request):
 
 ## 6. NFR BUDGETS
 
-| Operation | P99 Latency | Throughput | Timeout |
-|-----------|-------------|------------|---------|
-| Request routing (added overhead) | 2ms | 50,000/s | N/A |
-| JWT validation | 1ms | 100,000/s | 50ms |
-| Rate limit check | 0.5ms | 200,000/s | 10ms |
-| Schema validation | 2ms | 50,000/s | 100ms |
-| Route registration | 10ms | 100/s | 1000ms |
+| Operation                        | P99 Latency | Throughput | Timeout |
+| -------------------------------- | ----------- | ---------- | ------- |
+| Request routing (added overhead) | 2ms         | 50,000/s   | N/A     |
+| JWT validation                   | 1ms         | 100,000/s  | 50ms    |
+| Rate limit check                 | 0.5ms       | 200,000/s  | 10ms    |
+| Schema validation                | 2ms         | 50,000/s   | 100ms   |
+| Route registration               | 10ms        | 100/s      | 1000ms  |
 
 **Availability**: 99.999%
 
@@ -325,12 +330,14 @@ function authenticate(request):
 ## 8. OBSERVABILITY & AUDIT
 
 ### Metrics
+
 - `gateway_requests_total` — Total requests by method, path, status
 - `gateway_request_duration_seconds` — Request latency histogram
 - `gateway_rate_limit_rejections_total` — Rate limit rejections by tenant
 - `gateway_active_connections` — Current active connections
 
 ### Dashboards
+
 - Real-time traffic dashboard (requests/sec, latency, error rate)
 - Per-tenant usage dashboard
 - Rate limiting dashboard
@@ -340,6 +347,7 @@ function authenticate(request):
 ## 9. EXTENSIBILITY & EVOLUTION
 
 ### Extension Points
+
 - Custom authentication providers (T3)
 - Custom rate limiting algorithms (T3)
 - Gateway middleware plugins (T3)
@@ -350,18 +358,21 @@ function authenticate(request):
 ## 10. TEST PLAN
 
 ### Unit Tests
+
 - Token bucket rate limiting algorithm
 - Jurisdiction routing resolution
 - Authentication pipeline (JWT, API key, missing auth)
 - Schema validation against OpenAPI spec
 
 ### Integration Tests
+
 - End-to-end request routing to target services
 - Rate limiting under concurrent load
 - K-01 JWT validation integration
 - K-06 access log and metrics verification
 
 ### Security Tests
+
 - Invalid JWT → 401
 - Expired token → 401
 - Rate limit exceeded → 429
@@ -369,6 +380,7 @@ function authenticate(request):
 - SQL injection in path → WAF block
 
 ### Performance Tests
+
 - 50K TPS sustained with <2ms added latency
 - Rate limit evaluation at 200K/s
 - Connection handling under DDoS simulation

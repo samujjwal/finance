@@ -1,8 +1,8 @@
-EPIC-ID:    EPIC-D-01
-EPIC NAME:  Order Management System (OMS)
-LAYER:      DOMAIN
-MODULE:     D-01 Order Management System
-VERSION:    1.1.0
+EPIC-ID: EPIC-D-01
+EPIC NAME: Order Management System (OMS)
+LAYER: DOMAIN
+MODULE: D-01 Order Management System
+VERSION: 1.1.1
 
 ---
 
@@ -64,54 +64,54 @@ Deliver the D-01 Order Management System (OMS), an AI-native domain subsystem re
 
 #### Section 6 — Event Model Definition
 
-| Field | Description |
-|---|---|
-| Event Name | `OrderStateChanged` |
-| Schema Version | `v1.0.0` |
-| Trigger Condition | Any transition in the order lifecycle (e.g., PENDING -> FILLED). |
-| Payload | `{ "order_id": "...", "previous_state": "...", "new_state": "...", "timestamp_bs": "..." }` |
-| Consumers | Client Portal (UI updates), Trade Surveillance, Post-Trade |
-| Idempotency Key | `hash(order_id + new_state + timestamp)` |
-| Replay Behavior | Rebuilds the current state of the order book and position projections. |
-| Retention Policy | Permanent. |
+| Field             | Description                                                                                 |
+| ----------------- | ------------------------------------------------------------------------------------------- |
+| Event Name        | `OrderStateChanged`                                                                         |
+| Schema Version    | `v1.0.0`                                                                                    |
+| Trigger Condition | Any transition in the order lifecycle (e.g., PENDING -> FILLED).                            |
+| Payload           | `{ "order_id": "...", "previous_state": "...", "new_state": "...", "timestamp_bs": "..." }` |
+| Consumers         | Client Portal (UI updates), Trade Surveillance, Post-Trade                                  |
+| Idempotency Key   | `hash(order_id + new_state + timestamp)`                                                    |
+| Replay Behavior   | Rebuilds the current state of the order book and position projections.                      |
+| Retention Policy  | Permanent.                                                                                  |
 
 ---
 
-#### Section 6.5 — Command Model Definition
+#### Section 7 — Command Model Definition
 
-| Field | Description |
-|---|---|
-| Command Name | `PlaceOrderCommand` |
-| Schema Version | `v1.0.0` |
+| Field            | Description                                                                |
+| ---------------- | -------------------------------------------------------------------------- |
+| Command Name     | `PlaceOrderCommand`                                                        |
+| Schema Version   | `v1.0.0`                                                                   |
 | Validation Rules | Client authorized, instrument valid, quantity > 0, pre-trade checks passed |
-| Handler | `OrderCommandHandler` in D-01 OMS |
-| Success Event | `OrderPlaced` |
-| Failure Event | `OrderRejected` |
-| Idempotency | Order ID must be unique; duplicate commands are rejected |
+| Handler          | `OrderCommandHandler` in D-01 OMS                                          |
+| Success Event    | `OrderPlaced`                                                              |
+| Failure Event    | `OrderRejected`                                                            |
+| Idempotency      | Order ID must be unique; duplicate commands are rejected                   |
 
-| Field | Description |
-|---|---|
-| Command Name | `CancelOrderCommand` |
-| Schema Version | `v1.0.0` |
-| Validation Rules | Order exists, order cancelable, requester authorized |
-| Handler | `OrderCommandHandler` in D-01 OMS |
-| Success Event | `OrderCancelled` |
-| Failure Event | `OrderCancellationFailed` |
-| Idempotency | Command ID must be unique; duplicate commands return original result |
+| Field            | Description                                                          |
+| ---------------- | -------------------------------------------------------------------- |
+| Command Name     | `CancelOrderCommand`                                                 |
+| Schema Version   | `v1.0.0`                                                             |
+| Validation Rules | Order exists, order cancelable, requester authorized                 |
+| Handler          | `OrderCommandHandler` in D-01 OMS                                    |
+| Success Event    | `OrderCancelled`                                                     |
+| Failure Event    | `OrderCancellationFailed`                                            |
+| Idempotency      | Command ID must be unique; duplicate commands return original result |
 
-| Field | Description |
-|---|---|
-| Command Name | `AmendOrderCommand` |
-| Schema Version | `v1.0.0` |
+| Field            | Description                                                                  |
+| ---------------- | ---------------------------------------------------------------------------- |
+| Command Name     | `AmendOrderCommand`                                                          |
+| Schema Version   | `v1.0.0`                                                                     |
 | Validation Rules | Order exists, order amendable, new parameters valid, pre-trade checks passed |
-| Handler | `OrderCommandHandler` in D-01 OMS |
-| Success Event | `OrderAmended` |
-| Failure Event | `OrderAmendmentFailed` |
-| Idempotency | Command ID must be unique; duplicate commands return original result |
+| Handler          | `OrderCommandHandler` in D-01 OMS                                            |
+| Success Event    | `OrderAmended`                                                               |
+| Failure Event    | `OrderAmendmentFailed`                                                       |
+| Idempotency      | Command ID must be unique; duplicate commands return original result         |
 
 ---
 
-#### Section 7 — AI Integration Requirements
+#### Section 8 — AI Integration Requirements
 
 - **AI Hook Type:** Copilot Assist / Anomaly Detection
 - **Workflow Steps Exposed:** Order intent capture (chat-to-trade) and pre-trade anomaly check.
@@ -123,28 +123,28 @@ Deliver the D-01 Order Management System (OMS), an AI-native domain subsystem re
 
 ---
 
-#### Section 8 — NFRs
+#### Section 9 — NFRs
 
-| NFR Category | Required Targets |
-|---|---|
-| Latency / Throughput | OMS internal processing latency < 2ms P99 (capture → event emission, excludes pre-trade evaluation); total order path including K-03 pre-trade (D-06 risk + D-07 compliance) end-to-end < 12ms P99; 50,000 TPS peak |
-| Scalability | Horizontally scalable based on order queue depth; auto-scale at >70% partition lag |
-| Availability | 99.999% uptime during trading hours |
-| Consistency Model | Eventual consistency for read models; strong for state transitions |
-| Security | Row-level tenant isolation; K-01 IAM RBAC; mTLS inter-service |
-| Data Residency | Order data resides in-jurisdiction per K-02 config |
-| Data Retention | 10 years minimum (SEBON/SEBI cross-jurisdiction safety margin) |
-| Auditability | Every order state change is audited via K-07 |
-| Observability | Metrics: `order.latency`, `order.rejection.rate` |
-| Extensibility | New order types supported via T1 schema updates |
-| Upgrade / Compatibility | N/A |
-| On-Prem Constraints | Fully functional locally |
-| Ledger Integrity | Interacts with K-16 via Post-Trade module |
-| Dual-Calendar Correctness | Correct timestamping |
+| NFR Category              | Required Targets                                                                                                                                                                                                    |
+| ------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Latency / Throughput      | OMS internal processing latency < 2ms P99 (capture → event emission, excludes pre-trade evaluation); total order path including K-03 pre-trade (D-06 risk + D-07 compliance) end-to-end < 12ms P99; 50,000 TPS peak |
+| Scalability               | Horizontally scalable based on order queue depth; auto-scale at >70% partition lag                                                                                                                                  |
+| Availability              | 99.999% uptime during trading hours                                                                                                                                                                                 |
+| Consistency Model         | Eventual consistency for read models; strong for state transitions                                                                                                                                                  |
+| Security                  | Row-level tenant isolation; K-01 IAM RBAC; mTLS inter-service                                                                                                                                                       |
+| Data Residency            | Order data resides in-jurisdiction per K-02 config                                                                                                                                                                  |
+| Data Retention            | 10 years minimum (SEBON/SEBI cross-jurisdiction safety margin)                                                                                                                                                      |
+| Auditability              | Every order state change is audited via K-07                                                                                                                                                                        |
+| Observability             | Metrics: `order.latency`, `order.rejection.rate`                                                                                                                                                                    |
+| Extensibility             | New order types supported via T1 schema updates                                                                                                                                                                     |
+| Upgrade / Compatibility   | N/A                                                                                                                                                                                                                 |
+| On-Prem Constraints       | Fully functional locally                                                                                                                                                                                            |
+| Ledger Integrity          | Interacts with K-16 via Post-Trade module                                                                                                                                                                           |
+| Dual-Calendar Correctness | Correct timestamping                                                                                                                                                                                                |
 
 ---
 
-#### Section 9 — Acceptance Criteria
+#### Section 10 — Acceptance Criteria
 
 1. **Given** a valid limit order request, **When** submitted, **Then** an `OrderPlaced` event is generated, and the status becomes PENDING.
 2. **Given** an order attempting to sell 5 kitta, **When** the Nepal T2 Validation Pack specifies a minimum lot of 10, **Then** the order is synchronously rejected.
@@ -153,7 +153,7 @@ Deliver the D-01 Order Management System (OMS), an AI-native domain subsystem re
 
 ---
 
-#### Section 10 — Failure Modes & Resilience
+#### Section 11 — Failure Modes & Resilience
 
 - **Rules Engine Down:** Reject all new orders safely; circuit breaker opens after 5 consecutive failures; K-18 resilience pattern: fail-closed.
 - **Event Bus Partition:** Disconnect client and return 503 rather than accepting an order that cannot be persisted; outbox pattern ensures no event loss.
@@ -163,30 +163,30 @@ Deliver the D-01 Order Management System (OMS), an AI-native domain subsystem re
 
 ---
 
-#### Section 11 — Observability & Audit
+#### Section 12 — Observability & Audit
 
-| Telemetry Type | Required Details |
-|---|---|
-| Metrics | `order.count`, `order.latency.p99`, dimensions: `status`, `jurisdiction` |
-| Logs | Structured logs tracking `order_id` through the state machine. |
-| Traces | Span `OMS.processOrder` |
-| Audit Events | Action: `ApproveOrder`, `RejectOrder` [LCA-AUDIT-001] |
-| Regulatory Evidence | Complete order lifecycle history for best execution [LCA-BESTEX-001]. |
+| Telemetry Type      | Required Details                                                         |
+| ------------------- | ------------------------------------------------------------------------ |
+| Metrics             | `order.count`, `order.latency.p99`, dimensions: `status`, `jurisdiction` |
+| Logs                | Structured logs tracking `order_id` through the state machine.           |
+| Traces              | Span `OMS.processOrder`                                                  |
+| Audit Events        | Action: `ApproveOrder`, `RejectOrder` [LCA-AUDIT-001]                    |
+| Regulatory Evidence | Complete order lifecycle history for best execution [LCA-BESTEX-001].    |
 
 ---
 
-#### Section 12 — Compliance & Regulatory Traceability
+#### Section 13 — Compliance & Regulatory Traceability
 
 - Maker-checker controls [LCA-SOD-001]
 - Order record retention [LCA-RET-001]
 
 ---
 
-#### Section 13 — Extension Points & Contracts
+#### Section 14 — Extension Points & Contracts
 
 - **SDK Contract:** `OrderClient.place(PlaceOrderCommand)` → `OrderPlaced`, `OrderClient.cancel(CancelOrderCommand)` → `OrderCancelled`, `OrderClient.amend(AmendOrderCommand)` → `OrderAmended`, `OrderClient.getOrder(orderId)` → `Order`, `OrderClient.getPositions(clientId)` → `Position[]`
 - **REST API:** Exposed via K-11 API Gateway at `/api/v1/orders/*`
-- **Jurisdiction Plugin Extension Points:** 
+- **Jurisdiction Plugin Extension Points:**
   - Order Validation hooks (T2 Rule Pack) — lot size, price limits, restricted securities
   - Routing Preference hooks (T2 Rule Pack) — best execution routing rules per jurisdiction
   - Exchange Adapter interfaces (T3 Executable Pack) — NEPSE, NSE, BSE connectivity
@@ -196,17 +196,17 @@ Deliver the D-01 Order Management System (OMS), an AI-native domain subsystem re
 
 ---
 
-#### Section 14 — Future-Safe Architecture Evaluation
+#### Section 15 — Future-Safe Architecture Evaluation
 
-| Question | Expected Answer |
-|---|---|
+| Question                                             | Expected Answer                    |
+| ---------------------------------------------------- | ---------------------------------- |
 | Can this module support India/Bangladesh via plugin? | Yes, validation logic is external. |
-| Can order rules change without redeploy? | Yes, via K-03 Rule Packs. |
-| Can this run in an air-gapped deployment? | Yes. |
+| Can order rules change without redeploy?             | Yes, via K-03 Rule Packs.          |
+| Can this run in an air-gapped deployment?            | Yes.                               |
 
 ---
 
-#### Section 14.5 — Threat Model
+#### Section 16 — Threat Model
 
 **Attack Vectors & Mitigations:**
 
@@ -241,6 +241,7 @@ Deliver the D-01 Order Management System (OMS), an AI-native domain subsystem re
    - **Residual Risk:** Database-level privilege escalation.
 
 **Security Controls:**
+
 - Authentication via K-01 IAM with MFA
 - Authorization via RBAC with principle of least privilege
 - Encryption in transit (mTLS) and at rest
@@ -250,3 +251,15 @@ Deliver the D-01 Order Management System (OMS), an AI-native domain subsystem re
 - Anomaly detection via K-09 AI Governance
 - Network segmentation and firewall rules
 - Regular security scanning via T-01
+
+---
+
+## Changelog
+
+### Version 1.1.1 (2026-03-10)
+
+**Type:** PATCH  
+**Changes:**
+
+- Standardized section numbering to the sequential 16-section format.
+- Added changelog metadata for future epic maintenance.

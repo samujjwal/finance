@@ -6,7 +6,7 @@
 **Status**: Implementation-Ready  
 **Owner**: Platform Architecture Team
 
-> **Implementation alignment**: Per [ADR-011_STACK_STANDARDIZATION_AND_GHATANA_PLATFORM_ALIGNMENT.md](ADR-011_STACK_STANDARDIZATION_AND_GHATANA_PLATFORM_ALIGNMENT.md), shared data-governance and storage abstraction concerns should align to Ghatana `products:data-cloud:platform` and `products:data-cloud:spi`.
+> **Implementation alignment**: Per [../adr/ADR-011_STACK_STANDARDIZATION_AND_GHATANA_PLATFORM_ALIGNMENT.md](../adr/ADR-011_STACK_STANDARDIZATION_AND_GHATANA_PLATFORM_ALIGNMENT.md), shared data-governance and storage abstraction concerns should align to Ghatana `products:data-cloud:platform` and `products:data-cloud:spi`.
 
 ---
 
@@ -17,6 +17,7 @@
 The Data Governance Service provides **data lineage tracking, residency enforcement, retention lifecycle management, encryption abstraction, and data subject rights (GDPR/PDPA)** for all data across Project Siddhanta.
 
 **Core Responsibilities**:
+
 - Data classification (PUBLIC, INTERNAL, CONFIDENTIAL, RESTRICTED, PII)
 - Data lineage tracking across service boundaries
 - Residency enforcement — ensure data stays in designated jurisdictions
@@ -29,6 +30,7 @@ The Data Governance Service provides **data lineage tracking, residency enforcem
 - Dual-calendar timestamps on all governance metadata
 
 **Invariants**:
+
 1. Data MUST be classified before storage
 2. Residency rules MUST be enforced at write time — no cross-border writes without policy approval
 3. Retention policies MUST be applied to all data stores
@@ -43,15 +45,15 @@ The Data Governance Service provides **data lineage tracking, residency enforcem
 
 ### 1.3 Dependencies
 
-| Dependency | Purpose | Readiness Gate |
-|------------|---------|----------------|
-| K-01 IAM | Access control for governance operations | K-01 stable |
-| K-02 Config Engine | Governance policies, classification rules | K-02 stable |
-| K-05 Event Bus | Governance events, lineage events | K-05 stable |
-| K-06 Observability | Governance metrics, alerting | K-06 stable |
-| K-07 Audit Framework | Governance audit trail | K-07 stable |
-| K-14 Secrets Mgmt | Encryption key operations | K-14 stable |
-| Ghatana Data Cloud | Shared lineage, storage abstraction, lifecycle integration | Data Cloud available |
+| Dependency           | Purpose                                                    | Readiness Gate       |
+| -------------------- | ---------------------------------------------------------- | -------------------- |
+| K-01 IAM             | Access control for governance operations                   | K-01 stable          |
+| K-02 Config Engine   | Governance policies, classification rules                  | K-02 stable          |
+| K-05 Event Bus       | Governance events, lineage events                          | K-05 stable          |
+| K-06 Observability   | Governance metrics, alerting                               | K-06 stable          |
+| K-07 Audit Framework | Governance audit trail                                     | K-07 stable          |
+| K-14 Secrets Mgmt    | Encryption key operations                                  | K-14 stable          |
+| Ghatana Data Cloud   | Shared lineage, storage abstraction, lifecycle integration | Data Cloud available |
 
 ---
 
@@ -153,9 +155,16 @@ service DataGovernanceService {
 interface DataGovernanceClient {
   classify(request: ClassifyRequest): Promise<Classification>;
   getLineage(entityId: string, entityType: string): Promise<Lineage>;
-  getClassification(source: string, table: string, field: string): Promise<Classification>;
+  getClassification(
+    source: string,
+    table: string,
+    field: string,
+  ): Promise<Classification>;
   setRetentionPolicy(policy: RetentionPolicy): Promise<void>;
-  requestErasure(subjectId: string, jurisdiction: string): Promise<ErasureRequest>;
+  requestErasure(
+    subjectId: string,
+    jurisdiction: string,
+  ): Promise<ErasureRequest>;
   getResidencyPolicy(jurisdiction: string): Promise<ResidencyPolicy>;
   triggerKeyRotation(scope: string): Promise<KeyRotationResult>;
   checkResidency(data: any, targetRegion: string): Promise<ResidencyCheck>;
@@ -283,6 +292,7 @@ CREATE TABLE residency_policies (
 ## 4. CONTROL FLOW
 
 ### 4.1 Data Classification Flow
+
 ```
 1. Admin submits classification request
 2. Validate classification parameters
@@ -294,6 +304,7 @@ CREATE TABLE residency_policies (
 ```
 
 ### 4.2 Erasure Request Flow
+
 ```
 1. Data subject submits erasure request
 2. Create erasure_request record (PENDING_REVIEW)
@@ -307,6 +318,7 @@ CREATE TABLE residency_policies (
 ```
 
 ### 4.3 Key Rotation Flow
+
 ```
 1. Rotation trigger (scheduled or manual)
 2. Generate new key version via K-14
@@ -324,6 +336,7 @@ CREATE TABLE residency_policies (
 ## 5. ALGORITHMS & POLICIES
 
 ### 5.1 Residency Enforcement Algorithm
+
 ```
 function checkResidency(data, targetRegion, jurisdiction):
   policy = getResidencyPolicy(jurisdiction, data.classification)
@@ -338,6 +351,7 @@ function checkResidency(data, targetRegion, jurisdiction):
 ```
 
 ### 5.2 Retention Lifecycle
+
 ```
 ACTIVE (0 → archive_after_days) → ARCHIVED (archive_after_days → purge_after_days) → PURGED
 ```
@@ -346,13 +360,13 @@ ACTIVE (0 → archive_after_days) → ARCHIVED (archive_after_days → purge_aft
 
 ## 6. NFR BUDGETS
 
-| Operation | P99 Latency | Throughput | Timeout |
-|-----------|-------------|------------|---------|
-| classify() | 5ms | 10,000/s | 500ms |
-| getLineage() | 10ms | 5,000/s | 1000ms |
-| checkResidency() | 1ms | 100,000/s | 100ms |
-| getClassification() | 2ms | 50,000/s | 100ms |
-| requestErasure() | 50ms | 100/s | 5000ms |
+| Operation           | P99 Latency | Throughput | Timeout |
+| ------------------- | ----------- | ---------- | ------- |
+| classify()          | 5ms         | 10,000/s   | 500ms   |
+| getLineage()        | 10ms        | 5,000/s    | 1000ms  |
+| checkResidency()    | 1ms         | 100,000/s  | 100ms   |
+| getClassification() | 2ms         | 50,000/s   | 100ms   |
+| requestErasure()    | 50ms        | 100/s      | 5000ms  |
 
 **Availability**: 99.999%
 
@@ -370,12 +384,14 @@ ACTIVE (0 → archive_after_days) → ARCHIVED (archive_after_days → purge_aft
 ## 8. OBSERVABILITY & AUDIT
 
 ### Metrics
+
 - `data_governance_classifications_total` — Total classifications by type
 - `data_governance_erasure_requests_total` — Erasure requests by status
 - `data_governance_key_rotations_total` — Key rotations by scope
 - `data_governance_residency_violations_total` — Residency policy violations
 
 ### Alerts
+
 - Erasure request pending > 72 hours → P2 alert
 - Key rotation failure → P1 alert
 - Residency violation in STRICT mode → P1 alert
@@ -385,11 +401,13 @@ ACTIVE (0 → archive_after_days) → ARCHIVED (archive_after_days → purge_aft
 ## 9. EXTENSIBILITY & EVOLUTION
 
 ### Extension Points
+
 - T1 Config Packs: Jurisdiction-specific retention policies, residency rules
 - T2 Rule Packs: Custom classification rules per data type
 - Custom erasure handlers per service (T3)
 
 ### Versioning
+
 - API versioned (/v1/, /v2/)
 - Event schema versioned with backward compatibility
 
@@ -398,22 +416,26 @@ ACTIVE (0 → archive_after_days) → ARCHIVED (archive_after_days → purge_aft
 ## 10. TEST PLAN
 
 ### Unit Tests
+
 - Classification CRUD operations
 - Residency enforcement logic (STRICT/WARN/AUDIT_ONLY)
 - Retention lifecycle state transitions
 - Erasure workflow state machine
 
 ### Integration Tests
+
 - K-14 integration for key rotation
 - K-07 audit trail verification
 - K-05 event publication
 - Cross-service erasure coordination
 
 ### Security Tests
+
 - Unauthorized classification attempt → 403
 - PII data without encryption → validation error
 - Cross-tenant data access → blocked by RLS
 
 ### Performance Tests
+
 - checkResidency() at 100K TPS — P99 <1ms
 - Bulk key rotation for 1M records — complete within SLA

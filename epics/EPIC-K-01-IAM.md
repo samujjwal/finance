@@ -1,8 +1,8 @@
-EPIC-ID:    EPIC-K-01
-EPIC NAME:  Identity & Access Management (IAM)
-LAYER:      KERNEL
-MODULE:     K-01 Identity & Access Management
-VERSION:    1.1.0
+EPIC-ID: EPIC-K-01
+EPIC NAME: Identity & Access Management (IAM)
+LAYER: KERNEL
+MODULE: K-01 Identity & Access Management
+VERSION: 1.1.1
 
 ---
 
@@ -73,54 +73,54 @@ Deliver a multi-tenant Identity and Access Management (IAM) capability for the P
 
 #### Section 6 — Event Model Definition
 
-| Field | Description |
-|---|---|
-| Event Name | `UserAuthenticated` |
-| Schema Version | `v1.0.0` |
-| Trigger Condition | User successfully completes authentication and MFA. |
-| Payload | `{ "user_id": "...", "tenant_id": "...", "timestamp_gregorian": "...", "timestamp_bs": "...", "auth_method": "OIDC" }` |
-| Consumers | Audit Framework, AI Risk Model (for anomaly detection), User Dashboard |
-| Idempotency Key | `hash(user_id + session_id + timestamp)` |
-| Replay Behavior | Suppress side-effects (e.g., don't re-issue tokens); purely reconstruct read projections. |
-| Retention Policy | Configurable per jurisdiction (e.g., 5 years). |
+| Field             | Description                                                                                                            |
+| ----------------- | ---------------------------------------------------------------------------------------------------------------------- |
+| Event Name        | `UserAuthenticated`                                                                                                    |
+| Schema Version    | `v1.0.0`                                                                                                               |
+| Trigger Condition | User successfully completes authentication and MFA.                                                                    |
+| Payload           | `{ "user_id": "...", "tenant_id": "...", "timestamp_gregorian": "...", "timestamp_bs": "...", "auth_method": "OIDC" }` |
+| Consumers         | Audit Framework, AI Risk Model (for anomaly detection), User Dashboard                                                 |
+| Idempotency Key   | `hash(user_id + session_id + timestamp)`                                                                               |
+| Replay Behavior   | Suppress side-effects (e.g., don't re-issue tokens); purely reconstruct read projections.                              |
+| Retention Policy  | Configurable per jurisdiction (e.g., 5 years).                                                                         |
 
 ---
 
-#### Section 6.5 — Command Model Definition
+#### Section 7 — Command Model Definition
 
-| Field | Description |
-|---|---|
-| Command Name | `AuthenticateUserCommand` |
-| Schema Version | `v1.0.0` |
+| Field            | Description                                                          |
+| ---------------- | -------------------------------------------------------------------- |
+| Command Name     | `AuthenticateUserCommand`                                            |
+| Schema Version   | `v1.0.0`                                                             |
 | Validation Rules | Valid credentials, account not locked, MFA token valid (if required) |
-| Handler | `AuthenticationCommandHandler` in K-01 IAM |
-| Success Event | `UserAuthenticated` |
-| Failure Event | `AuthenticationFailed` |
-| Idempotency | Command ID must be unique; duplicate commands return cached result |
+| Handler          | `AuthenticationCommandHandler` in K-01 IAM                           |
+| Success Event    | `UserAuthenticated`                                                  |
+| Failure Event    | `AuthenticationFailed`                                               |
+| Idempotency      | Command ID must be unique; duplicate commands return cached result   |
 
-| Field | Description |
-|---|---|
-| Command Name | `AssignRoleCommand` |
-| Schema Version | `v1.0.0` |
+| Field            | Description                                                                   |
+| ---------------- | ----------------------------------------------------------------------------- |
+| Command Name     | `AssignRoleCommand`                                                           |
+| Schema Version   | `v1.0.0`                                                                      |
 | Validation Rules | User exists, role exists, requester has permission, maker-checker if required |
-| Handler | `RoleCommandHandler` in K-01 IAM |
-| Success Event | `RoleAssigned` |
-| Failure Event | `RoleAssignmentFailed` |
-| Idempotency | Command ID must be unique; duplicate commands return original result |
+| Handler          | `RoleCommandHandler` in K-01 IAM                                              |
+| Success Event    | `RoleAssigned`                                                                |
+| Failure Event    | `RoleAssignmentFailed`                                                        |
+| Idempotency      | Command ID must be unique; duplicate commands return original result          |
 
-| Field | Description |
-|---|---|
-| Command Name | `RevokeSessionCommand` |
-| Schema Version | `v1.0.0` |
-| Validation Rules | Session exists, requester authorized (self or admin) |
-| Handler | `SessionCommandHandler` in K-01 IAM |
-| Success Event | `SessionRevoked` |
-| Failure Event | `SessionRevocationFailed` |
-| Idempotency | Command ID must be unique; duplicate commands return original result |
+| Field            | Description                                                          |
+| ---------------- | -------------------------------------------------------------------- |
+| Command Name     | `RevokeSessionCommand`                                               |
+| Schema Version   | `v1.0.0`                                                             |
+| Validation Rules | Session exists, requester authorized (self or admin)                 |
+| Handler          | `SessionCommandHandler` in K-01 IAM                                  |
+| Success Event    | `SessionRevoked`                                                     |
+| Failure Event    | `SessionRevocationFailed`                                            |
+| Idempotency      | Command ID must be unique; duplicate commands return original result |
 
 ---
 
-#### Section 7 — AI Integration Requirements
+#### Section 8 — AI Integration Requirements
 
 - **AI Hook Type:** Anomaly Detection
 - **Workflow Steps Exposed:** Login attempt evaluation.
@@ -132,28 +132,28 @@ Deliver a multi-tenant Identity and Access Management (IAM) capability for the P
 
 ---
 
-#### Section 8 — NFRs
+#### Section 9 — NFRs
 
-| NFR Category | Required Targets |
-|---|---|
-| Latency / Throughput | P99 < 50ms for auth evaluation; 5,000 TPS |
-| Scalability | Horizontal scale-out based on request volume |
-| Availability | 99.999% target uptime (critical path for all services) |
-| Consistency Model | Strong consistency for role changes |
-| Security | Multi-tenant namespace isolation; secrets encrypted at rest via K-08 |
-| Data Residency | PII and identity data bounded by Jurisdiction Config Pack |
-| Data Retention | Session logs kept per `[LCA-RET-001]` requirements |
-| Auditability | Every failed login and role change recorded |
-| Observability | Metrics: `auth.success`, `auth.failure`, `auth.latency`, dimensions: `tenant_id`, `jurisdiction` |
-| Extensibility | New ID scheme via plugin < 1 sprint |
-| Upgrade / Compatibility | JWT validation forward/backward compatible during rolling upgrades |
-| On-Prem Constraints | Support local LDAP/AD integration without external internet |
-| Ledger Integrity | N/A |
-| Dual-Calendar Correctness | Session dates correctly reflect BS/Gregorian conversion |
+| NFR Category              | Required Targets                                                                                 |
+| ------------------------- | ------------------------------------------------------------------------------------------------ |
+| Latency / Throughput      | P99 < 50ms for auth evaluation; 5,000 TPS                                                        |
+| Scalability               | Horizontal scale-out based on request volume                                                     |
+| Availability              | 99.999% target uptime (critical path for all services)                                           |
+| Consistency Model         | Strong consistency for role changes                                                              |
+| Security                  | Multi-tenant namespace isolation; secrets encrypted at rest via K-08                             |
+| Data Residency            | PII and identity data bounded by Jurisdiction Config Pack                                        |
+| Data Retention            | Session logs kept per `[LCA-RET-001]` requirements                                               |
+| Auditability              | Every failed login and role change recorded                                                      |
+| Observability             | Metrics: `auth.success`, `auth.failure`, `auth.latency`, dimensions: `tenant_id`, `jurisdiction` |
+| Extensibility             | New ID scheme via plugin < 1 sprint                                                              |
+| Upgrade / Compatibility   | JWT validation forward/backward compatible during rolling upgrades                               |
+| On-Prem Constraints       | Support local LDAP/AD integration without external internet                                      |
+| Ledger Integrity          | N/A                                                                                              |
+| Dual-Calendar Correctness | Session dates correctly reflect BS/Gregorian conversion                                          |
 
 ---
 
-#### Section 9 — Acceptance Criteria
+#### Section 10 — Acceptance Criteria
 
 1. **Given** valid credentials for Tenant A, **When** the user logs in, **Then** a JWT is issued strictly scoped to Tenant A, and `UserAuthenticated` is emitted.
 2. **Given** a domain module evaluating permissions, **When** it calls the AuthZ SDK, **Then** IAM accurately returns true/false based on ABAC policies < 50ms.
@@ -163,7 +163,7 @@ Deliver a multi-tenant Identity and Access Management (IAM) capability for the P
 
 ---
 
-#### Section 10 — Failure Modes & Resilience
+#### Section 11 — Failure Modes & Resilience
 
 - **External IdP Outage:** Degraded mode allows pre-configured emergency local admin login; standard users fail with clear message.
 - **Cache Partition:** IAM queries the persistent store directly with latency penalty, triggering scale-out if necessary.
@@ -171,19 +171,19 @@ Deliver a multi-tenant Identity and Access Management (IAM) capability for the P
 
 ---
 
-#### Section 11 — Observability & Audit
+#### Section 12 — Observability & Audit
 
-| Telemetry Type | Required Details |
-|---|---|
-| Metrics | `iam.login.count`, `iam.authz.latency`, dimensions: `tenant_id`, `status` |
-| Logs | Structured: `trace_id`, `tenant_id`, `user_id`, `operation`, `result` |
-| Traces | Spans for `login`, `evaluate_policy` |
-| Audit Events | `RoleAssigned`, `RoleRevoked`, `LoginFailed` [LCA-AUDIT-001] |
-| Regulatory Evidence | Access control reports for compliance audits |
+| Telemetry Type      | Required Details                                                          |
+| ------------------- | ------------------------------------------------------------------------- |
+| Metrics             | `iam.login.count`, `iam.authz.latency`, dimensions: `tenant_id`, `status` |
+| Logs                | Structured: `trace_id`, `tenant_id`, `user_id`, `operation`, `result`     |
+| Traces              | Spans for `login`, `evaluate_policy`                                      |
+| Audit Events        | `RoleAssigned`, `RoleRevoked`, `LoginFailed` [LCA-AUDIT-001]              |
+| Regulatory Evidence | Access control reports for compliance audits                              |
 
 ---
 
-#### Section 12 — Compliance & Regulatory Traceability
+#### Section 13 — Compliance & Regulatory Traceability
 
 - AML/KYC readiness — identity verification hooks [LCA-AMLKYC-001]
 - Segregation of duties — maker-checker controls for sensitive role assignments [LCA-SOD-001]
@@ -191,7 +191,7 @@ Deliver a multi-tenant Identity and Access Management (IAM) capability for the P
 
 ---
 
-#### Section 13 — Extension Points & Contracts
+#### Section 14 — Extension Points & Contracts
 
 - **SDK Contract:** `AuthZClient` exposing `hasPermission(userId, resource, action)`, `getRoles(userId)`.
 - **Jurisdiction Plugin Extension Points:** `NationalIdValidator` interface for T3 Adapters.
@@ -199,20 +199,20 @@ Deliver a multi-tenant Identity and Access Management (IAM) capability for the P
 
 ---
 
-#### Section 14 — Future-Safe Architecture Evaluation
+#### Section 15 — Future-Safe Architecture Evaluation
 
-| Question | Expected Answer |
-|---|---|
-| Can this module support India/Bangladesh via plugin? | Yes, via Aadhaar or NID plugins. |
-| Can a new regulator be added? | N/A for core IAM; role definitions handled via Config. |
-| Can tax rules change? | N/A |
-| Can this run in an air-gapped deployment? | Yes, using local AD/LDAP configuration. |
-| Can this module handle digital assets (tokenized securities, crypto)? | Yes. Wallet-bound identity and DID (Decentralized Identifier) claims are supported via pluggable identity providers. |
-| Is the design ready for CBDC integration or T+0 settlement? | Yes. Token-based authentication flows and real-time session management support instant settlement identity verification. |
+| Question                                                              | Expected Answer                                                                                                          |
+| --------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------ |
+| Can this module support India/Bangladesh via plugin?                  | Yes, via Aadhaar or NID plugins.                                                                                         |
+| Can a new regulator be added?                                         | N/A for core IAM; role definitions handled via Config.                                                                   |
+| Can tax rules change?                                                 | N/A                                                                                                                      |
+| Can this run in an air-gapped deployment?                             | Yes, using local AD/LDAP configuration.                                                                                  |
+| Can this module handle digital assets (tokenized securities, crypto)? | Yes. Wallet-bound identity and DID (Decentralized Identifier) claims are supported via pluggable identity providers.     |
+| Is the design ready for CBDC integration or T+0 settlement?           | Yes. Token-based authentication flows and real-time session management support instant settlement identity verification. |
 
 ---
 
-#### Section 14.5 — Threat Model
+#### Section 16 — Threat Model
 
 **Attack Vectors & Mitigations:**
 
@@ -257,6 +257,7 @@ Deliver a multi-tenant Identity and Access Management (IAM) capability for the P
    - **Residual Risk:** Email account compromise.
 
 **Security Controls:**
+
 - Multi-factor authentication (TOTP, hardware tokens, biometrics)
 - Rate limiting and account lockout policies
 - Session management with short-lived tokens
@@ -268,3 +269,15 @@ Deliver a multi-tenant Identity and Access Management (IAM) capability for the P
 - Regular security assessments and penetration testing
 - Principle of least privilege enforcement
 - Emergency break-glass procedures with audit trail
+
+---
+
+## Changelog
+
+### Version 1.1.1 (2026-03-10)
+
+**Type:** PATCH  
+**Changes:**
+
+- Standardized section numbering to the sequential 16-section format.
+- Added changelog metadata for future epic maintenance.

@@ -1,8 +1,8 @@
-EPIC-ID:    EPIC-D-02
-EPIC NAME:  Execution Management System (EMS)
-LAYER:      DOMAIN
-MODULE:     D-02 Execution Management System
-VERSION:    1.0.0
+EPIC-ID: EPIC-D-02
+EPIC NAME: Execution Management System (EMS)
+LAYER: DOMAIN
+MODULE: D-02 Execution Management System
+VERSION: 1.0.1
 
 ---
 
@@ -62,54 +62,54 @@ Deliver the D-02 Execution Management System (EMS) responsible for smart order r
 
 #### Section 6 — Event Model Definition
 
-| Field | Description |
-|---|---|
-| Event Name | `TradeExecuted` |
-| Schema Version | `v1.0.0` |
-| Trigger Condition | An exchange adapter confirms a partial or full fill. |
-| Payload | `{ "order_id": "...", "fill_qty": 100, "fill_price": 245.5, "venue": "NEPSE", "timestamp_bs": "..." }` |
-| Consumers | OMS (Position Update), Post-Trade, Surveillance |
-| Idempotency Key | `hash(fill_id + venue_ref)` |
-| Replay Behavior | Updates execution read models. |
-| Retention Policy | Permanent. |
+| Field             | Description                                                                                            |
+| ----------------- | ------------------------------------------------------------------------------------------------------ |
+| Event Name        | `TradeExecuted`                                                                                        |
+| Schema Version    | `v1.0.0`                                                                                               |
+| Trigger Condition | An exchange adapter confirms a partial or full fill.                                                   |
+| Payload           | `{ "order_id": "...", "fill_qty": 100, "fill_price": 245.5, "venue": "NEPSE", "timestamp_bs": "..." }` |
+| Consumers         | OMS (Position Update), Post-Trade, Surveillance                                                        |
+| Idempotency Key   | `hash(fill_id + venue_ref)`                                                                            |
+| Replay Behavior   | Updates execution read models.                                                                         |
+| Retention Policy  | Permanent.                                                                                             |
 
 ---
 
-#### Section 6.5 — Command Model Definition
+#### Section 7 — Command Model Definition
 
-| Field | Description |
-|---|---|
-| Command Name | `RouteOrderCommand` |
-| Schema Version | `v1.0.0` |
-| Validation Rules | Order exists, routing strategy valid, venue available |
-| Handler | `RoutingCommandHandler` in D-02 EMS |
-| Success Event | `OrderRouted` |
-| Failure Event | `OrderRoutingFailed` |
-| Idempotency | Command ID must be unique; duplicate commands return original result |
+| Field            | Description                                                          |
+| ---------------- | -------------------------------------------------------------------- |
+| Command Name     | `RouteOrderCommand`                                                  |
+| Schema Version   | `v1.0.0`                                                             |
+| Validation Rules | Order exists, routing strategy valid, venue available                |
+| Handler          | `RoutingCommandHandler` in D-02 EMS                                  |
+| Success Event    | `OrderRouted`                                                        |
+| Failure Event    | `OrderRoutingFailed`                                                 |
+| Idempotency      | Command ID must be unique; duplicate commands return original result |
 
-| Field | Description |
-|---|---|
-| Command Name | `CancelRouteCommand` |
-| Schema Version | `v1.0.0` |
-| Validation Rules | Route exists, not fully executed, requester authorized |
-| Handler | `RoutingCommandHandler` in D-02 EMS |
-| Success Event | `RouteCancelled` |
-| Failure Event | `RouteCancellationFailed` |
-| Idempotency | Command ID must be unique; duplicate commands return original result |
+| Field            | Description                                                          |
+| ---------------- | -------------------------------------------------------------------- |
+| Command Name     | `CancelRouteCommand`                                                 |
+| Schema Version   | `v1.0.0`                                                             |
+| Validation Rules | Route exists, not fully executed, requester authorized               |
+| Handler          | `RoutingCommandHandler` in D-02 EMS                                  |
+| Success Event    | `RouteCancelled`                                                     |
+| Failure Event    | `RouteCancellationFailed`                                            |
+| Idempotency      | Command ID must be unique; duplicate commands return original result |
 
-| Field | Description |
-|---|---|
-| Command Name | `ExecuteAlgorithmCommand` |
-| Schema Version | `v1.0.0` |
-| Validation Rules | Algorithm exists, parameters valid, order sliceable |
-| Handler | `AlgorithmCommandHandler` in D-02 EMS |
-| Success Event | `AlgorithmStarted` |
-| Failure Event | `AlgorithmStartFailed` |
-| Idempotency | Command ID must be unique; duplicate commands return original result |
+| Field            | Description                                                          |
+| ---------------- | -------------------------------------------------------------------- |
+| Command Name     | `ExecuteAlgorithmCommand`                                            |
+| Schema Version   | `v1.0.0`                                                             |
+| Validation Rules | Algorithm exists, parameters valid, order sliceable                  |
+| Handler          | `AlgorithmCommandHandler` in D-02 EMS                                |
+| Success Event    | `AlgorithmStarted`                                                   |
+| Failure Event    | `AlgorithmStartFailed`                                               |
+| Idempotency      | Command ID must be unique; duplicate commands return original result |
 
 ---
 
-#### Section 7 — AI Integration Requirements
+#### Section 8 — AI Integration Requirements
 
 - **AI Hook Type:** Recommendation / Strategy Selection
 - **Workflow Steps Exposed:** Smart Order Routing venue selection.
@@ -121,28 +121,28 @@ Deliver the D-02 Execution Management System (EMS) responsible for smart order r
 
 ---
 
-#### Section 8 — NFRs
+#### Section 9 — NFRs
 
-| NFR Category | Required Targets |
-|---|---|
-| Latency / Throughput | Routing decision < 1ms; 50,000 TPS |
-| Scalability | Horizontally scalable |
-| Availability | 99.999% during market hours |
-| Consistency Model | Strong consistency for fills |
-| Security | Internal mTLS |
-| Data Residency | Enforced per Config |
-| Data Retention | Retain TCA data 10 years |
-| Auditability | All routing decisions logged |
-| Observability | Metrics: `ems.latency.route`, `ems.fill.ratio` |
-| Extensibility | Connect new exchange via T3 Adapter < 1 sprint |
-| Upgrade / Compatibility | T3 Adapter API strict versioning |
-| On-Prem Constraints | Can run local exchange proxies |
-| Ledger Integrity | Feeds D-09 (Post-Trade) which posts to K-16 |
-| Dual-Calendar Correctness | Fill timestamps |
+| NFR Category              | Required Targets                               |
+| ------------------------- | ---------------------------------------------- |
+| Latency / Throughput      | Routing decision < 1ms; 50,000 TPS             |
+| Scalability               | Horizontally scalable                          |
+| Availability              | 99.999% during market hours                    |
+| Consistency Model         | Strong consistency for fills                   |
+| Security                  | Internal mTLS                                  |
+| Data Residency            | Enforced per Config                            |
+| Data Retention            | Retain TCA data 10 years                       |
+| Auditability              | All routing decisions logged                   |
+| Observability             | Metrics: `ems.latency.route`, `ems.fill.ratio` |
+| Extensibility             | Connect new exchange via T3 Adapter < 1 sprint |
+| Upgrade / Compatibility   | T3 Adapter API strict versioning               |
+| On-Prem Constraints       | Can run local exchange proxies                 |
+| Ledger Integrity          | Feeds D-09 (Post-Trade) which posts to K-16    |
+| Dual-Calendar Correctness | Fill timestamps                                |
 
 ---
 
-#### Section 9 — Acceptance Criteria
+#### Section 10 — Acceptance Criteria
 
 1. **Given** an approved parent order from OMS, **When** processed by the EMS, **Then** it determines the venue via K-03 rules and invokes the correct T3 Adapter.
 2. **Given** a response from the NEPSE adapter containing a fill, **When** processed, **Then** the EMS emits a `TradeExecuted` event matching the parent `order_id`.
@@ -150,32 +150,32 @@ Deliver the D-02 Execution Management System (EMS) responsible for smart order r
 
 ---
 
-#### Section 10 — Failure Modes & Resilience
+#### Section 11 — Failure Modes & Resilience
 
 - **Adapter Disconnect:** Adapter enters degraded state; EMS pauses routing to venue; circuit breaker pattern applied.
 - **Event Bus Lag:** Fills processed locally in memory to ensure fast acknowledgment to venue; K-05 emission is async.
 
 ---
 
-#### Section 11 — Observability & Audit
+#### Section 12 — Observability & Audit
 
-| Telemetry Type | Required Details |
-|---|---|
-| Metrics | `ems.route.latency`, `ems.venue.reject_rate` |
-| Logs | Routing decisions |
-| Traces | Span `EMS.route` |
-| Audit Events | Execution details [LCA-BESTEX-001] |
-| Regulatory Evidence | TCA reports and routing rationale. |
+| Telemetry Type      | Required Details                             |
+| ------------------- | -------------------------------------------- |
+| Metrics             | `ems.route.latency`, `ems.venue.reject_rate` |
+| Logs                | Routing decisions                            |
+| Traces              | Span `EMS.route`                             |
+| Audit Events        | Execution details [LCA-BESTEX-001]           |
+| Regulatory Evidence | TCA reports and routing rationale.           |
 
 ---
 
-#### Section 12 — Compliance & Regulatory Traceability
+#### Section 13 — Compliance & Regulatory Traceability
 
 - Best execution evidence [LCA-BESTEX-001]
 
 ---
 
-#### Section 13 — Extension Points & Contracts
+#### Section 14 — Extension Points & Contracts
 
 - **SDK Contract:** `ExchangeAdapter` interface (connect, send_order, cancel_order, handle_fill).
 - **Jurisdiction Plugin Extension Points:** T3 Exchange Adapters (e.g., NEPSE FIX adapter, BSE native adapter).
@@ -196,17 +196,17 @@ Deliver the D-02 Execution Management System (EMS) responsible for smart order r
 
 ---
 
-#### Section 14 — Future-Safe Architecture Evaluation
+#### Section 15 — Future-Safe Architecture Evaluation
 
-| Question | Expected Answer |
-|---|---|
+| Question                                             | Expected Answer                     |
+| ---------------------------------------------------- | ----------------------------------- |
 | Can this module support India/Bangladesh via plugin? | Yes, via new T3 Adapters (BSE/NSE). |
-| Can a new exchange be connected? | Yes. |
-| Can this run in an air-gapped deployment? | Yes, with local exchange adapters. |
+| Can a new exchange be connected?                     | Yes.                                |
+| Can this run in an air-gapped deployment?            | Yes, with local exchange adapters.  |
 
 ---
 
-#### Section 14.5 — Threat Model
+#### Section 16 — Threat Model
 
 **Attack Vectors & Mitigations:**
 
@@ -236,6 +236,7 @@ Deliver the D-02 Execution Management System (EMS) responsible for smart order r
    - **Residual Risk:** Coordinated attack across multiple data sources.
 
 **Security Controls:**
+
 - T3 adapter sandboxing via K-04
 - Cryptographic signing of all adapters
 - mTLS for venue connectivity
@@ -243,3 +244,15 @@ Deliver the D-02 Execution Management System (EMS) responsible for smart order r
 - Execution quality monitoring
 - Audit logging of all routing decisions
 - Regular adapter security scans via P-01
+
+---
+
+## Changelog
+
+### Version 1.0.1 (2026-03-10)
+
+**Type:** PATCH  
+**Changes:**
+
+- Standardized section numbering to the sequential 16-section format.
+- Added changelog metadata for future epic maintenance.

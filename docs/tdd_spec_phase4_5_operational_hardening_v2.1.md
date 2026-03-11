@@ -10,19 +10,22 @@
 ## 1. Scope Summary
 
 **In Scope:**
+
 - **Regulatory Scale-Out**: D-10 Regulatory Reporting, D-12 Corporate Actions, D-13 Client Money Reconciliation, D-14 Sanctions Screening
-- **Certification and Evidence**: P-01 Pack Certification, R-01 Regulator Portal, R-02 Incident Notification
-- **Operational Workflows**: W-01 Workflow Orchestration, W-02 Client Onboarding, O-01 Operator Workflows
+- **Certification and Evidence**: P-01 Pack Certification, R-01 Regulator Portal, R-02 Incident Response
+- **Operational Workflows**: W-01 Workflow Orchestration, W-02 Client Onboarding, O-01 Operator Console
 - **Integration and Resilience**: T-01 Integration Testing, T-02 Chaos Engineering, Performance Qualification
 - **Security and DR**: Security Validation, Disaster Recovery Rehearsal
 - **Launch Readiness**: Launch Checklist Evidence, Production Readiness Validation
 
 **Out of Scope:**
+
 - Advanced regulatory reporting beyond MVP requirements
 - Multi-jurisdiction regulatory variations (future enhancement)
 - Advanced disaster recovery scenarios (future enhancement)
 
 **Authority Sources Used:**
+
 - CURRENT_EXECUTION_PLAN.md
 - Relevant LLDs for all Phase 4/5 modules
 - ADR-011_STACK_STANDARDIZATION_AND_GHATANA_PLATFORM_ALIGNMENT.md
@@ -30,6 +33,7 @@
 - Regulatory requirements and compliance frameworks
 
 **Assumptions:**
+
 - Phase 1-3 modules operational and stable
 - Regulatory interfaces established (SEBON, NRB, Beema Samiti)
 - Client onboarding workflows defined
@@ -40,147 +44,160 @@
 
 ## 2. Source Inventory
 
-| source_id | path | authority | why_it_matters | extracted_behaviors |
-|-----------|------|-----------|----------------|-------------------|
-| EXEC_PLAN_001 | CURRENT_EXECUTION_PLAN.md | Primary | Phase 4/5 sequence and dependencies | Operational hardening, launch readiness |
-| LLD_D10_001 | LLD_D10_REGULATORY_REPORTING.md | Primary | Regulatory reporting | Report generation, submission |
-| LLD_D12_001 | LLD_D12_CORPORATE_ACTIONS.md | Primary | Corporate actions processing | Entitlements, exceptions |
-| LLD_D13_001 | LLD_D13_CLIENT_MONEY_RECONCILIATION.md | Primary | Client money reconciliation | Segregation, reconciliation |
-| LLD_D14_001 | LLD_D14_SANCTIONS_SCREENING.md | Primary | Sanctions screening | Screening, escalation |
-| LLD_W01_001 | LLD_W01_WORKFLOW_ORCHESTRATION.md | Primary | Workflow orchestration | Workflow management |
-| LLD_W02_001 | LLD_W02_CLIENT_ONBOARDING.md | Primary | Client onboarding | Onboarding workflows |
-| LLD_O01_001 | LLD_O01_OPERATOR_WORKFLOWS.md | Primary | Operator workflows | Runbooks, escalation |
-| LLD_P01_001 | LLD_P01_PACK_CERTIFICATION.md | Primary | Pack certification | Validation, rejection |
-| LLD_R01_001 | LLD_R01_REGULATOR_PORTAL.md | Primary | Regulator portal | Access controls, evidence |
-| LLD_R02_001 | LLD_R02_INCIDENT_NOTIFICATION.md | Primary | Incident notification | Escalation, notification |
-| LLD_T01_001 | LLD_T01_INTEGRATION_TESTING.md | Primary | Integration testing | Regression testing |
-| LLD_T02_001 | LLD_T02_CHAOS_ENGINEERING.md | Primary | Chaos engineering | Failure injection |
-| REG_FRAMEWORK_001 | REGULATORY_FRAMEWORK.md | Primary | Regulatory requirements | Compliance requirements |
+| source_id         | path                                   | authority | why_it_matters                      | extracted_behaviors                     |
+| ----------------- | -------------------------------------- | --------- | ----------------------------------- | --------------------------------------- |
+| EXEC_PLAN_001     | CURRENT_EXECUTION_PLAN.md              | Primary   | Phase 4/5 sequence and dependencies | Operational hardening, launch readiness |
+| LLD_D10_001       | LLD_D10_REGULATORY_REPORTING.md        | Primary   | Regulatory reporting                | Report generation, submission           |
+| LLD_D12_001       | LLD_D12_CORPORATE_ACTIONS.md           | Primary   | Corporate actions processing        | Entitlements, exceptions                |
+| LLD_D13_001       | LLD_D13_CLIENT_MONEY_RECONCILIATION.md | Primary   | Client money reconciliation         | Segregation, reconciliation             |
+| LLD_D14_001       | LLD_D14_SANCTIONS_SCREENING.md         | Primary   | Sanctions screening                 | Screening, escalation                   |
+| LLD_W01_001       | LLD_W01_WORKFLOW_ORCHESTRATION.md      | Primary   | Workflow orchestration              | Workflow management                     |
+| LLD_W02_001       | LLD_W02_CLIENT_ONBOARDING.md           | Primary   | Client onboarding                   | Onboarding workflows                    |
+| LLD_O01_001       | LLD_O01_OPERATOR_WORKFLOWS.md          | Primary   | Operator console                    | Runbooks, escalation                    |
+| LLD_P01_001       | LLD_P01_PACK_CERTIFICATION.md          | Primary   | Pack certification                  | Validation, rejection                   |
+| LLD_R01_001       | LLD_R01_REGULATOR_PORTAL.md            | Primary   | Regulator portal                    | Access controls, evidence               |
+| LLD_R02_001       | LLD_R02_INCIDENT_NOTIFICATION.md       | Primary   | Incident response & escalation      | Escalation, notification                |
+| LLD_T01_001       | LLD_T01_INTEGRATION_TESTING.md         | Primary   | Integration testing                 | Regression testing                      |
+| LLD_T02_001       | LLD_T02_CHAOS_ENGINEERING.md           | Primary   | Chaos engineering                   | Failure injection                       |
+| REG_FRAMEWORK_001 | REGULATORY_FRAMEWORK.md                | Primary   | Regulatory requirements             | Compliance requirements                 |
 
 ---
 
 ## 3. Behavior Inventory
 
 ### Group: D-10 Regulatory Reporting
-| group_id | module/service | behavior_id | description | source_refs |
-|----------|----------------|-------------|-------------|-------------|
-| REG_001 | Report Generator | GENERATE_REGULATORY_REPORTS | Generate regulatory reports | LLD_D10_001 |
-| REG_002 | Report Validator | VALIDATE_REPORT_PAYLOADS | Validate report data integrity | LLD_D10_001 |
-| REG_003 | Deadline Monitor | MONITOR_FILING_DEADLINES | Monitor regulatory filing deadlines | LLD_D10_001 |
-| REG_004 | Report Submitter | SUBMIT_TO_REGULATORS | Submit reports to regulatory bodies | LLD_D10_001 |
+
+| group_id | module/service   | behavior_id                 | description                         | source_refs |
+| -------- | ---------------- | --------------------------- | ----------------------------------- | ----------- |
+| REG_001  | Report Generator | GENERATE_REGULATORY_REPORTS | Generate regulatory reports         | LLD_D10_001 |
+| REG_002  | Report Validator | VALIDATE_REPORT_PAYLOADS    | Validate report data integrity      | LLD_D10_001 |
+| REG_003  | Deadline Monitor | MONITOR_FILING_DEADLINES    | Monitor regulatory filing deadlines | LLD_D10_001 |
+| REG_004  | Report Submitter | SUBMIT_TO_REGULATORS        | Submit reports to regulatory bodies | LLD_D10_001 |
 
 ### Group: D-12 Corporate Actions
-| group_id | module/service | behavior_id | description | source_refs |
-|----------|----------------|-------------|-------------|-------------|
-| CA_001 | Corporate Action Processor | PROCESS_CORPORATE_ACTIONS | Process corporate action events | LLD_D12_001 |
-| CA_002 | Entitlement Calculator | CALCULATE_ENTITLEMENTS | Calculate shareholder entitlements | LLD_D12_001 |
-| CA_003 | Exception Handler | HANDLE_EXCEPTIONS | Handle corporate action exceptions | LLD_D12_001 |
-| CA_004 | Notification Manager | NOTIFY_STAKEHOLDERS | Notify affected stakeholders | LLD_D12_001 |
+
+| group_id | module/service             | behavior_id               | description                        | source_refs |
+| -------- | -------------------------- | ------------------------- | ---------------------------------- | ----------- |
+| CA_001   | Corporate Action Processor | PROCESS_CORPORATE_ACTIONS | Process corporate action events    | LLD_D12_001 |
+| CA_002   | Entitlement Calculator     | CALCULATE_ENTITLEMENTS    | Calculate shareholder entitlements | LLD_D12_001 |
+| CA_003   | Exception Handler          | HANDLE_EXCEPTIONS         | Handle corporate action exceptions | LLD_D12_001 |
+| CA_004   | Notification Manager       | NOTIFY_STAKEHOLDERS       | Notify affected stakeholders       | LLD_D12_001 |
 
 ### Group: D-13 Client Money Reconciliation
-| group_id | module/service | behavior_id | description | source_refs |
-|----------|----------------|-------------|-------------|-------------|
-| CMR_001 | Money Segregator | SEGREGATE_CLIENT_MONEY | Segregate client funds | LLD_D13_001 |
-| CMR_002 | Reconciliation Engine | RECONCILE_FUNDS | Reconcile client money balances | LLD_D13_001 |
-| CMR_003 | Break Handler | HANDLE_RECONCILIATION_BREAKS | Handle reconciliation breaks | LLD_D13_001 |
-| CMR_004 | Compliance Monitor | MONITOR_COMPLIANCE | Monitor client money compliance | LLD_D13_001 |
+
+| group_id | module/service        | behavior_id                  | description                     | source_refs |
+| -------- | --------------------- | ---------------------------- | ------------------------------- | ----------- |
+| CMR_001  | Money Segregator      | SEGREGATE_CLIENT_MONEY       | Segregate client funds          | LLD_D13_001 |
+| CMR_002  | Reconciliation Engine | RECONCILE_FUNDS              | Reconcile client money balances | LLD_D13_001 |
+| CMR_003  | Break Handler         | HANDLE_RECONCILIATION_BREAKS | Handle reconciliation breaks    | LLD_D13_001 |
+| CMR_004  | Compliance Monitor    | MONITOR_COMPLIANCE           | Monitor client money compliance | LLD_D13_001 |
 
 ### Group: D-14 Sanctions Screening
-| group_id | module/service | behavior_id | description | source_refs |
-|----------|----------------|-------------|-------------|-------------|
-| SAN_001 | Screening Engine | SCREEN_AGAINST_SANCTIONS | Screen against sanctions lists | LLD_D14_001 |
-| SAN_002 | Adverse Media Checker | CHECK_ADVERSE_MEDIA | Check adverse media references | LLD_D14_001 |
-| SAN_003 | Escalation Manager | MANAGE_ESCALATIONS | Manage screening escalations | LLD_D14_001 |
-| SAN_004 | Override Handler | HANDLE_SCREENING_OVERRIDES | Handle screening overrides | LLD_D14_001 |
+
+| group_id | module/service        | behavior_id                | description                    | source_refs |
+| -------- | --------------------- | -------------------------- | ------------------------------ | ----------- |
+| SAN_001  | Screening Engine      | SCREEN_AGAINST_SANCTIONS   | Screen against sanctions lists | LLD_D14_001 |
+| SAN_002  | Adverse Media Checker | CHECK_ADVERSE_MEDIA        | Check adverse media references | LLD_D14_001 |
+| SAN_003  | Escalation Manager    | MANAGE_ESCALATIONS         | Manage screening escalations   | LLD_D14_001 |
+| SAN_004  | Override Handler      | HANDLE_SCREENING_OVERRIDES | Handle screening overrides     | LLD_D14_001 |
 
 ### Group: W-01 Workflow Orchestration
-| group_id | module/service | behavior_id | description | source_refs |
-|----------|----------------|-------------|-------------|-------------|
-| WF_001 | Workflow Engine | ORCHESTRATE_WORKFLOWS | Orchestrate business workflows | LLD_W01_001 |
-| WF_002 | Step Executor | EXECUTE_WORKFLOW_STEPS | Execute individual workflow steps | LLD_W01_001 |
-| WF_003 | State Manager | MANAGE_WORKFLOW_STATE | Manage workflow state transitions | LLD_W01_001 |
-| WF_004 | Approval Manager | MANAGE_APPROVALS | Manage workflow approvals | LLD_W01_001 |
+
+| group_id | module/service         | behavior_id            | description                       | source_refs |
+| -------- | ---------------------- | ---------------------- | --------------------------------- | ----------- |
+| WF_001   | Workflow Orchestration | ORCHESTRATE_WORKFLOWS  | Orchestrate business workflows    | LLD_W01_001 |
+| WF_002   | Step Executor          | EXECUTE_WORKFLOW_STEPS | Execute individual workflow steps | LLD_W01_001 |
+| WF_003   | State Manager          | MANAGE_WORKFLOW_STATE  | Manage workflow state transitions | LLD_W01_001 |
+| WF_004   | Approval Manager       | MANAGE_APPROVALS       | Manage workflow approvals         | LLD_W01_001 |
 
 ### Group: W-02 Client Onboarding
-| group_id | module/service | behavior_id | description | source_refs |
-|----------|----------------|-------------|-------------|-------------|
-| ONB_001 | Onboarding Orchestrator | ORCHESTRATE_ONBOARDING | Orchestrate client onboarding | LLD_W02_001 |
-| ONB_002 | KYC Processor | PROCESS_KYC_CHECKS | Process KYC verification | LLD_W02_001 |
-| ONB_003 | Risk Assessor | ASSESS_CLIENT_RISK | Assess client risk profile | LLD_W02_001 |
-| ONB_004 | Account Creator | CREATE_CLIENT_ACCOUNTS | Create client accounts | LLD_W02_001 |
 
-### Group: O-01 Operator Workflows
-| group_id | module/service | behavior_id | description | source_refs |
-|----------|----------------|-------------|-------------|-------------|
-| OP_001 | Runbook Manager | MANAGE_RUNBOOKS | Manage operational runbooks | LLD_O01_001 |
-| OP_002 | Escalation Handler | HANDLE_ESCALATIONS | Handle operational escalations | LLD_O01_001 |
-| OP_003 | Incident Responder | RESPOND_TO_INCIDENTS | Respond to operational incidents | LLD_O01_001 |
-| OP_004 | Task Scheduler | SCHEDULE_OPERATIONAL_TASKS | Schedule routine tasks | LLD_O01_001 |
+| group_id | module/service          | behavior_id            | description                   | source_refs |
+| -------- | ----------------------- | ---------------------- | ----------------------------- | ----------- |
+| ONB_001  | Onboarding Orchestrator | ORCHESTRATE_ONBOARDING | Orchestrate client onboarding | LLD_W02_001 |
+| ONB_002  | KYC Processor           | PROCESS_KYC_CHECKS     | Process KYC verification      | LLD_W02_001 |
+| ONB_003  | Risk Assessor           | ASSESS_CLIENT_RISK     | Assess client risk profile    | LLD_W02_001 |
+| ONB_004  | Account Creator         | CREATE_CLIENT_ACCOUNTS | Create client accounts        | LLD_W02_001 |
+
+### Group: O-01 Operator Console
+
+| group_id | module/service     | behavior_id                | description                      | source_refs |
+| -------- | ------------------ | -------------------------- | -------------------------------- | ----------- |
+| OP_001   | Runbook Manager    | MANAGE_RUNBOOKS            | Manage operational runbooks      | LLD_O01_001 |
+| OP_002   | Escalation Handler | HANDLE_ESCALATIONS         | Handle operational escalations   | LLD_O01_001 |
+| OP_003   | Incident Responder | RESPOND_TO_INCIDENTS       | Respond to operational incidents | LLD_O01_001 |
+| OP_004   | Task Scheduler     | SCHEDULE_OPERATIONAL_TASKS | Schedule routine tasks           | LLD_O01_001 |
 
 ### Group: P-01 Pack Certification
-| group_id | module/service | behavior_id | description | source_refs |
-|----------|----------------|-------------|-------------|-------------|
-| CERT_001 | Pack Validator | VALIDATE_PACK_ARTIFACTS | Validate pack artifacts | LLD_P01_001 |
-| CERT_002 | Certification Engine | CERTIFY_PACKS | Certify T1/T2/T3 packs | LLD_P01_001 |
-| CERT_003 | Rejection Handler | HANDLE_REJECTIONS | Handle certification rejections | LLD_P01_001 |
-| CERT_004 | Certificate Issuer | ISSUE_CERTIFICATES | Issue pack certificates | LLD_P01_001 |
+
+| group_id | module/service       | behavior_id             | description                     | source_refs |
+| -------- | -------------------- | ----------------------- | ------------------------------- | ----------- |
+| CERT_001 | Pack Validator       | VALIDATE_PACK_ARTIFACTS | Validate pack artifacts         | LLD_P01_001 |
+| CERT_002 | Certification Engine | CERTIFY_PACKS           | Certify T1/T2/T3 packs          | LLD_P01_001 |
+| CERT_003 | Rejection Handler    | HANDLE_REJECTIONS       | Handle certification rejections | LLD_P01_001 |
+| CERT_004 | Certificate Issuer   | ISSUE_CERTIFICATES      | Issue pack certificates         | LLD_P01_001 |
 
 ### Group: R-01 Regulator Portal
-| group_id | module/service | behavior_id | description | source_refs |
-|----------|----------------|-------------|-------------|-------------|
-| RP_001 | Access Controller | CONTROL_REGULATOR_ACCESS | Control regulator portal access | LLD_R01_001 |
-| RP_002 | Evidence Provider | PROVIDE_EVIDENCE_VIEWS | Provide evidence views to regulators | LLD_R01_001 |
-| RP_003 | Report Exporter | EXPORT_REGULATORY_DATA | Export regulatory data | LLD_R01_001 |
-| RP_004 | Audit Logger | LOG_REGULATOR_INTERACTIONS | Log regulator interactions | LLD_R01_001 |
 
-### Group: R-02 Incident Notification
-| group_id | module/service | behavior_id | description | source_refs |
-|----------|----------------|-------------|-------------|-------------|
-| INC_001 | Incident Detector | DETECT_INCIDENTS | Detect operational incidents | LLD_R02_001 |
-| INC_002 | Clustering Engine | CLUSTER_INCIDENTS | Cluster related incidents | LLD_R02_001 |
-| INC_003 | Notification Manager | MANAGE_NOTIFICATIONS | Manage incident notifications | LLD_R02_001 |
-| INC_004 | Escalation Orchestrator | ORCHESTRATE_ESCALATIONS | Orchestrate incident escalations | LLD_R02_001 |
+| group_id | module/service    | behavior_id                | description                          | source_refs |
+| -------- | ----------------- | -------------------------- | ------------------------------------ | ----------- |
+| RP_001   | Access Controller | CONTROL_REGULATOR_ACCESS   | Control regulator portal access      | LLD_R01_001 |
+| RP_002   | Evidence Provider | PROVIDE_EVIDENCE_VIEWS     | Provide evidence views to regulators | LLD_R01_001 |
+| RP_003   | Report Exporter   | EXPORT_REGULATORY_DATA     | Export regulatory data               | LLD_R01_001 |
+| RP_004   | Audit Logger      | LOG_REGULATOR_INTERACTIONS | Log regulator interactions           | LLD_R01_001 |
+
+### Group: R-02 Incident Response
+
+| group_id | module/service          | behavior_id             | description                            | source_refs |
+| -------- | ----------------------- | ----------------------- | -------------------------------------- | ----------- |
+| INC_001  | Incident Detector       | DETECT_INCIDENTS        | Detect operational incidents           | LLD_R02_001 |
+| INC_002  | Clustering Engine       | CLUSTER_INCIDENTS       | Cluster related incidents              | LLD_R02_001 |
+| INC_003  | Notification Manager    | MANAGE_NOTIFICATIONS    | Manage incident response notifications | LLD_R02_001 |
+| INC_004  | Escalation Orchestrator | ORCHESTRATE_ESCALATIONS | Orchestrate incident escalations       | LLD_R02_001 |
 
 ### Group: T-01 Integration Testing
-| group_id | module/service | behavior_id | description | source_refs |
-|----------|----------------|-------------|-------------|-------------|
-| INT_001 | Regression Tester | RUN_REGRESSION_TESTS | Run full integration regression | LLD_T01_001 |
-| INT_002 | Test Orchestrator | ORCHESTRATE_TESTS | Orchestrate test execution | LLD_T01_001 |
-| INT_003 | Result Analyzer | ANALYZE_TEST_RESULTS | Analyze test results | LLD_T01_001 |
-| INT_004 | Coverage Tracker | TRACK_TEST_COVERAGE | Track test coverage | LLD_T01_001 |
+
+| group_id | module/service    | behavior_id          | description                     | source_refs |
+| -------- | ----------------- | -------------------- | ------------------------------- | ----------- |
+| INT_001  | Regression Tester | RUN_REGRESSION_TESTS | Run full integration regression | LLD_T01_001 |
+| INT_002  | Test Orchestrator | ORCHESTRATE_TESTS    | Orchestrate test execution      | LLD_T01_001 |
+| INT_003  | Result Analyzer   | ANALYZE_TEST_RESULTS | Analyze test results            | LLD_T01_001 |
+| INT_004  | Coverage Tracker  | TRACK_TEST_COVERAGE  | Track test coverage             | LLD_T01_001 |
 
 ### Group: T-02 Chaos Engineering
-| group_id | module/service | behavior_id | description | source_refs |
-|----------|----------------|-------------|-------------|-------------|
-| CHAOS_001 | Fault Injector | INJECT_FAULTS | Inject system faults | LLD_T02_001 |
-| CHAOS_002 | Chaos Orchestrator | ORCHESTRATE_CHAOS | Orchestrate chaos experiments | LLD_T02_001 |
-| CHAOS_003 | Resilience Validator | VALIDATE_RESILIENCE | Validate system resilience | LLD_T02_001 |
-| CHAOS_004 | Recovery Monitor | MONITOR_RECOVERY | Monitor system recovery | LLD_T02_001 |
+
+| group_id  | module/service       | behavior_id         | description                   | source_refs |
+| --------- | -------------------- | ------------------- | ----------------------------- | ----------- |
+| CHAOS_001 | Fault Injector       | INJECT_FAULTS       | Inject system faults          | LLD_T02_001 |
+| CHAOS_002 | Chaos Orchestrator   | ORCHESTRATE_CHAOS   | Orchestrate chaos experiments | LLD_T02_001 |
+| CHAOS_003 | Resilience Validator | VALIDATE_RESILIENCE | Validate system resilience    | LLD_T02_001 |
+| CHAOS_004 | Recovery Monitor     | MONITOR_RECOVERY    | Monitor system recovery       | LLD_T02_001 |
 
 ---
 
 ## 4. Risk Inventory
 
-| risk_id | description | severity | impacted_behaviors | required_test_layers |
-|---------|-------------|----------|-------------------|---------------------|
-| RISK_001 | Regulatory reporting failures cause compliance violations | Critical | REG_001-004 | Integration, Compliance |
-| RISK_002 | Corporate action processing errors cause client losses | High | CA_001-004 | Integration, Business |
-| RISK_003 | Client money reconciliation failures cause regulatory issues | Critical | CMR_001-004 | Integration, Compliance |
-| RISK_004 | Sanctions screening failures enable prohibited transactions | Critical | SAN_001-004 | Security, Compliance |
-| RISK_005 | Workflow orchestration failures cause operational disruptions | High | WF_001-004 | Integration, Operations |
-| RISK_006 | Client onboarding failures prevent business growth | Medium | ONB_001-004 | Integration, Business |
-| RISK_007 | Operator workflow failures cause incident escalation | High | OP_001-004 | Integration, Operations |
-| RISK_008 | Pack certification failures allow unvalidated code deployment | Critical | CERT_001-004 | Security, Integration |
-| RISK_009 | Regulator portal security breaches expose sensitive data | Critical | RP_001-004 | Security, Integration |
-| RISK_010 | Incident notification failures delay issue resolution | High | INC_001-004 | Integration, Operations |
-| RISK_011 | Integration testing gaps hide system issues | High | INT_001-004 | Integration, Quality |
-| RISK_012 | Chaos engineering failures cause system instability | Medium | CHAOS_001-004 | Integration, Resilience |
+| risk_id  | description                                                    | severity | impacted_behaviors | required_test_layers    |
+| -------- | -------------------------------------------------------------- | -------- | ------------------ | ----------------------- |
+| RISK_001 | Regulatory reporting failures cause compliance violations      | Critical | REG_001-004        | Integration, Compliance |
+| RISK_002 | Corporate action processing errors cause client losses         | High     | CA_001-004         | Integration, Business   |
+| RISK_003 | Client money reconciliation failures cause regulatory issues   | Critical | CMR_001-004        | Integration, Compliance |
+| RISK_004 | Sanctions screening failures enable prohibited transactions    | Critical | SAN_001-004        | Security, Compliance    |
+| RISK_005 | Workflow orchestration failures cause operational disruptions  | High     | WF_001-004         | Integration, Operations |
+| RISK_006 | Client onboarding failures prevent business growth             | Medium   | ONB_001-004        | Integration, Business   |
+| RISK_007 | Operator workflow failures cause incident escalation           | High     | OP_001-004         | Integration, Operations |
+| RISK_008 | Pack certification failures allow unvalidated code deployment  | Critical | CERT_001-004       | Security, Integration   |
+| RISK_009 | Regulator portal security breaches expose sensitive data       | Critical | RP_001-004         | Security, Integration   |
+| RISK_010 | Incident response notification failures delay issue resolution | High     | INC_001-004        | Integration, Operations |
+| RISK_011 | Integration testing gaps hide system issues                    | High     | INT_001-004        | Integration, Quality    |
+| RISK_012 | Chaos engineering failures cause system instability            | Medium   | CHAOS_001-004      | Integration, Resilience |
 
 ---
 
 ## 5. Test Strategy by Layer
 
 ### Unit Tests
+
 - **Purpose**: Validate individual business logic, calculations, and data transformations
 - **Tools**: JUnit 5, Jest, pytest, mock frameworks
 - **Coverage Goal**: 100% statement and branch coverage
@@ -188,6 +205,7 @@
 - **Exit Criteria**: All unit tests pass, logic verified
 
 ### Component Tests
+
 - **Purpose**: Validate module interactions with dependencies
 - **Tools**: Testcontainers, mock external systems
 - **Coverage Goal**: 100% component interaction scenarios
@@ -195,6 +213,7 @@
 - **Exit Criteria**: All components work with real dependencies
 
 ### Integration Tests
+
 - **Purpose**: Validate end-to-end workflows and system interactions
 - **Tools**: Docker Compose, full staging environment
 - **Coverage Goal**: 100% critical integration paths
@@ -202,6 +221,7 @@
 - **Exit Criteria**: All integration flows work correctly
 
 ### Chaos Tests
+
 - **Purpose**: Validate system resilience under failure conditions
 - **Tools**: Chaos engineering frameworks, failure injection
 - **Coverage Goal**: 100% failure scenarios
@@ -209,6 +229,7 @@
 - **Exit Criteria**: System handles failures gracefully
 
 ### Security Tests
+
 - **Purpose**: Validate security controls and compliance requirements
 - **Tools**: Security test frameworks, penetration testing tools
 - **Coverage Goal**: 100% security scenarios
@@ -221,117 +242,118 @@
 
 ### Test Cases for D-10 Regulatory Reporting
 
-| test_id | title | module | requirement_refs | test_layer | scenario_type | priority |
-|---------|-------|--------|------------------|------------|--------------|----------|
-| REG_TC_001 | Generate valid regulatory report | Report Generator | LLD_D10_001 | Integration | Happy Path | High |
-| REG_TC_002 | Validate report payload integrity | Report Validator | LLD_D10_001 | Unit | Validation | High |
-| REG_TC_003 | Monitor filing deadlines | Deadline Monitor | LLD_D10_001 | Integration | Happy Path | High |
-| REG_TC_004 | Submit report to regulators | Report Submitter | LLD_D10_001 | Integration | Happy Path | High |
+| test_id    | title                             | module           | requirement_refs | test_layer  | scenario_type | priority |
+| ---------- | --------------------------------- | ---------------- | ---------------- | ----------- | ------------- | -------- |
+| REG_TC_001 | Generate valid regulatory report  | Report Generator | LLD_D10_001      | Integration | Happy Path    | High     |
+| REG_TC_002 | Validate report payload integrity | Report Validator | LLD_D10_001      | Unit        | Validation    | High     |
+| REG_TC_003 | Monitor filing deadlines          | Deadline Monitor | LLD_D10_001      | Integration | Happy Path    | High     |
+| REG_TC_004 | Submit report to regulators       | Report Submitter | LLD_D10_001      | Integration | Happy Path    | High     |
 
 ### Test Cases for D-12 Corporate Actions
 
-| test_id | title | module | requirement_refs | test_layer | scenario_type | priority |
-|---------|-------|--------|------------------|------------|--------------|----------|
-| CA_TC_001 | Process corporate action events | Corporate Action Processor | LLD_D12_001 | Integration | Happy Path | High |
-| CA_TC_002 | Calculate shareholder entitlements | Entitlement Calculator | LLD_D12_001 | Unit | Happy Path | High |
-| CA_TC_003 | Handle corporate action exceptions | Exception Handler | LLD_D12_001 | Integration | Error Handling | High |
-| CA_TC_004 | Notify affected stakeholders | Notification Manager | LLD_D12_001 | Integration | Happy Path | High |
+| test_id   | title                              | module                     | requirement_refs | test_layer  | scenario_type  | priority |
+| --------- | ---------------------------------- | -------------------------- | ---------------- | ----------- | -------------- | -------- |
+| CA_TC_001 | Process corporate action events    | Corporate Action Processor | LLD_D12_001      | Integration | Happy Path     | High     |
+| CA_TC_002 | Calculate shareholder entitlements | Entitlement Calculator     | LLD_D12_001      | Unit        | Happy Path     | High     |
+| CA_TC_003 | Handle corporate action exceptions | Exception Handler          | LLD_D12_001      | Integration | Error Handling | High     |
+| CA_TC_004 | Notify affected stakeholders       | Notification Manager       | LLD_D12_001      | Integration | Happy Path     | High     |
 
 ### Test Cases for D-13 Client Money Reconciliation
 
-| test_id | title | module | requirement_refs | test_layer | scenario_type | priority |
-|---------|-------|--------|------------------|------------|--------------|----------|
-| CMR_TC_001 | Segregate client funds | Money Segregator | LLD_D13_001 | Integration | Happy Path | High |
-| CMR_TC_002 | Reconcile client money balances | Reconciliation Engine | LLD_D13_001 | Integration | Happy Path | High |
-| CMR_TC_003 | Handle reconciliation breaks | Break Handler | LLD_D13_001 | Integration | Error Handling | High |
-| CMR_TC_004 | Monitor client money compliance | Compliance Monitor | LLD_D13_001 | Integration | Happy Path | High |
+| test_id    | title                           | module                | requirement_refs | test_layer  | scenario_type  | priority |
+| ---------- | ------------------------------- | --------------------- | ---------------- | ----------- | -------------- | -------- |
+| CMR_TC_001 | Segregate client funds          | Money Segregator      | LLD_D13_001      | Integration | Happy Path     | High     |
+| CMR_TC_002 | Reconcile client money balances | Reconciliation Engine | LLD_D13_001      | Integration | Happy Path     | High     |
+| CMR_TC_003 | Handle reconciliation breaks    | Break Handler         | LLD_D13_001      | Integration | Error Handling | High     |
+| CMR_TC_004 | Monitor client money compliance | Compliance Monitor    | LLD_D13_001      | Integration | Happy Path     | High     |
 
 ### Test Cases for D-14 Sanctions Screening
 
-| test_id | title | module | requirement_refs | test_layer | scenario_type | priority |
-|---------|-------|--------|------------------|------------|--------------|----------|
-| SAN_TC_001 | Screen against sanctions lists | Screening Engine | LLD_D14_001 | Integration | Happy Path | High |
-| SAN_TC_002 | Check adverse media references | Adverse Media Checker | LLD_D14_001 | Integration | Happy Path | High |
-| SAN_TC_003 | Manage screening escalations | Escalation Manager | LLD_D14_001 | Integration | Happy Path | High |
-| SAN_TC_004 | Handle screening overrides | Override Handler | LLD_D14_001 | Security | Override | High |
+| test_id    | title                          | module                | requirement_refs | test_layer  | scenario_type | priority |
+| ---------- | ------------------------------ | --------------------- | ---------------- | ----------- | ------------- | -------- |
+| SAN_TC_001 | Screen against sanctions lists | Screening Engine      | LLD_D14_001      | Integration | Happy Path    | High     |
+| SAN_TC_002 | Check adverse media references | Adverse Media Checker | LLD_D14_001      | Integration | Happy Path    | High     |
+| SAN_TC_003 | Manage screening escalations   | Escalation Manager    | LLD_D14_001      | Integration | Happy Path    | High     |
+| SAN_TC_004 | Handle screening overrides     | Override Handler      | LLD_D14_001      | Security    | Override      | High     |
 
 ### Test Cases for W-01 Workflow Orchestration
 
-| test_id | title | module | requirement_refs | test_layer | scenario_type | priority |
-|---------|-------|--------|------------------|------------|--------------|----------|
-| WF_TC_001 | Orchestrate business workflows | Workflow Engine | LLD_W01_001 | Integration | Happy Path | High |
-| WF_TC_002 | Execute workflow steps | Step Executor | LLD_W01_001 | Unit | Happy Path | High |
-| WF_TC_003 | Manage workflow state transitions | State Manager | LLD_W01_001 | Unit | Happy Path | High |
-| WF_TC_004 | Manage workflow approvals | Approval Manager | LLD_W01_001 | Integration | Happy Path | High |
+| test_id   | title                             | module                 | requirement_refs | test_layer  | scenario_type | priority |
+| --------- | --------------------------------- | ---------------------- | ---------------- | ----------- | ------------- | -------- |
+| WF_TC_001 | Orchestrate business workflows    | Workflow Orchestration | LLD_W01_001      | Integration | Happy Path    | High     |
+| WF_TC_002 | Execute workflow steps            | Step Executor          | LLD_W01_001      | Unit        | Happy Path    | High     |
+| WF_TC_003 | Manage workflow state transitions | State Manager          | LLD_W01_001      | Unit        | Happy Path    | High     |
+| WF_TC_004 | Manage workflow approvals         | Approval Manager       | LLD_W01_001      | Integration | Happy Path    | High     |
 
 ### Test Cases for W-02 Client Onboarding
 
-| test_id | title | module | requirement_refs | test_layer | scenario_type | priority |
-|---------|-------|--------|------------------|------------|--------------|----------|
-| ONB_TC_001 | Orchestrate client onboarding | Onboarding Orchestrator | LLD_W02_001 | Integration | Happy Path | High |
-| ONB_TC_002 | Process KYC verification | KYC Processor | LLD_W02_001 | Integration | Happy Path | High |
-| ONB_TC_003 | Assess client risk profile | Risk Assessor | LLD_W02_001 | Unit | Happy Path | High |
-| ONB_TC_004 | Create client accounts | Account Creator | LLD_W02_001 | Integration | Happy Path | High |
+| test_id    | title                         | module                  | requirement_refs | test_layer  | scenario_type | priority |
+| ---------- | ----------------------------- | ----------------------- | ---------------- | ----------- | ------------- | -------- |
+| ONB_TC_001 | Orchestrate client onboarding | Onboarding Orchestrator | LLD_W02_001      | Integration | Happy Path    | High     |
+| ONB_TC_002 | Process KYC verification      | KYC Processor           | LLD_W02_001      | Integration | Happy Path    | High     |
+| ONB_TC_003 | Assess client risk profile    | Risk Assessor           | LLD_W02_001      | Unit        | Happy Path    | High     |
+| ONB_TC_004 | Create client accounts        | Account Creator         | LLD_W02_001      | Integration | Happy Path    | High     |
 
-### Test Cases for O-01 Operator Workflows
+### Test Cases for O-01 Operator Console
 
-| test_id | title | module | requirement_refs | test_layer | scenario_type | priority |
-|---------|-------|--------|------------------|------------|--------------|----------|
-| OP_TC_001 | Manage operational runbooks | Runbook Manager | LLD_O01_001 | Integration | Happy Path | High |
-| OP_TC_002 | Handle operational escalations | Escalation Handler | LLD_O01_001 | Integration | Happy Path | High |
-| OP_TC_003 | Respond to operational incidents | Incident Responder | LLD_O01_001 | Integration | Happy Path | High |
-| OP_TC_004 | Schedule routine operational tasks | Task Scheduler | LLD_O01_001 | Integration | Happy Path | High |
+| test_id   | title                              | module             | requirement_refs | test_layer  | scenario_type | priority |
+| --------- | ---------------------------------- | ------------------ | ---------------- | ----------- | ------------- | -------- |
+| OP_TC_001 | Manage operational runbooks        | Runbook Manager    | LLD_O01_001      | Integration | Happy Path    | High     |
+| OP_TC_002 | Handle operational escalations     | Escalation Handler | LLD_O01_001      | Integration | Happy Path    | High     |
+| OP_TC_003 | Respond to operational incidents   | Incident Responder | LLD_O01_001      | Integration | Happy Path    | High     |
+| OP_TC_004 | Schedule routine operational tasks | Task Scheduler     | LLD_O01_001      | Integration | Happy Path    | High     |
 
 ### Test Cases for P-01 Pack Certification
 
-| test_id | title | module | requirement_refs | test_layer | scenario_type | priority |
-|---------|-------|--------|------------------|------------|--------------|----------|
-| CERT_TC_001 | Validate pack artifacts | Pack Validator | LLD_P01_001 | Integration | Happy Path | High |
-| CERT_TC_002 | Certify T1/T2/T3 packs | Certification Engine | LLD_P01_001 | Integration | Happy Path | High |
-| CERT_TC_003 | Handle certification rejections | Rejection Handler | LLD_P01_001 | Integration | Error Handling | High |
-| CERT_TC_004 | Issue pack certificates | Certificate Issuer | LLD_P01_001 | Integration | Happy Path | High |
+| test_id     | title                           | module               | requirement_refs | test_layer  | scenario_type  | priority |
+| ----------- | ------------------------------- | -------------------- | ---------------- | ----------- | -------------- | -------- |
+| CERT_TC_001 | Validate pack artifacts         | Pack Validator       | LLD_P01_001      | Integration | Happy Path     | High     |
+| CERT_TC_002 | Certify T1/T2/T3 packs          | Certification Engine | LLD_P01_001      | Integration | Happy Path     | High     |
+| CERT_TC_003 | Handle certification rejections | Rejection Handler    | LLD_P01_001      | Integration | Error Handling | High     |
+| CERT_TC_004 | Issue pack certificates         | Certificate Issuer   | LLD_P01_001      | Integration | Happy Path     | High     |
 
 ### Test Cases for R-01 Regulator Portal
 
-| test_id | title | module | requirement_refs | test_layer | scenario_type | priority |
-|---------|-------|--------|------------------|------------|--------------|----------|
-| RP_TC_001 | Control regulator portal access | Access Controller | LLD_R01_001 | Security | Access Control | High |
-| RP_TC_002 | Provide evidence views to regulators | Evidence Provider | LLD_R01_001 | Integration | Happy Path | High |
-| RP_TC_003 | Export regulatory data | Report Exporter | LLD_R01_001 | Integration | Happy Path | High |
-| RP_TC_004 | Log regulator interactions | Audit Logger | LLD_R01_001 | Integration | Happy Path | High |
+| test_id   | title                                | module            | requirement_refs | test_layer  | scenario_type  | priority |
+| --------- | ------------------------------------ | ----------------- | ---------------- | ----------- | -------------- | -------- |
+| RP_TC_001 | Control regulator portal access      | Access Controller | LLD_R01_001      | Security    | Access Control | High     |
+| RP_TC_002 | Provide evidence views to regulators | Evidence Provider | LLD_R01_001      | Integration | Happy Path     | High     |
+| RP_TC_003 | Export regulatory data               | Report Exporter   | LLD_R01_001      | Integration | Happy Path     | High     |
+| RP_TC_004 | Log regulator interactions           | Audit Logger      | LLD_R01_001      | Integration | Happy Path     | High     |
 
-### Test Cases for R-02 Incident Notification
+### Test Cases for R-02 Incident Response
 
-| test_id | title | module | requirement_refs | test_layer | scenario_type | priority |
-|---------|-------|--------|------------------|------------|--------------|----------|
-| INC_TC_001 | Detect operational incidents | Incident Detector | LLD_R02_001 | Integration | Happy Path | High |
-| INC_TC_002 | Cluster related incidents | Clustering Engine | LLD_R02_001 | Integration | Happy Path | High |
-| INC_TC_003 | Manage incident notifications | Notification Manager | LLD_R02_001 | Integration | Happy Path | High |
-| INC_TC_004 | Orchestrate incident escalations | Escalation Orchestrator | LLD_R02_001 | Integration | Happy Path | High |
+| test_id    | title                                  | module                  | requirement_refs | test_layer  | scenario_type | priority |
+| ---------- | -------------------------------------- | ----------------------- | ---------------- | ----------- | ------------- | -------- |
+| INC_TC_001 | Detect operational incidents           | Incident Detector       | LLD_R02_001      | Integration | Happy Path    | High     |
+| INC_TC_002 | Cluster related incidents              | Clustering Engine       | LLD_R02_001      | Integration | Happy Path    | High     |
+| INC_TC_003 | Manage incident response notifications | Notification Manager    | LLD_R02_001      | Integration | Happy Path    | High     |
+| INC_TC_004 | Orchestrate incident escalations       | Escalation Orchestrator | LLD_R02_001      | Integration | Happy Path    | High     |
 
 ### Test Cases for T-01 Integration Testing
 
-| test_id | title | module | requirement_refs | test_layer | scenario_type | priority |
-|---------|-------|--------|------------------|------------|--------------|----------|
-| INT_TC_001 | Run full integration regression | Regression Tester | LLD_T01_001 | Integration | Regression | High |
-| INT_TC_002 | Orchestrate test execution | Test Orchestrator | LLD_T01_001 | Integration | Happy Path | High |
-| INT_TC_003 | Analyze test results | Result Analyzer | LLD_T01_001 | Unit | Happy Path | High |
-| INT_TC_004 | Track test coverage | Coverage Tracker | LLD_T01_001 | Integration | Happy Path | High |
+| test_id    | title                           | module            | requirement_refs | test_layer  | scenario_type | priority |
+| ---------- | ------------------------------- | ----------------- | ---------------- | ----------- | ------------- | -------- |
+| INT_TC_001 | Run full integration regression | Regression Tester | LLD_T01_001      | Integration | Regression    | High     |
+| INT_TC_002 | Orchestrate test execution      | Test Orchestrator | LLD_T01_001      | Integration | Happy Path    | High     |
+| INT_TC_003 | Analyze test results            | Result Analyzer   | LLD_T01_001      | Unit        | Happy Path    | High     |
+| INT_TC_004 | Track test coverage             | Coverage Tracker  | LLD_T01_001      | Integration | Happy Path    | High     |
 
 ### Test Cases for T-02 Chaos Engineering
 
-| test_id | title | module | requirement_refs | test_layer | scenario_type | priority |
-|---------|-------|--------|------------------|------------|--------------|----------|
-| CHAOS_TC_001 | Inject system faults | Fault Injector | LLD_T02_001 | Integration | Chaos | High |
-| CHAOS_TC_002 | Orchestrate chaos experiments | Chaos Orchestrator | LLD_T02_001 | Integration | Chaos | High |
-| CHAOS_TC_003 | Validate system resilience | Resilience Validator | LLD_T02_001 | Integration | Resilience | High |
-| CHAOS_TC_004 | Monitor system recovery | Recovery Monitor | LLD_T02_001 | Integration | Recovery | High |
+| test_id      | title                         | module               | requirement_refs | test_layer  | scenario_type | priority |
+| ------------ | ----------------------------- | -------------------- | ---------------- | ----------- | ------------- | -------- |
+| CHAOS_TC_001 | Inject system faults          | Fault Injector       | LLD_T02_001      | Integration | Chaos         | High     |
+| CHAOS_TC_002 | Orchestrate chaos experiments | Chaos Orchestrator   | LLD_T02_001      | Integration | Chaos         | High     |
+| CHAOS_TC_003 | Validate system resilience    | Resilience Validator | LLD_T02_001      | Integration | Resilience    | High     |
+| CHAOS_TC_004 | Monitor system recovery       | Recovery Monitor     | LLD_T02_001      | Integration | Recovery      | High     |
 
 ---
 
 ## 7. Chaos Engineering Scenarios
 
 ### Chaos Suite CHAOS_001: Broker Outage
+
 - **Suite ID**: CHAOS_001
 - **Business Narrative**: System behavior during broker connectivity failure
 - **Actors**: Trading System, Exchange, Backup Systems
@@ -347,6 +369,7 @@
 - **Expected Recovery Variants**: Manual intervention, data reconciliation
 
 ### Chaos Suite CHAOS_002: Consumer Lag
+
 - **Suite ID**: CHAOS_002
 - **Business Narrative**: System behavior under message processing lag
 - **Actors**: Event Bus, Consumers, Monitoring Systems
@@ -362,6 +385,7 @@
 - **Expected Recovery Variants**: Consumer restart, message replay
 
 ### Chaos Suite CHAOS_003: Stale Calendar Config
+
 - **Suite ID**: CHAOS_003
 - **Business Narrative**: System behavior with outdated calendar configuration
 - **Actors**: Calendar Service, Trading Systems, Compliance
@@ -377,6 +401,7 @@
 - **Expected Recovery Variants**: Manual intervention, trade corrections
 
 ### Chaos Suite CHAOS_004: Saga Timeout
+
 - **Suite ID**: CHAOS_004
 - **Business Narrative**: System behavior when saga transactions timeout
 - **Actors**: Transaction Coordinator, Participants, Compensation
@@ -396,6 +421,7 @@
 ## 8. Disaster Recovery Scenarios
 
 ### DR Suite DR_001: Database Failover
+
 - **Suite ID**: DR_001
 - **Business Narrative**: Complete database failover and recovery
 - **Actors**: Primary Database, Standby Database, Applications
@@ -411,6 +437,7 @@
 - **Expected Recovery Variants**: Manual intervention, data restoration
 
 ### DR Suite DR_002: Object Storage Outage
+
 - **Suite ID**: DR_002
 - **Business Narrative**: Object storage service outage and recovery
 - **Actors**: Object Storage, Backup Storage, Applications
@@ -426,6 +453,7 @@
 - **Expected Recovery Variants**: Manual intervention, data restoration
 
 ### DR Suite DR_003: Gateway Partial Outage
+
 - **Suite ID**: DR_003
 - **Business Narrative**: API Gateway partial outage and recovery
 - **Actors**: API Gateway, Load Balancer, Services
@@ -445,6 +473,7 @@
 ## 9. Launch Readiness Evidence Suites
 
 ### Launch Suite LAUNCH_001: Production Readiness Checklist
+
 - **Suite ID**: LAUNCH_001
 - **Business Narrative**: Validate production readiness checklist items
 - **Actors**: Launch Team, Operations Team, Compliance Team
@@ -460,6 +489,7 @@
 - **Expected Recovery Variants**: Additional testing, process improvements
 
 ### Launch Suite LAUNCH_002: Regulatory Evidence Validation
+
 - **Suite ID**: LAUNCH_002
 - **Business Narrative**: Validate regulatory evidence generation
 - **Actors**: Compliance Team, Regulators, Legal Team
@@ -479,91 +509,102 @@
 ## 10. Coverage Matrices
 
 ### Regulatory Evidence Coverage Matrix
-| Evidence Type | Source | Test Cases | Coverage Status |
-|--------------|--------|-----------|-----------------|
-| Transaction Reports | D-10 | REG_TC_001-004 | ✅ |
-| Position Statements | D-10 | REG_TC_001-004 | ✅ |
-| Compliance Reports | D-10 | REG_TC_001-004 | ✅ |
-| Audit Trails | K-07 | REG_TC_001-004 | ✅ |
-| Client Money Records | D-13 | CMR_TC_001-004 | ✅ |
+
+| Evidence Type        | Source | Test Cases     | Coverage Status |
+| -------------------- | ------ | -------------- | --------------- |
+| Transaction Reports  | D-10   | REG_TC_001-004 | ✅              |
+| Position Statements  | D-10   | REG_TC_001-004 | ✅              |
+| Compliance Reports   | D-10   | REG_TC_001-004 | ✅              |
+| Audit Trails         | K-07   | REG_TC_001-004 | ✅              |
+| Client Money Records | D-13   | CMR_TC_001-004 | ✅              |
 
 ### Operational Incident Coverage Matrix
-| Incident Type | Detection | Response | Test Cases | Coverage Status |
-|---------------|----------|----------|-----------|-----------------|
-| System Outage | Automated | Automated | OP_TC_003, INC_TC_001 | ✅ |
-| Data Breach | Manual | Automated | SAN_TC_001-004 | ✅ |
-| Compliance Violation | Automated | Manual | COMP_TC_001-004 | ✅ |
-| Performance Degradation | Automated | Automated | OP_TC_001-004 | ✅ |
+
+| Incident Type           | Detection | Response  | Test Cases            | Coverage Status |
+| ----------------------- | --------- | --------- | --------------------- | --------------- |
+| System Outage           | Automated | Automated | OP_TC_003, INC_TC_001 | ✅              |
+| Data Breach             | Manual    | Automated | SAN_TC_001-004        | ✅              |
+| Compliance Violation    | Automated | Manual    | COMP_TC_001-004       | ✅              |
+| Performance Degradation | Automated | Automated | OP_TC_001-004         | ✅              |
 
 ### Runbook Coverage Matrix
-| Runbook Type | Scenario | Test Cases | Coverage Status |
-|--------------|----------|-----------|-----------------|
-| Incident Response | System Outage | OP_TC_002-003 | ✅ |
-| Data Recovery | Database Failure | OP_TC_002-003 | ✅ |
-| Security Response | Security Incident | OP_TC_002-003 | ✅ |
-| Compliance Response | Regulatory Issue | OP_TC_002-003 | ✅ |
+
+| Runbook Type        | Scenario          | Test Cases    | Coverage Status |
+| ------------------- | ----------------- | ------------- | --------------- |
+| Incident Response   | System Outage     | OP_TC_002-003 | ✅              |
+| Data Recovery       | Database Failure  | OP_TC_002-003 | ✅              |
+| Security Response   | Security Incident | OP_TC_002-003 | ✅              |
+| Compliance Response | Regulatory Issue  | OP_TC_002-003 | ✅              |
 
 ### Chaos Fault Coverage Matrix
-| Fault Type | Injection Point | Test Cases | Coverage Status |
-|------------|----------------|-----------|-----------------|
-| Network Failure | Broker Connection | CHAOS_TC_001 | ✅ |
-| Processing Lag | Message Consumer | CHAOS_TC_002 | ✅ |
-| Configuration Stale | Calendar Service | CHAOS_TC_003 | ✅ |
-| Transaction Timeout | Saga Coordinator | CHAOS_TC_004 | ✅ |
+
+| Fault Type          | Injection Point   | Test Cases   | Coverage Status |
+| ------------------- | ----------------- | ------------ | --------------- |
+| Network Failure     | Broker Connection | CHAOS_TC_001 | ✅              |
+| Processing Lag      | Message Consumer  | CHAOS_TC_002 | ✅              |
+| Configuration Stale | Calendar Service  | CHAOS_TC_003 | ✅              |
+| Transaction Timeout | Saga Coordinator  | CHAOS_TC_004 | ✅              |
 
 ### DR Step Coverage Matrix
-| DR Step | Component | Test Cases | Coverage Status |
-|---------|----------|-----------|-----------------|
-| Failover Detection | Database | DR_TC_001 | ✅ |
-| Backup Activation | Storage | DR_TC_002 | ✅ |
-| Traffic Redirection | Gateway | DR_TC_003 | ✅ |
-| Data Verification | All Components | DR_TC_001-003 | ✅ |
+
+| DR Step             | Component      | Test Cases    | Coverage Status |
+| ------------------- | -------------- | ------------- | --------------- |
+| Failover Detection  | Database       | DR_TC_001     | ✅              |
+| Backup Activation   | Storage        | DR_TC_002     | ✅              |
+| Traffic Redirection | Gateway        | DR_TC_003     | ✅              |
+| Data Verification   | All Components | DR_TC_001-003 | ✅              |
 
 ### Launch Readiness Checklist Coverage Matrix
-| Checklist Item | Validation | Test Cases | Coverage Status |
-|----------------|------------|-----------|-----------------|
-| System Performance | Automated | LAUNCH_TC_001 | ✅ |
-| Security Controls | Automated | LAUNCH_TC_001 | ✅ |
-| Regulatory Compliance | Manual | LAUNCH_TC_002 | ✅ |
-| Documentation | Manual | LAUNCH_TC_001 | ✅ |
+
+| Checklist Item        | Validation | Test Cases    | Coverage Status |
+| --------------------- | ---------- | ------------- | --------------- |
+| System Performance    | Automated  | LAUNCH_TC_001 | ✅              |
+| Security Controls     | Automated  | LAUNCH_TC_001 | ✅              |
+| Regulatory Compliance | Manual     | LAUNCH_TC_002 | ✅              |
+| Documentation         | Manual     | LAUNCH_TC_001 | ✅              |
 
 ---
 
 ## 11. Phase Exit Criteria Validation
 
 ### Regulatory Evidence Export Tests
-| Test | Description | Expected Outcome |
-|------|-------------|-----------------|
+
+| Test   | Description                            | Expected Outcome                        |
+| ------ | -------------------------------------- | --------------------------------------- |
 | RE_001 | Regulator evidence export demonstrable | Evidence export works from staging data |
-| RE_002 | Client money controls integrated | Controls work end-to-end |
-| RE_003 | Sanctions screening integrated | Screening works with trading flow |
+| RE_002 | Client money controls integrated       | Controls work end-to-end                |
+| RE_003 | Sanctions screening integrated         | Screening works with trading flow       |
 
 ### Certification and Validation Tests
-| Test | Description | Expected Outcome |
-|------|-------------|-----------------|
-| CV_001 | Pack certification validates artifacts | T1/T2/T3 packs validated before install |
-| CV_002 | Operator runbooks tested | Runbooks work for incident response |
-| CV_003 | Incident response validated | Incidents handled with proper escalation |
+
+| Test   | Description                            | Expected Outcome                         |
+| ------ | -------------------------------------- | ---------------------------------------- |
+| CV_001 | Pack certification validates artifacts | T1/T2/T3 packs validated before install  |
+| CV_002 | Operator runbooks tested               | Runbooks work for incident response      |
+| CV_003 | Incident response validated            | Incidents handled with proper escalation |
 
 ### Integration and Resilience Tests
-| Test | Description | Expected Outcome |
-|------|-------------|-----------------|
-| IR_001 | Full integration regression covers trading path | End-to-end regression passes |
-| IR_002 | Chaos scenarios include critical failures | System handles broker outage, lag, timeouts |
-| IR_003 | DR rehearsal confirms recovery path | DR procedures work and data integrity maintained |
+
+| Test   | Description                                     | Expected Outcome                                 |
+| ------ | ----------------------------------------------- | ------------------------------------------------ |
+| IR_001 | Full integration regression covers trading path | End-to-end regression passes                     |
+| IR_002 | Chaos scenarios include critical failures       | System handles broker outage, lag, timeouts      |
+| IR_003 | DR rehearsal confirms recovery path             | DR procedures work and data integrity maintained |
 
 ### Launch Readiness Tests
-| Test | Description | Expected Outcome |
-|------|-------------|-----------------|
-| LR_001 | Launch checklist evidence-backed | All checklist items have evidence |
-| LR_002 | Security validation complete | Security controls validated |
-| LR_003 | Performance qualification complete | System meets performance targets |
+
+| Test   | Description                        | Expected Outcome                  |
+| ------ | ---------------------------------- | --------------------------------- |
+| LR_001 | Launch checklist evidence-backed   | All checklist items have evidence |
+| LR_002 | Security validation complete       | Security controls validated       |
+| LR_003 | Performance qualification complete | System meets performance targets  |
 
 ---
 
 ## 12. Recommended Test File Plan
 
 ### Unit Tests
+
 - `src/test/java/com/siddhanta/operational/regulatory/**Test.java`
 - `src/test/java/com/siddhanta/operational/corporate/**Test.java`
 - `src/test/java/com/siddhanta/operational/clientmoney/**Test.java`
@@ -576,6 +617,7 @@
 - `src/test/java/com/siddhanta/operational/incident/**Test.java`
 
 ### Integration Tests
+
 - `src/test/java/com/siddhanta/operational/integration/RegulatoryReportingTest.java`
 - `src/test/java/com/siddhanta/operational/integration/CorporateActionsTest.java`
 - `src/test/java/com/siddhanta/operational/integration/ClientMoneyTest.java`
@@ -588,22 +630,26 @@
 - `src/test/java/com/siddhanta/operational/integration/IncidentNotificationTest.java`
 
 ### Chaos Tests
+
 - `src/test/java/com/siddhanta/operational/chaos/BrokerOutageTest.java`
 - `src/test/java/com/siddhanta/operational/chaos/ConsumerLagTest.java`
 - `src/test/java/com/siddhanta/operational/chaos/StaleConfigTest.java`
 - `src/test/java/com/siddhanta/operational/chaos/SagaTimeoutTest.java`
 
 ### DR Tests
+
 - `src/test/java/com/siddhanta/operational/dr/DatabaseFailoverTest.java`
 - `src/test/java/com/siddhanta/operational/dr/StorageOutageTest.java`
 - `src/test/java/com/siddhanta/operational/dr/GatewayOutageTest.java`
 
 ### Security Tests
+
 - `src/test/java/com/siddhanta/operational/security/RegulatorPortalSecurityTest.java`
 - `src/test/java/com/siddhanta/operational/security/SanctionsSecurityTest.java`
 - `src/test/java/com/siddhanta/operational/security/ClientMoneySecurityTest.java`
 
 ### Launch Readiness Tests
+
 - `src/test/java/com/siddhanta/operational/launch/ProductionReadinessTest.java`
 - `src/test/java/com/siddhanta/operational/launch/RegulatoryEvidenceTest.java`
 - `src/test/java/com/siddhanta/operational/launch/LaunchChecklistTest.java`
@@ -654,7 +700,7 @@ test_plan:
       cleanup: [delete_test_report]
       branch_ids_covered: [report_generation_success]
       statement_groups_covered: [report_generator, data_collector, validator]
-    
+
     - id: CA_TC_001
       title: Process corporate action events
       layer: integration
@@ -680,7 +726,7 @@ test_plan:
       cleanup: [reverse_position_adjustments]
       branch_ids_covered: [corporate_action_success, entitlements_calculated]
       statement_groups_covered: [corporate_action_processor, entitlement_calculator, position_adjuster]
-    
+
     - id: CMR_TC_001
       title: Segregate client funds
       layer: integration
@@ -706,7 +752,7 @@ test_plan:
       cleanup: [reverse_segregation]
       branch_ids_covered: [segregation_success, funds_transferred]
       statement_groups_covered: [money_segregator, validator, transfer_processor]
-    
+
     - id: SAN_TC_001
       title: Screen against sanctions lists
       layer: integration
@@ -732,7 +778,7 @@ test_plan:
       cleanup: [clear_screening_records]
       branch_ids_covered: [screening_success, clear_result]
       statement_groups_covered: [screening_engine, list_checker, media_checker]
-    
+
     - id: WF_TC_001
       title: Orchestrate business workflows
       layer: integration
@@ -758,7 +804,7 @@ test_plan:
       cleanup: [cleanup_workflow_instance]
       branch_ids_covered: [workflow_orchestration_success, all_steps_completed]
       statement_groups_covered: [workflow_engine, step_executor, approval_manager]
-    
+
     - id: ONB_TC_001
       title: Orchestrate client onboarding
       layer: integration
@@ -784,7 +830,7 @@ test_plan:
       cleanup: [cleanup_client_data]
       branch_ids_covered: [onboarding_success, all_steps_completed]
       statement_groups_covered: [onboarding_orchestrator, kyc_processor, risk_assessor]
-    
+
     - id: OP_TC_001
       title: Manage operational runbooks
       layer: integration
@@ -810,7 +856,7 @@ test_plan:
       cleanup: [cleanup_execution_data]
       branch_ids_covered: [runbook_execution_success, all_steps_completed]
       statement_groups_covered: [runbook_manager, step_executor, progress_tracker]
-    
+
     - id: CERT_TC_001
       title: Validate pack artifacts
       layer: integration
@@ -836,7 +882,7 @@ test_plan:
       cleanup: [cleanup_certification_data]
       branch_ids_covered: [certification_success, all_validations_passed]
       statement_groups_covered: [pack_validator, signature_verifier, security_scanner]
-    
+
     - id: RP_TC_001
       title: Control regulator portal access
       layer: security
@@ -862,7 +908,7 @@ test_plan:
       cleanup: [invalidate_session]
       branch_ids_covered: [access_control_success, permissions_verified]
       statement_groups_covered: [access_controller, auth_service, authorization_service]
-    
+
     - id: INC_TC_001
       title: Detect operational incidents
       layer: integration
@@ -888,7 +934,7 @@ test_plan:
       cleanup: [close_test_incident]
       branch_ids_covered: [incident_detection_success, anomaly_detected]
       statement_groups_covered: [incident_detector, anomaly_analyzer, severity_classifier]
-    
+
     - id: INT_TC_001
       title: Run full integration regression
       layer: integration
@@ -914,7 +960,7 @@ test_plan:
       cleanup: [cleanup_test_data]
       branch_ids_covered: [regression_success, high_coverage]
       statement_groups_covered: [regression_tester, test_orchestrator, result_analyzer]
-    
+
     - id: CHAOS_TC_001
       title: Inject system faults
       layer: integration

@@ -1,8 +1,8 @@
-EPIC-ID:    EPIC-K-11
-EPIC NAME:  Unified API Gateway
-LAYER:      KERNEL
-MODULE:     K-11 API Gateway
-VERSION:    1.1.0
+EPIC-ID: EPIC-K-11
+EPIC NAME: Unified API Gateway
+LAYER: KERNEL
+MODULE: K-11 API Gateway
+VERSION: 1.1.1
 
 ---
 
@@ -63,54 +63,54 @@ Deploy a Unified API Gateway (K-11) acting as the single, secure entry point for
 
 #### Section 6 — Event Model Definition
 
-| Field | Description |
-|---|---|
-| Event Name | `ApiQuotaExceededEvent` |
-| Schema Version | `v1.0.0` |
-| Trigger Condition | A tenant or user exceeds their allowed API quota for a specific endpoint. |
-| Payload | `{ "tenant_id": "...", "endpoint": "...", "limit": 1000, "window": "1m" }` |
-| Consumers | Billing Module, Security Operations, Observability |
-| Idempotency Key | `hash(tenant_id + endpoint + window_start)` |
-| Replay Behavior | Ignored. |
-| Retention Policy | 1 year. |
+| Field             | Description                                                                |
+| ----------------- | -------------------------------------------------------------------------- |
+| Event Name        | `ApiQuotaExceededEvent`                                                    |
+| Schema Version    | `v1.0.0`                                                                   |
+| Trigger Condition | A tenant or user exceeds their allowed API quota for a specific endpoint.  |
+| Payload           | `{ "tenant_id": "...", "endpoint": "...", "limit": 1000, "window": "1m" }` |
+| Consumers         | Billing Module, Security Operations, Observability                         |
+| Idempotency Key   | `hash(tenant_id + endpoint + window_start)`                                |
+| Replay Behavior   | Ignored.                                                                   |
+| Retention Policy  | 1 year.                                                                    |
 
 ---
 
-#### Section 6.5 — Command Model Definition
+#### Section 7 — Command Model Definition
 
-| Field | Description |
-|---|---|
-| Command Name | `RegisterRouteCommand` |
-| Schema Version | `v1.0.0` |
-| Validation Rules | Route path valid, backend service exists, requester authorized |
-| Handler | `RouteCommandHandler` in K-11 API Gateway |
-| Success Event | `RouteRegistered` |
-| Failure Event | `RouteRegistrationFailed` |
-| Idempotency | Command ID must be unique; duplicate commands return original result |
+| Field            | Description                                                          |
+| ---------------- | -------------------------------------------------------------------- |
+| Command Name     | `RegisterRouteCommand`                                               |
+| Schema Version   | `v1.0.0`                                                             |
+| Validation Rules | Route path valid, backend service exists, requester authorized       |
+| Handler          | `RouteCommandHandler` in K-11 API Gateway                            |
+| Success Event    | `RouteRegistered`                                                    |
+| Failure Event    | `RouteRegistrationFailed`                                            |
+| Idempotency      | Command ID must be unique; duplicate commands return original result |
 
-| Field | Description |
-|---|---|
-| Command Name | `UpdateRateLimitCommand` |
-| Schema Version | `v1.0.0` |
-| Validation Rules | Tenant exists, rate limit values valid, requester authorized |
-| Handler | `RateLimitCommandHandler` in K-11 API Gateway |
-| Success Event | `RateLimitUpdated` |
-| Failure Event | `RateLimitUpdateFailed` |
-| Idempotency | Command ID must be unique; duplicate commands return original result |
+| Field            | Description                                                          |
+| ---------------- | -------------------------------------------------------------------- |
+| Command Name     | `UpdateRateLimitCommand`                                             |
+| Schema Version   | `v1.0.0`                                                             |
+| Validation Rules | Tenant exists, rate limit values valid, requester authorized         |
+| Handler          | `RateLimitCommandHandler` in K-11 API Gateway                        |
+| Success Event    | `RateLimitUpdated`                                                   |
+| Failure Event    | `RateLimitUpdateFailed`                                              |
+| Idempotency      | Command ID must be unique; duplicate commands return original result |
 
-| Field | Description |
-|---|---|
-| Command Name | `BlockTenantCommand` |
-| Schema Version | `v1.0.0` |
-| Validation Rules | Tenant exists, reason provided, requester authorized |
-| Handler | `TenantCommandHandler` in K-11 API Gateway |
-| Success Event | `TenantBlocked` |
-| Failure Event | `TenantBlockFailed` |
-| Idempotency | Command ID must be unique; duplicate commands return original result |
+| Field            | Description                                                          |
+| ---------------- | -------------------------------------------------------------------- |
+| Command Name     | `BlockTenantCommand`                                                 |
+| Schema Version   | `v1.0.0`                                                             |
+| Validation Rules | Tenant exists, reason provided, requester authorized                 |
+| Handler          | `TenantCommandHandler` in K-11 API Gateway                           |
+| Success Event    | `TenantBlocked`                                                      |
+| Failure Event    | `TenantBlockFailed`                                                  |
+| Idempotency      | Command ID must be unique; duplicate commands return original result |
 
 ---
 
-#### Section 7 — AI Integration Requirements
+#### Section 8 — AI Integration Requirements
 
 - **AI Hook Type:** Anomaly Detection
 - **Workflow Steps Exposed:** Inbound traffic monitoring.
@@ -122,28 +122,28 @@ Deploy a Unified API Gateway (K-11) acting as the single, secure entry point for
 
 ---
 
-#### Section 8 — NFRs
+#### Section 9 — NFRs
 
-| NFR Category | Required Targets |
-|---|---|
-| Latency / Throughput | P99 overhead < 2ms; 50,000 TPS |
-| Scalability | Fully stateless edge nodes |
-| Availability | 99.999% uptime |
-| Consistency Model | Eventual consistency for rate limit counters |
-| Security | TLS termination; WAF integration; DDoS protection |
-| Data Residency | N/A (Transient processing only) |
-| Data Retention | N/A |
-| Auditability | Admin changes to routes are logged |
-| Observability | Metrics: `gateway.latency`, `gateway.4xx.rate`, `gateway.5xx.rate` |
-| Extensibility | Dynamic route registration |
-| Upgrade / Compatibility | Multi-version API routing (e.g., /v1/, /v2/) |
-| On-Prem Constraints | Can run as a local edge proxy |
-| Ledger Integrity | N/A |
-| Dual-Calendar Correctness | N/A |
+| NFR Category              | Required Targets                                                   |
+| ------------------------- | ------------------------------------------------------------------ |
+| Latency / Throughput      | P99 overhead < 2ms; 50,000 TPS                                     |
+| Scalability               | Fully stateless edge nodes                                         |
+| Availability              | 99.999% uptime                                                     |
+| Consistency Model         | Eventual consistency for rate limit counters                       |
+| Security                  | TLS termination; WAF integration; DDoS protection                  |
+| Data Residency            | N/A (Transient processing only)                                    |
+| Data Retention            | N/A                                                                |
+| Auditability              | Admin changes to routes are logged                                 |
+| Observability             | Metrics: `gateway.latency`, `gateway.4xx.rate`, `gateway.5xx.rate` |
+| Extensibility             | Dynamic route registration                                         |
+| Upgrade / Compatibility   | Multi-version API routing (e.g., /v1/, /v2/)                       |
+| On-Prem Constraints       | Can run as a local edge proxy                                      |
+| Ledger Integrity          | N/A                                                                |
+| Dual-Calendar Correctness | N/A                                                                |
 
 ---
 
-#### Section 9 — Acceptance Criteria
+#### Section 10 — Acceptance Criteria
 
 1. **Given** an unauthenticated request to a protected endpoint, **When** it hits the gateway, **Then** it is rejected with 401 Unauthorized in < 2ms without touching the domain module.
 2. **Given** a domain module that just started up, **When** it registers its routes via the control plane, **Then** the gateway begins routing traffic to it within 1 second.
@@ -151,51 +151,51 @@ Deploy a Unified API Gateway (K-11) acting as the single, secure entry point for
 
 ---
 
-#### Section 10 — Failure Modes & Resilience
+#### Section 11 — Failure Modes & Resilience
 
 - **Auth Service Outage:** Fails closed (rejects requests) to preserve security, unless specific cached tokens are valid.
 - **Backend Service Down:** Returns 503 Service Unavailable or 504 Gateway Timeout gracefully. Circuit breaker opens after repeated failures.
 
 ---
 
-#### Section 11 — Observability & Audit
+#### Section 12 — Observability & Audit
 
-| Telemetry Type | Required Details |
-|---|---|
-| Metrics | `request.latency`, `request.count`, dimensions: `route`, `tenant_id`, `status_code` |
-| Logs | Access logs (stripped of PII/payloads) |
-| Traces | Originating span starts here |
-| Audit Events | N/A |
-| Regulatory Evidence | Access logs can prove API interactions. |
+| Telemetry Type      | Required Details                                                                    |
+| ------------------- | ----------------------------------------------------------------------------------- |
+| Metrics             | `request.latency`, `request.count`, dimensions: `route`, `tenant_id`, `status_code` |
+| Logs                | Access logs (stripped of PII/payloads)                                              |
+| Traces              | Originating span starts here                                                        |
+| Audit Events        | N/A                                                                                 |
+| Regulatory Evidence | Access logs can prove API interactions.                                             |
 
 ---
 
-#### Section 12 — Compliance & Regulatory Traceability
+#### Section 13 — Compliance & Regulatory Traceability
 
 - System access controls [LCA-AUDIT-001]
 
 ---
 
-#### Section 13 — Extension Points & Contracts
+#### Section 14 — Extension Points & Contracts
 
 - **SDK Contract:** Control plane API for route registration.
 - **Jurisdiction Plugin Extension Points:** Gateway config extensions.
 
 ---
 
-#### Section 14 — Future-Safe Architecture Evaluation
+#### Section 15 — Future-Safe Architecture Evaluation
 
-| Question | Expected Answer |
-|---|---|
-| Can this module support India/Bangladesh via plugin? | Yes. |
-| Can a new exchange be connected? | N/A |
-| Can this run in an air-gapped deployment? | Yes. |
+| Question                                                              | Expected Answer                                                                                     |
+| --------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------- |
+| Can this module support India/Bangladesh via plugin?                  | Yes.                                                                                                |
+| Can a new exchange be connected?                                      | N/A                                                                                                 |
+| Can this run in an air-gapped deployment?                             | Yes.                                                                                                |
 | Can this module handle digital assets (tokenized securities, crypto)? | Yes. Token-based API authentication and on-chain webhook routing are supported via gateway plugins. |
-| Is the design ready for CBDC integration or T+0 settlement? | Yes. Ultra-low-latency pass-through mode (≤2ms P99) supports real-time settlement API flows. |
+| Is the design ready for CBDC integration or T+0 settlement?           | Yes. Ultra-low-latency pass-through mode (≤2ms P99) supports real-time settlement API flows.        |
 
 ---
 
-#### Section 14.5 — Threat Model
+#### Section 16 — Threat Model
 
 **Attack Vectors & Mitigations:**
 
@@ -240,6 +240,7 @@ Deploy a Unified API Gateway (K-11) acting as the single, secure entry point for
    - **Residual Risk:** Novel smuggling techniques.
 
 **Security Controls:**
+
 - TLS 1.3+ enforcement with strong ciphers
 - Rate limiting and throttling per tenant/IP/API key
 - Input validation and schema enforcement
@@ -253,3 +254,15 @@ Deploy a Unified API Gateway (K-11) acting as the single, secure entry point for
 - Regular security scanning and penetration testing
 - Auto-scaling and DDoS protection
 - API versioning and deprecation management
+
+---
+
+## Changelog
+
+### Version 1.1.1 (2026-03-10)
+
+**Type:** PATCH  
+**Changes:**
+
+- Standardized section numbering to the sequential 16-section format.
+- Added changelog metadata for future epic maintenance.

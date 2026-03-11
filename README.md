@@ -4,53 +4,45 @@
 
 ## Architecture at a Glance
 
-| Dimension | Choice |
-|-----------|--------|
-| **Architecture Style** | 7-layer microservices, Event Sourcing, CQRS |
-| **Extensibility Model** | T1 Config / T2 Rules (OPA-Rego) / T3 Executable Content Packs |
-| **Calendar** | Dual-Calendar Native (Bikram Sambat + Gregorian) |
-| **Tech Stack** | Java 21 + ActiveJ, Node.js LTS + TypeScript + Fastify + Prisma, Python 3.11 + FastAPI, React 18 + Tailwind CSS + Jotai + TanStack Query, Kafka 3+, PostgreSQL 15+, TimescaleDB, Redis 7+, Elasticsearch, Kubernetes, Istio |
-| **Security** | Zero-Trust, OPA policy-as-code, mTLS, HashiCorp Vault |
-| **Availability Target** | 99.999% (5.26 min downtime/year) |
-| **Data Retention** | 10 years regulatory minimum |
+| Dimension               | Choice                                                                                                                                                                                                                     |
+| ----------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Architecture Style**  | 7-layer microservices, Event Sourcing, CQRS                                                                                                                                                                                |
+| **Extensibility Model** | T1 Config / T2 Rules (OPA-Rego) / T3 Executable Content Packs                                                                                                                                                              |
+| **Runtime Metadata**    | Versioned process templates, task schemas, routing policies, and value catalogs resolved through K-02 and consumed by W-01 / K-13                                                                                          |
+| **Calendar**            | Dual-Calendar Native (Bikram Sambat + Gregorian)                                                                                                                                                                           |
+| **Tech Stack**          | Java 21 + ActiveJ, Node.js LTS + TypeScript + Fastify + Prisma, Python 3.11 + FastAPI, React 18 + Tailwind CSS + Jotai + TanStack Query, Kafka 3+, PostgreSQL 15+, TimescaleDB, Redis 7+, Elasticsearch, Kubernetes, Istio |
+| **Security**            | Zero-Trust, OPA policy-as-code, mTLS, HashiCorp Vault                                                                                                                                                                      |
+| **Availability Target** | 99.999% (5.26 min downtime/year)                                                                                                                                                                                           |
+| **Data Retention**      | 10 years regulatory minimum                                                                                                                                                                                                |
 
-> **Stack authority**: [ADR-011_STACK_STANDARDIZATION_AND_GHATANA_PLATFORM_ALIGNMENT.md](ADR-011_STACK_STANDARDIZATION_AND_GHATANA_PLATFORM_ALIGNMENT.md) is the canonical technology baseline. Older architecture and C4 docs may contain historical labels that do not override ADR-011.
+> **Stack authority**: [adr/ADR-011_STACK_STANDARDIZATION_AND_GHATANA_PLATFORM_ALIGNMENT.md](adr/ADR-011_STACK_STANDARDIZATION_AND_GHATANA_PLATFORM_ALIGNMENT.md) is the canonical technology baseline. Older architecture and C4 docs may contain historical labels that do not override ADR-011.
 
 ## Repository Structure
 
 ```
-├── ARCHITECTURE_AND_DESIGN_SPECIFICATION.md   # Master index & key architectural decisions
-├── CURRENT_EXECUTION_PLAN.md                  # Current implementation and phase plan
-├── ADR-011_STACK_STANDARDIZATION_AND_GHATANA_PLATFORM_ALIGNMENT.md # Canonical stack baseline and Ghatana alignment
-├── ARCHITECTURE_SPEC_PART_1_SECTIONS_1-3.md   # Executive summary, layered architecture, event-driven/CQRS
-├── ARCHITECTURE_SPEC_PART_1_SECTIONS_4-5.md   # Configuration hierarchy, plugin runtime (T1/T2/T3)
-├── ARCHITECTURE_SPEC_PART_2_SECTIONS_6-8.md   # Data architecture, database schemas, AI/ML
-├── ARCHITECTURE_SPEC_PART_2_SECTIONS_9-10.md  # Security, deployment, observability
-├── ARCHITECTURE_SPEC_PART_3_SECTIONS_11-15.md # Performance, compliance, future-safe, traceability
-├── C4_C1_CONTEXT_SIDDHANTA.md                 # C4 Level 1 — System Context
-├── C4_C2_CONTAINER_SIDDHANTA.md               # C4 Level 2 — Container
-├── C4_C3_COMPONENT_SIDDHANTA.md               # C4 Level 3 — Component
-├── C4_C4_CODE_SIDDHANTA.md                    # C4 Level 4 — Code
-├── REGULATORY_ARCHITECTURE_DOCUMENT.md        # Regulatory compliance framework
-├── epics/                                      # 42 epics across 8 layers
-│   ├── EPIC-K-01 through K-19                 # Kernel layer (19 epics)
-│   ├── EPIC-D-01 through D-14                 # Domain layer (14 epics)
-│   ├── EPIC-W-01, W-02                        # Workflow layer
-│   ├── EPIC-P-01                              # Content Packs certification
-│   ├── EPIC-T-01, T-02                        # Testing layer
-│   ├── EPIC-O-01                              # Operations
-│   ├── EPIC-R-01, R-02                        # Regulatory layer
-│   └── DEPENDENCY_MATRIX.md                   # Cross-epic dependency graph
-├── LLD_INDEX.md                               # Low-Level Design master index
-├── LLD_D01_OMS.md                             # Order Management System LLD
-├── LLD_K02_CONFIGURATION_ENGINE.md            # Config Engine LLD
-├── LLD_K03_RULES_ENGINE.md                    # Rules Engine LLD
-├── LLD_K04_PLUGIN_RUNTIME.md                  # Plugin Runtime LLD
-├── LLD_K05_EVENT_BUS.md                       # Event Bus LLD
-├── LLD_K07_AUDIT_FRAMEWORK.md                 # Audit Framework LLD
-├── LLD_K09_AI_GOVERNANCE.md                   # AI Governance LLD
-└── docs/                                       # Proposals, claims, research
+finance/
+├── README.md                                  # Top-level orientation and authority map
+├── adr/                                       # Architecture Decision Records (ADR-001 through ADR-011)
+├── architecture/                              # Master architecture suite and sectioned specifications
+├── c4/                                        # C4 context, container, component, and code views
+├── plans/                                     # Current execution plan and delivery program plan
+├── epics/                                     # 42 implementation epics plus dependency matrix and glossary
+├── stories/                                   # Story index, milestone story packs, and backlog
+├── lld/                                       # Low-level designs for kernel and domain modules
+├── docs/                                      # Strategy, specifications, TDD expansions, and claim packs
+├── regulatory/                                # Regulatory-specific supporting documents
+└── archive/                                   # Historical reviews, prompts, and snapshots
 ```
+
+## Document Authority Order
+
+1. `adr/ADR-011_STACK_STANDARDIZATION_AND_GHATANA_PLATFORM_ALIGNMENT.md` for canonical stack and implementation baseline
+2. `plans/CURRENT_EXECUTION_PLAN.md` for execution sequencing and milestone order
+3. `epics/` and `lld/` for implementation scope, contracts, and design detail
+4. `stories/STORY_INDEX.md` and milestone story files for backlog execution
+5. `docs/`, `c4/`, and historical archive content for supporting context unless they explicitly override nothing above
+
+Detailed classification of normative versus supporting material: `docs/DOCUMENT_AUTHORITY_MAP.md`
 
 ## Key Architectural Decisions
 
@@ -60,20 +52,21 @@
 4. **10-Year Regulatory Retention** — All audit/trade/event data retained for 10 years minimum
 5. **99.999% Availability** — Active-active multi-AZ with automatic failover
 6. **ADR-011 Stack Standardization** — One canonical stack baseline aligned to finance ADRs and reusable Ghatana platform products
+7. **Metadata-Driven Process Model** — Step order, human-task forms, routing policies, and operator choice lists are governed as versioned metadata, not embedded in service or portal code
 
 ## Epic Layers
 
-| Layer | Count | Scope |
-|-------|-------|-------|
-| Kernel (K) | 19 | IAM, Config, Rules, Plugin, Event Bus, Observability, Audit, Data Governance, AI Governance, Deployment, API Gateway, Platform SDK, Dual-Calendar, Ledger, DTC, Resilience, DLQ |
-| Domain (D) | 14 | OMS, EMS, PMS, Market Data, Pricing, Risk, Compliance, Surveillance, Post-Trade, Regulatory Reporting, Reference Data, Corporate Actions, Client Money, Sanctions |
-| Workflow (W) | 2 | Orchestration, Client Onboarding |
-| Packs (P) | 1 | Content Pack Certification Pipeline |
-| Testing (T) | 2 | Testing Framework, Performance Testing |
-| Operations (O) | 1 | Runbook Automation |
-| Regulatory (R) | 2 | Regulator Portal, Incident Notification |
-| Platform Unity (PU) | 1 | Platform Manifest |
+| Layer               | Count | Scope                                                                                                                                                                           |
+| ------------------- | ----- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Kernel (K)          | 19    | IAM, Config, Rules, Plugin, Event Bus, Observability, Audit, Data Governance, AI Governance, Deployment, API Gateway, Platform SDK, Dual-Calendar, Ledger, DTC, Resilience, DLQ |
+| Domain (D)          | 14    | OMS, EMS, PMS, Market Data, Pricing, Risk, Compliance, Surveillance, Post-Trade, Regulatory Reporting, Reference Data, Corporate Actions, Client Money, Sanctions               |
+| Workflow (W)        | 2     | Orchestration, Client Onboarding                                                                                                                                                |
+| Packs (P)           | 1     | Content Pack Certification Pipeline                                                                                                                                             |
+| Testing (T)         | 2     | Integration Testing, Chaos Engineering                                                                                                                                          |
+| Operations (O)      | 1     | Operator Console                                                                                                                                                                |
+| Regulatory (R)      | 2     | Regulator Portal, Incident Response & Escalation                                                                                                                                |
+| Platform Unity (PU) | 1     | Platform Manifest                                                                                                                                                               |
 
 ## Version
 
-**v2.1** — March 2026 | Post-ARB Review | Hardened for consistency, extensibility, and future-proofing.
+**v2.2** — March 10, 2026 | Post-ARB Review | Hardened for consistency, extensibility, metadata-driven runtime configuration, and future-proofing.

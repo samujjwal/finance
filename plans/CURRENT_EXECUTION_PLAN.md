@@ -1,7 +1,8 @@
 # Current Execution Plan
+
 ## Project Siddhanta
 
-**Date:** 2026-03-08  
+**Date:** 2026-03-10  
 **Status:** Current planning baseline  
 **Supersedes:** `archive/reviews/2026-03/COMPREHENSIVE_REVIEW_AND_IMPLEMENTATION_PLAN.md`
 
@@ -11,7 +12,7 @@
 
 The repository now separates:
 
-- **Current baseline documents** in the repository root, `docs/`, `epics/`, and the `LLD_*.md` set
+- **Current baseline documents** in `adr/`, `architecture/`, `plans/`, `epics/`, `stories/`, `lld/`, and the current specification set in `docs/`
 - **Historical review snapshots** in `archive/reviews/2026-03/`
 
 This means the program is now in a cleaner state:
@@ -31,7 +32,7 @@ These assumptions drive the execution sequence below:
 1. The repo starts implementation on **Monday, March 9, 2026**.
 2. The first implementation target is a **kernel-first platform bootstrap**, not a domain UI or exchange adapter.
 3. The first business milestone is a **staging-grade trading control path**, not production launch.
-4. Standardized implementation profile per [ADR-011_STACK_STANDARDIZATION_AND_GHATANA_PLATFORM_ALIGNMENT.md](ADR-011_STACK_STANDARDIZATION_AND_GHATANA_PLATFORM_ALIGNMENT.md):
+4. Standardized implementation profile per [../adr/ADR-011_STACK_STANDARDIZATION_AND_GHATANA_PLATFORM_ALIGNMENT.md](../adr/ADR-011_STACK_STANDARDIZATION_AND_GHATANA_PLATFORM_ALIGNMENT.md):
    - **Java 21 + ActiveJ** for kernel, domain, event, workflow, and data platform services
    - **Node.js LTS + TypeScript + Fastify + Prisma** for user-facing API and control-plane CRUD services
    - **Python 3.11 + FastAPI** only where AI/ML execution is required
@@ -40,12 +41,14 @@ These assumptions drive the execution sequence below:
    - T1 Config Packs
    - T2 Rules Packs
    - T3 Executable Packs
+6. Runtime business-process definitions, human-task schemas, and operator-facing value catalogs must be metadata-driven and versioned; tenant-specific changes in step order, allowed values, or approval forms should not require core-service code changes unless the underlying contract changes.
 
 ---
 
 ## 3. Program Milestones
 
 ### Milestone A — Executable Platform Skeleton
+
 Target date: **March 20, 2026**
 
 Success means:
@@ -56,6 +59,7 @@ Success means:
 - Shared contract packages exist for event envelope and dual-date
 
 ### Milestone B — Kernel Foundation in Staging
+
 Target date: **May 15, 2026**
 
 Success means:
@@ -66,6 +70,7 @@ Success means:
 - K-15 Dual-Calendar conversion is available as service and library
 
 ### Milestone C — Kernel Completion
+
 Target date: **July 10, 2026**
 
 Success means:
@@ -74,6 +79,7 @@ Success means:
 - Kernel gates for domain work are cleared
 
 ### Milestone D — Trading MVP Path
+
 Target date: **September 18, 2026**
 
 Success means the following flow works in staging:
@@ -81,11 +87,12 @@ Success means the following flow works in staging:
 `Reference Data -> Market Data -> OMS -> Risk -> Compliance -> EMS -> Post-Trade -> Ledger -> PMS`
 
 ### Milestone E — Operational and Regulatory Hardening
+
 Target date: **November 13, 2026**
 
 Success means:
 
-- Reporting, sanctions, reconciliation, operator workflows, regulator workflows, and certification paths exist
+- Reporting, sanctions, reconciliation, operator console workflows, regulator workflows, and certification paths exist
 - Integration and chaos testing are active
 
 ---
@@ -93,6 +100,7 @@ Success means:
 ## 4. Detailed Phase Plan
 
 ### Phase 0 — Execution Bootstrap
+
 **Dates:** March 9, 2026 to March 20, 2026
 
 **Objective:** Convert the repository from document-only to implementation-ready workspace.
@@ -117,7 +125,7 @@ Success means:
   - event schema versioning
   - migration policy
   - branch and release conventions
-  - apply [ADR-011_STACK_STANDARDIZATION_AND_GHATANA_PLATFORM_ALIGNMENT.md](ADR-011_STACK_STANDARDIZATION_AND_GHATANA_PLATFORM_ALIGNMENT.md) as stack authority
+  - apply [../adr/ADR-011_STACK_STANDARDIZATION_AND_GHATANA_PLATFORM_ALIGNMENT.md](../adr/ADR-011_STACK_STANDARDIZATION_AND_GHATANA_PLATFORM_ALIGNMENT.md) as stack authority
 
 **Phase 0 Deliverables**
 
@@ -138,6 +146,7 @@ Success means:
 ---
 
 ### Phase 1 — Kernel Foundation
+
 **Dates:** March 23, 2026 to May 15, 2026
 
 **Objective:** Build the non-negotiable kernel primitives that every domain module depends on.
@@ -185,17 +194,19 @@ K-05 and K-07 reference each other conceptually. Implementation should break tha
   - hierarchical resolution
   - maker-checker activation flow
   - T1 pack loader
+  - metadata catalog support for value sets, task schemas, and process-template parameters
 
 **Exit Criteria**
 
 - K-05 critical publish path meets the documented `2ms P99` target in isolated benchmarks
 - K-15 dual-date conversion is available in both service and package form
 - K-07 chain verification passes replay tests
-- K-02 resolves config deterministically for `GLOBAL -> JURISDICTION -> TENANT -> USER -> SESSION`
+- K-02 resolves config and metadata deterministically for `GLOBAL -> JURISDICTION -> OPERATOR -> TENANT -> ACCOUNT -> USER`
 
 ---
 
 ### Phase 2 — Kernel Completion and Control Plane
+
 **Dates:** May 18, 2026 to July 10, 2026
 
 **Objective:** Clear the kernel readiness gates required for domain implementation.
@@ -227,6 +238,9 @@ K-05 and K-07 reference each other conceptually. Implementation should break tha
 2. Policy/extensibility
    - K-03
    - K-04
+
+- extend K-02 for dynamic process/value metadata catalogs
+
 3. Operational core
    - K-06
    - K-18
@@ -234,12 +248,20 @@ K-05 and K-07 reference each other conceptually. Implementation should break tha
 4. Financial/core state
    - K-16
    - K-17
-5. Governance/control-plane surfaces
+5. Metadata governance and runtime configurability
+
+- K-02
+- value catalog registry with scoped overrides and deprecation controls
+- task/form schema registry for operator and human-in-the-loop workflows
+- effective-date activation and compatibility validation for metadata assets
+
+6. Governance/control-plane surfaces
    - K-08
    - K-09
    - K-10
    - K-11
    - K-13
+   - schema-driven admin surfaces for dynamic forms, catalogs, and workflow tasks
    - PU-004
 
 **Detailed Outputs**
@@ -280,6 +302,7 @@ K-05 and K-07 reference each other conceptually. Implementation should break tha
 ---
 
 ### Phase 3 — Trading MVP Domain Path
+
 **Dates:** July 13, 2026 to September 18, 2026
 
 **Objective:** Deliver the minimum viable end-to-end trading flow in staging.
@@ -328,6 +351,7 @@ K-05 and K-07 reference each other conceptually. Implementation should break tha
 ---
 
 ### Phase 4 — Reporting, Operations, and Workflow Scale-Out
+
 **Dates:** September 21, 2026 to November 13, 2026
 
 **Objective:** Extend the MVP into a regulator-credible operating platform.
@@ -340,18 +364,18 @@ K-05 and K-07 reference each other conceptually. Implementation should break tha
 - D-14 Sanctions Screening
 - W-01 Workflow Orchestration
 - W-02 Client Onboarding
-- O-01 Operator Workflows
+- O-01 Operator Console
 - P-01 Pack Certification
 - R-01 Regulator Portal
-- R-02 Incident Notification
+- R-02 Incident Response & Escalation
 
 **Focus Areas**
 
 - Regulatory evidence generation
 - client money and sanctions controls
-- onboarding and operator workflows
+- onboarding and operator console workflows
 - pack governance and certification
-- regulator-facing exports and incident escalation
+- regulator-facing exports and incident response escalation
 
 **Exit Criteria**
 
@@ -363,6 +387,7 @@ K-05 and K-07 reference each other conceptually. Implementation should break tha
 ---
 
 ### Phase 5 — Hardening, Certification, and Launch Readiness
+
 **Dates:** November 16, 2026 to December 24, 2026
 
 **Objective:** Prove the platform under load, failure, and audit conditions.
@@ -479,26 +504,31 @@ schemas/
 ## 7. Risks To Track From Day One
 
 ### Risk 1 — Kernel dependency cycles
+
 Example: K-05 and K-07 are conceptually coupled.
 
 **Mitigation:** implement core capability first, cross-cutting hook second.
 
 ### Risk 2 — Premature stack sprawl
+
 The architecture allows multiple languages, but that should not become a Day 1 tax.
 
 **Mitigation:** keep the first implementation wave mostly Java + TypeScript.
 
 ### Risk 3 — SDK too early, too broad
+
 K-12 can become a bottleneck if treated as a full platform product before kernel APIs settle.
 
 **Mitigation:** publish thin generated clients first, composite SDK second.
 
 ### Risk 4 — Domain work starting before kernel gates are real
+
 Spec pressure may push OMS early.
 
 **Mitigation:** block D-01 coding until K-05, K-02, K-15, K-01, K-03, K-07 foundations are demonstrably usable.
 
 ### Risk 5 — NFRs being treated as launch-time only
+
 Latency, replay safety, and auditability must be designed in from the first service.
 
 **Mitigation:** embed benchmarks and contract tests in each kernel phase.
@@ -540,4 +570,4 @@ Proceed in this exact order:
 
 Do **not** start with OMS screens, exchange adapters, or regulator portals before the kernel foundation exists.
 
-Apply [ADR-011_STACK_STANDARDIZATION_AND_GHATANA_PLATFORM_ALIGNMENT.md](ADR-011_STACK_STANDARDIZATION_AND_GHATANA_PLATFORM_ALIGNMENT.md) to all new implementation scaffolding and documentation updates.
+Apply [../adr/ADR-011_STACK_STANDARDIZATION_AND_GHATANA_PLATFORM_ALIGNMENT.md](../adr/ADR-011_STACK_STANDARDIZATION_AND_GHATANA_PLATFORM_ALIGNMENT.md) to all new implementation scaffolding and documentation updates.

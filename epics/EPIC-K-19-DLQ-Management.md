@@ -1,9 +1,9 @@
-EPIC-ID:    EPIC-K-19
-EPIC NAME:  DLQ Management & Event Replay Tooling
-LAYER:      KERNEL
-MODULE:     K-19 DLQ Management & Event Replay
-VERSION:    1.0.0
-ARB-REF:    P0-04
+EPIC-ID: EPIC-K-19
+EPIC NAME: DLQ Management & Event Replay Tooling
+LAYER: KERNEL
+MODULE: K-19 DLQ Management & Event Replay
+VERSION: 1.0.1
+ARB-REF: P0-04
 
 ---
 
@@ -68,44 +68,44 @@ Deliver the K-19 DLQ Management & Event Replay module to prevent silent data los
 
 #### Section 6 — Event Model Definition
 
-| Field | Description |
-|---|---|
-| Event Name | `DlqThresholdBreachedEvent` |
-| Schema Version | `v1.0.0` |
-| Trigger Condition | DLQ size, age, or growth rate exceeds configured threshold. |
-| Payload | `{ "topic": "...", "consumer_group": "...", "dlq_size": 150, "threshold": 100, "severity": "P1" }` |
-| Consumers | K-06 Alerting, Admin Portal, On-Call Escalation |
-| Idempotency Key | `hash(topic + consumer_group + threshold_type + window)` |
-| Replay Behavior | N/A (alert event). |
-| Retention Policy | 90 days. |
+| Field             | Description                                                                                        |
+| ----------------- | -------------------------------------------------------------------------------------------------- |
+| Event Name        | `DlqThresholdBreachedEvent`                                                                        |
+| Schema Version    | `v1.0.0`                                                                                           |
+| Trigger Condition | DLQ size, age, or growth rate exceeds configured threshold.                                        |
+| Payload           | `{ "topic": "...", "consumer_group": "...", "dlq_size": 150, "threshold": 100, "severity": "P1" }` |
+| Consumers         | K-06 Alerting, Admin Portal, On-Call Escalation                                                    |
+| Idempotency Key   | `hash(topic + consumer_group + threshold_type + window)`                                           |
+| Replay Behavior   | N/A (alert event).                                                                                 |
+| Retention Policy  | 90 days.                                                                                           |
 
 ---
 
-#### Section 6.5 — Command Model Definition
+#### Section 7 — Command Model Definition
 
-| Field | Description |
-|---|---|
-| Command Name | `ReplayDlqEventsCommand` |
-| Schema Version | `v1.0.0` |
+| Field            | Description                                                            |
+| ---------------- | ---------------------------------------------------------------------- |
+| Command Name     | `ReplayDlqEventsCommand`                                               |
+| Schema Version   | `v1.0.0`                                                               |
 | Validation Rules | RCA record exists and approved, DLQ events exist, requester authorized |
-| Handler | `DlqCommandHandler` in K-19 |
-| Success Event | `DlqReplayCompleted` |
-| Failure Event | `DlqReplayFailed` |
-| Idempotency | Command ID must be unique; duplicate commands return replay status |
+| Handler          | `DlqCommandHandler` in K-19                                            |
+| Success Event    | `DlqReplayCompleted`                                                   |
+| Failure Event    | `DlqReplayFailed`                                                      |
+| Idempotency      | Command ID must be unique; duplicate commands return replay status     |
 
-| Field | Description |
-|---|---|
-| Command Name | `DiscardDlqEventCommand` |
-| Schema Version | `v1.0.0` |
+| Field            | Description                                                                     |
+| ---------------- | ------------------------------------------------------------------------------- |
+| Command Name     | `DiscardDlqEventCommand`                                                        |
+| Schema Version   | `v1.0.0`                                                                        |
 | Validation Rules | Event in quarantine, RCA recorded, maker-checker approval, requester authorized |
-| Handler | `DlqCommandHandler` in K-19 |
-| Success Event | `DlqEventDiscarded` |
-| Failure Event | `DlqDiscardFailed` |
-| Idempotency | Command ID must be unique |
+| Handler          | `DlqCommandHandler` in K-19                                                     |
+| Success Event    | `DlqEventDiscarded`                                                             |
+| Failure Event    | `DlqDiscardFailed`                                                              |
+| Idempotency      | Command ID must be unique                                                       |
 
 ---
 
-#### Section 7 — AI Integration Requirements
+#### Section 8 — AI Integration Requirements
 
 - **AI Hook Type:** Pattern Recognition
 - **Workflow Steps Exposed:** DLQ failure analysis.
@@ -117,28 +117,28 @@ Deliver the K-19 DLQ Management & Event Replay module to prevent silent data los
 
 ---
 
-#### Section 8 — NFRs
+#### Section 9 — NFRs
 
-| NFR Category | Required Targets |
-|---|---|
-| Latency / Throughput | Dashboard refresh < 5s; replay throughput configurable (default: 100 events/sec) |
-| Scalability | Horizontally scalable replay workers |
-| Availability | 99.99% uptime |
-| Consistency Model | Strong consistency for DLQ state |
-| Security | Replay actions require maker-checker for production; RBAC-restricted |
-| Data Residency | DLQ data follows K-08 residency rules |
-| Data Retention | DLQ entries retained per audit policy; quarantined events retained indefinitely until resolved |
-| Auditability | All replay and discard actions logged to K-07 |
-| Observability | Metrics: `dlq.size`, `dlq.age.max`, `dlq.replay.success_rate`, `dlq.quarantine.count` |
-| Extensibility | Custom failure classifiers via plugin |
-| Upgrade / Compatibility | Backward compatible API |
-| On-Prem Constraints | Operates with local storage |
-| Ledger Integrity | Ensures no silent loss of financial events |
-| Dual-Calendar Correctness | All timestamps use DualDate |
+| NFR Category              | Required Targets                                                                               |
+| ------------------------- | ---------------------------------------------------------------------------------------------- |
+| Latency / Throughput      | Dashboard refresh < 5s; replay throughput configurable (default: 100 events/sec)               |
+| Scalability               | Horizontally scalable replay workers                                                           |
+| Availability              | 99.99% uptime                                                                                  |
+| Consistency Model         | Strong consistency for DLQ state                                                               |
+| Security                  | Replay actions require maker-checker for production; RBAC-restricted                           |
+| Data Residency            | DLQ data follows K-08 residency rules                                                          |
+| Data Retention            | DLQ entries retained per audit policy; quarantined events retained indefinitely until resolved |
+| Auditability              | All replay and discard actions logged to K-07                                                  |
+| Observability             | Metrics: `dlq.size`, `dlq.age.max`, `dlq.replay.success_rate`, `dlq.quarantine.count`          |
+| Extensibility             | Custom failure classifiers via plugin                                                          |
+| Upgrade / Compatibility   | Backward compatible API                                                                        |
+| On-Prem Constraints       | Operates with local storage                                                                    |
+| Ledger Integrity          | Ensures no silent loss of financial events                                                     |
+| Dual-Calendar Correctness | All timestamps use DualDate                                                                    |
 
 ---
 
-#### Section 9 — Acceptance Criteria
+#### Section 10 — Acceptance Criteria
 
 1. **Given** a DLQ with 150 events (threshold: 100), **When** the monitoring job runs, **Then** a `DlqThresholdBreachedEvent` is emitted with severity P1.
 2. **Given** an operator with an approved RCA, **When** they initiate replay of 50 DLQ events, **Then** events are replayed with idempotency checks and a progress report is provided.
@@ -148,7 +148,7 @@ Deliver the K-19 DLQ Management & Event Replay module to prevent silent data los
 
 ---
 
-#### Section 10 — Failure Modes & Resilience
+#### Section 11 — Failure Modes & Resilience
 
 - **DLQ Storage Full:** Alert raised; oldest resolved entries purged; replay paused.
 - **Replay Worker Failure:** Replay pauses; resumes from last successful event on recovery.
@@ -156,19 +156,19 @@ Deliver the K-19 DLQ Management & Event Replay module to prevent silent data los
 
 ---
 
-#### Section 11 — Observability & Audit
+#### Section 12 — Observability & Audit
 
-| Telemetry Type | Required Details |
-|---|---|
-| Metrics | `dlq.size` (gauge), `dlq.replay.count` (counter), `dlq.quarantine.count` (gauge), `dlq.age.max` (gauge) |
-| Logs | Structured: `dlq_id`, `topic`, `action`, `result` |
-| Traces | Span for replay operations linked to original event trace |
-| Audit Events | `DlqReplayInitiated`, `DlqEventDiscarded`, `DlqRcaRecorded` [LCA-AUDIT-001] |
-| Regulatory Evidence | DLQ resolution records for compliance audit |
+| Telemetry Type      | Required Details                                                                                        |
+| ------------------- | ------------------------------------------------------------------------------------------------------- |
+| Metrics             | `dlq.size` (gauge), `dlq.replay.count` (counter), `dlq.quarantine.count` (gauge), `dlq.age.max` (gauge) |
+| Logs                | Structured: `dlq_id`, `topic`, `action`, `result`                                                       |
+| Traces              | Span for replay operations linked to original event trace                                               |
+| Audit Events        | `DlqReplayInitiated`, `DlqEventDiscarded`, `DlqRcaRecorded` [LCA-AUDIT-001]                             |
+| Regulatory Evidence | DLQ resolution records for compliance audit                                                             |
 
 ---
 
-#### Section 12 — Compliance & Regulatory Traceability
+#### Section 13 — Compliance & Regulatory Traceability
 
 - Data integrity assurance [LCA-DATA-001]
 - Audit trails for event resolution [LCA-AUDIT-001]
@@ -176,19 +176,31 @@ Deliver the K-19 DLQ Management & Event Replay module to prevent silent data los
 
 ---
 
-#### Section 13 — Extension Points & Contracts
+#### Section 14 — Extension Points & Contracts
 
 - **SDK Contract:** `DlqClient.getStatus(topic, consumerGroup)`, `DlqClient.replay(dlqIds, rcaId)`, `DlqClient.quarantine(dlqId)`, `DlqClient.discard(dlqId, reason)`.
 - **Jurisdiction Plugin Extension Points:** N/A.
 
 ---
 
-#### Section 14 — Future-Safe Architecture Evaluation
+#### Section 15 — Future-Safe Architecture Evaluation
 
-| Question | Expected Answer |
-|---|---|
-| Can this module support India/Bangladesh via plugin? | Yes, infrastructure is jurisdiction-agnostic. |
-| Can new failure classifiers be added? | Yes, via AI model registry or plugin. |
-| Can this run in an air-gapped deployment? | Yes, uses local storage. |
+| Question                                                              | Expected Answer                                                                                                              |
+| --------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------- |
+| Can this module support India/Bangladesh via plugin?                  | Yes, infrastructure is jurisdiction-agnostic.                                                                                |
+| Can new failure classifiers be added?                                 | Yes, via AI model registry or plugin.                                                                                        |
+| Can this run in an air-gapped deployment?                             | Yes, uses local storage.                                                                                                     |
 | Can this module handle digital assets (tokenized securities, crypto)? | Yes. Failed token transfer events and smart-contract revert messages are classified and quarantined with full chain context. |
-| Is the design ready for CBDC integration or T+0 settlement? | Yes. Priority-based DLQ processing ensures T+0 settlement failures are retried within SLA windows. |
+| Is the design ready for CBDC integration or T+0 settlement?           | Yes. Priority-based DLQ processing ensures T+0 settlement failures are retried within SLA windows.                           |
+
+---
+
+## Changelog
+
+### Version 1.0.1 (2026-03-10)
+
+**Type:** PATCH  
+**Changes:**
+
+- Standardized section numbering to the sequential 16-section format.
+- Added changelog metadata for future epic maintenance.

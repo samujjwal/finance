@@ -1,8 +1,8 @@
-EPIC-ID:    EPIC-D-09
-EPIC NAME:  Post-Trade & Settlement
-LAYER:      DOMAIN
-MODULE:     D-09 Post-Trade & Settlement
-VERSION:    1.0.0
+EPIC-ID: EPIC-D-09
+EPIC NAME: Post-Trade & Settlement
+LAYER: DOMAIN
+MODULE: D-09 Post-Trade & Settlement
+VERSION: 1.0.1
 
 ---
 
@@ -61,54 +61,54 @@ Deliver the D-09 Post-Trade & Settlement module, responsible for trade confirmat
 
 #### Section 6 — Event Model Definition
 
-| Field | Description |
-|---|---|
-| Event Name | `SettlementCompleted` |
-| Schema Version | `v1.0.0` |
+| Field             | Description                                                                            |
+| ----------------- | -------------------------------------------------------------------------------------- |
+| Event Name        | `SettlementCompleted`                                                                  |
+| Schema Version    | `v1.0.0`                                                                               |
 | Trigger Condition | T3 Adapter confirms the settlement, and D-09 successfully posts it to the K-16 Ledger. |
-| Payload | `{ "obligation_id": "...", "status": "SETTLED", "settlement_date_bs": "..." }` |
-| Consumers | OMS (unlock funds/shares), Regulatory Reporting, Client Notification |
-| Idempotency Key | `hash(obligation_id + status)` |
-| Replay Behavior | Updates the read model of obligation status. |
-| Retention Policy | Permanent. |
+| Payload           | `{ "obligation_id": "...", "status": "SETTLED", "settlement_date_bs": "..." }`         |
+| Consumers         | OMS (unlock funds/shares), Regulatory Reporting, Client Notification                   |
+| Idempotency Key   | `hash(obligation_id + status)`                                                         |
+| Replay Behavior   | Updates the read model of obligation status.                                           |
+| Retention Policy  | Permanent.                                                                             |
 
 ---
 
-#### Section 6.5 — Command Model Definition
+#### Section 7 — Command Model Definition
 
-| Field | Description |
-|---|---|
-| Command Name | `CalculateObligationCommand` |
-| Schema Version | `v1.0.0` |
+| Field            | Description                                                   |
+| ---------------- | ------------------------------------------------------------- |
+| Command Name     | `CalculateObligationCommand`                                  |
+| Schema Version   | `v1.0.0`                                                      |
 | Validation Rules | Trade exists, settlement cycle configured, counterparty valid |
-| Handler | `SettlementCommandHandler` in D-09 Post-Trade |
-| Success Event | `ObligationCalculated` |
-| Failure Event | `ObligationCalculationFailed` |
-| Idempotency | Same trade returns cached obligation |
+| Handler          | `SettlementCommandHandler` in D-09 Post-Trade                 |
+| Success Event    | `ObligationCalculated`                                        |
+| Failure Event    | `ObligationCalculationFailed`                                 |
+| Idempotency      | Same trade returns cached obligation                          |
 
-| Field | Description |
-|---|---|
-| Command Name | `SettleCommand` |
-| Schema Version | `v1.0.0` |
+| Field            | Description                                                            |
+| ---------------- | ---------------------------------------------------------------------- |
+| Command Name     | `SettleCommand`                                                        |
+| Schema Version   | `v1.0.0`                                                               |
 | Validation Rules | Obligation exists, settlement date reached, funds/securities available |
-| Handler | `SettlementCommandHandler` in D-09 Post-Trade |
-| Success Event | `SettlementCompleted` |
-| Failure Event | `SettlementFailed` |
-| Idempotency | Command ID must be unique; duplicate commands return original result |
+| Handler          | `SettlementCommandHandler` in D-09 Post-Trade                          |
+| Success Event    | `SettlementCompleted`                                                  |
+| Failure Event    | `SettlementFailed`                                                     |
+| Idempotency      | Command ID must be unique; duplicate commands return original result   |
 
-| Field | Description |
-|---|---|
-| Command Name | `HandleExceptionCommand` |
-| Schema Version | `v1.0.0` |
+| Field            | Description                                                                       |
+| ---------------- | --------------------------------------------------------------------------------- |
+| Command Name     | `HandleExceptionCommand`                                                          |
+| Schema Version   | `v1.0.0`                                                                          |
 | Validation Rules | Settlement failure exists, exception type identified, resolution action specified |
-| Handler | `ExceptionHandler` in D-09 Post-Trade |
-| Success Event | `ExceptionResolved` |
-| Failure Event | `ExceptionResolutionFailed` |
-| Idempotency | Command ID must be unique; duplicate commands return original result |
+| Handler          | `ExceptionHandler` in D-09 Post-Trade                                             |
+| Success Event    | `ExceptionResolved`                                                               |
+| Failure Event    | `ExceptionResolutionFailed`                                                       |
+| Idempotency      | Command ID must be unique; duplicate commands return original result              |
 
 ---
 
-#### Section 7 — AI Integration Requirements
+#### Section 8 — AI Integration Requirements
 
 - **AI Hook Type:** Predictive Model
 - **Workflow Steps Exposed:** Settlement failure prediction.
@@ -120,28 +120,28 @@ Deliver the D-09 Post-Trade & Settlement module, responsible for trade confirmat
 
 ---
 
-#### Section 8 — NFRs
+#### Section 9 — NFRs
 
-| NFR Category | Required Targets |
-|---|---|
-| Latency / Throughput | Netting calculation < 100ms for a batch of 10,000 trades |
-| Scalability | Batch processing scaled horizontally |
-| Availability | 99.99% |
-| Consistency Model | Strong consistency for ledger postings |
-| Security | Row-level tenant isolation |
-| Data Residency | Enforced via K-08 |
-| Data Retention | Retain settlement history 10 years |
-| Auditability | All manual interventions logged |
-| Observability | Metrics: `settlement.fail.rate`, `netting.duration` |
-| Extensibility | Connect new depository via T3 |
-| Upgrade / Compatibility | N/A |
-| On-Prem Constraints | Runs batch jobs locally |
-| Ledger Integrity | Posts directly to K-16 |
-| Dual-Calendar Correctness | Correct T+n calculations |
+| NFR Category              | Required Targets                                         |
+| ------------------------- | -------------------------------------------------------- |
+| Latency / Throughput      | Netting calculation < 100ms for a batch of 10,000 trades |
+| Scalability               | Batch processing scaled horizontally                     |
+| Availability              | 99.99%                                                   |
+| Consistency Model         | Strong consistency for ledger postings                   |
+| Security                  | Row-level tenant isolation                               |
+| Data Residency            | Enforced via K-08                                        |
+| Data Retention            | Retain settlement history 10 years                       |
+| Auditability              | All manual interventions logged                          |
+| Observability             | Metrics: `settlement.fail.rate`, `netting.duration`      |
+| Extensibility             | Connect new depository via T3                            |
+| Upgrade / Compatibility   | N/A                                                      |
+| On-Prem Constraints       | Runs batch jobs locally                                  |
+| Ledger Integrity          | Posts directly to K-16                                   |
+| Dual-Calendar Correctness | Correct T+n calculations                                 |
 
 ---
 
-#### Section 9 — Acceptance Criteria
+#### Section 10 — Acceptance Criteria
 
 1. **Given** 10 buys and 5 sells of the same ISIN by the same account today, **When** the EOD netting job runs, **Then** it creates a single `SettlementObligation` for the net 5 buys.
 2. **Given** a trade executed on Sunday, **When** calculating settlement date against a Nepal T1 Calendar Pack (Sun-Thu trading, T+2 cycle), **Then** it accurately calculates Tuesday as the dual-calendar settlement date.
@@ -149,33 +149,33 @@ Deliver the D-09 Post-Trade & Settlement module, responsible for trade confirmat
 
 ---
 
-#### Section 10 — Failure Modes & Resilience
+#### Section 11 — Failure Modes & Resilience
 
 - **Ledger K-16 Unreachable:** D-09 retries posting with exponential backoff; keeps obligation in `PENDING_POST` state.
 - **Adapter Down:** Obligation marked as `PENDING_INSTRUCTION`; alerts operations.
 
 ---
 
-#### Section 11 — Observability & Audit
+#### Section 12 — Observability & Audit
 
-| Telemetry Type | Required Details |
-|---|---|
-| Metrics | `settlement.success.count`, `settlement.fail.count` |
-| Logs | Netting errors |
-| Traces | Span `Settlement.process` |
-| Audit Events | Action: `ManualSettle`, `OverrideFail` |
-| Regulatory Evidence | Settlement logs for depository reconciliation. |
+| Telemetry Type      | Required Details                                    |
+| ------------------- | --------------------------------------------------- |
+| Metrics             | `settlement.success.count`, `settlement.fail.count` |
+| Logs                | Netting errors                                      |
+| Traces              | Span `Settlement.process`                           |
+| Audit Events        | Action: `ManualSettle`, `OverrideFail`              |
+| Regulatory Evidence | Settlement logs for depository reconciliation.      |
 
 ---
 
-#### Section 12 — Compliance & Regulatory Traceability
+#### Section 13 — Compliance & Regulatory Traceability
 
 - Clearing and Settlement tracking [ASR-OPS-001]
 - Asset segregation verification [LCA-SEG-001]
 
 ---
 
-#### Section 13 — Extension Points & Contracts
+#### Section 14 — Extension Points & Contracts
 
 - **SDK Contract:** `PostTradeClient.getSettlementStatus(tradeId)`, `PostTradeClient.initiateSettlement(tradeId)`, `PostTradeClient.getSettlementSchedule(date_bs)`.
 - **Jurisdiction Plugin Extension Points:** T3 Depository Adapters (e.g., CDS&C Nepal, NSDL/CDSL India).
@@ -196,17 +196,17 @@ Deliver the D-09 Post-Trade & Settlement module, responsible for trade confirmat
 
 ---
 
-#### Section 14 — Future-Safe Architecture Evaluation
+#### Section 15 — Future-Safe Architecture Evaluation
 
-| Question | Expected Answer |
-|---|---|
-| Can this module support India/Bangladesh via plugin? | Yes, via new T3 Adapters (NSDL/CDSL). |
-| Can settlement cycle change without redeploy? | Yes, handled via T1 Config Pack. |
-| Can this run in an air-gapped deployment? | Partially; requires depository connectivity. |
+| Question                                             | Expected Answer                              |
+| ---------------------------------------------------- | -------------------------------------------- |
+| Can this module support India/Bangladesh via plugin? | Yes, via new T3 Adapters (NSDL/CDSL).        |
+| Can settlement cycle change without redeploy?        | Yes, handled via T1 Config Pack.             |
+| Can this run in an air-gapped deployment?            | Partially; requires depository connectivity. |
 
 ---
 
-#### Section 14.5 — Threat Model
+#### Section 16 — Threat Model
 
 **Attack Vectors & Mitigations:**
 
@@ -236,6 +236,7 @@ Deliver the D-09 Post-Trade & Settlement module, responsible for trade confirmat
    - **Residual Risk:** Coordinated attack across multiple systems.
 
 **Security Controls:**
+
 - Cryptographic signing of instructions
 - Maker-checker for exceptions
 - T3 adapter sandboxing
@@ -243,3 +244,15 @@ Deliver the D-09 Post-Trade & Settlement module, responsible for trade confirmat
 - Independent reconciliation
 - Audit logging of all operations
 - Network segmentation for depository connectivity
+
+---
+
+## Changelog
+
+### Version 1.0.1 (2026-03-10)
+
+**Type:** PATCH  
+**Changes:**
+
+- Standardized section numbering to the sequential 16-section format.
+- Added changelog metadata for future epic maintenance.

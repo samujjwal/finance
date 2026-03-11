@@ -1,8 +1,9 @@
 # LOW-LEVEL DESIGN (LLD) INDEX
+
 ## Project Siddhanta - Implementation-Ready Design Documents
 
-**Version**: 3.0.0  
-**Last Updated**: 2026-03-08  
+**Version**: 3.1.1  
+**Last Updated**: 2026-03-10  
 **Status**: Complete — All 33 LLDs Authored (Full Architecture Coverage)  
 **Owner**: Platform Architecture Team
 
@@ -42,11 +43,13 @@ All LLDs follow this mandatory structure:
 ## 2. KERNEL MODULES (K-XX)
 
 ### K-01 Identity & Access Management (IAM)
-**File**: `@/Users/samujjwal/Development/finance/LLD_K01_IAM.md`
+
+**File**: `lld/LLD_K01_IAM.md`
 
 **Purpose**: Multi-tenant authentication, authorization, session management, and KYC/AML integration.
 
 **Key Features**:
+
 - OAuth 2.0 + JWT authentication with MFA (TOTP/WebAuthn)
 - RBAC with fine-grained permissions (resource + action level)
 - Multi-tenant session management with tenant isolation
@@ -58,6 +61,7 @@ All LLDs follow this mandatory structure:
 **Dependencies**: K-02 (configuration), K-05 (auth events), K-07 (audit), K-15 (dual-calendar)
 
 **Extension Points**:
+
 - National ID verification adapters (T3 — jurisdiction-specific)
 - Custom authentication providers (T3)
 - KYC/AML rule packs (T2)
@@ -67,33 +71,40 @@ All LLDs follow this mandatory structure:
 ---
 
 ### K-02 Configuration Engine
-**File**: `@/Users/samujjwal/Development/finance/LLD_K02_CONFIGURATION_ENGINE.md`
+
+**File**: `lld/LLD_K02_CONFIGURATION_ENGINE.md`
 
 **Purpose**: Hierarchical configuration management with hot-reload, schema validation, and multi-level overrides.
 
 **Key Features**:
+
 - Schema registration and validation
-- 5-level hierarchy: GLOBAL → JURISDICTION → TENANT → USER → SESSION
+- 6-level hierarchy: GLOBAL → JURISDICTION → OPERATOR → TENANT → ACCOUNT → USER
 - Hot-reload without service restart
 - Dual-calendar effective dates
 - Canary rollout for configuration changes
 - Air-gap support with cryptographic signing
+- Metadata asset governance for process templates, task schemas, value catalogs, and routing policies
 
 **Dependencies**: None (foundational module)
 
 **Extension Points**:
+
 - Custom schema validators
 - Configuration transformers
 - Rollout strategies
+- Metadata asset providers and scoped overlay policies
 
 ---
 
 ### K-03 Policy/Rules Engine
-**File**: `@/Users/samujjwal/Development/finance/LLD_K03_RULES_ENGINE.md`
+
+**File**: `lld/LLD_K03_RULES_ENGINE.md`
 
 **Purpose**: Declarative policy evaluation using OPA/Rego for compliance and business rules.
 
 **Key Features**:
+
 - Sandboxed Rego execution (T2 isolation)
 - Hot-reload of rule packs
 - Audit trail of all policy decisions
@@ -104,6 +115,7 @@ All LLDs follow this mandatory structure:
 **Dependencies**: K-02 (rule pack storage), K-05 (hot-reload events), K-07 (audit)
 
 **Extension Points**:
+
 - Custom Rego functions
 - Policy versioning strategies
 - Fallback policies
@@ -111,11 +123,13 @@ All LLDs follow this mandatory structure:
 ---
 
 ### K-04 Plugin Runtime & SDK
-**File**: `@/Users/samujjwal/Development/finance/LLD_K04_PLUGIN_RUNTIME.md`
+
+**File**: `lld/LLD_K04_PLUGIN_RUNTIME.md`
 
 **Purpose**: Secure, versioned extension mechanism for third-party and internal plugins.
 
 **Key Features**:
+
 - Cryptographic signature verification (Ed25519)
 - Tier-based isolation (T1=process, T2=sandbox, T3=network)
 - Capability-based access control
@@ -126,6 +140,7 @@ All LLDs follow this mandatory structure:
 **Dependencies**: K-02 (plugin config), K-05 (lifecycle events), K-07 (audit)
 
 **Extension Points**:
+
 - Custom plugin tiers
 - Plugin lifecycle hooks
 - Capability registration
@@ -133,11 +148,13 @@ All LLDs follow this mandatory structure:
 ---
 
 ### K-05 Event Bus, Event Store & Workflow Orchestration
-**File**: `@/Users/samujjwal/Development/finance/LLD_K05_EVENT_BUS.md`
+
+**File**: `lld/LLD_K05_EVENT_BUS.md`
 
 **Purpose**: Append-only event storage, reliable delivery, and saga-based workflow orchestration.
 
 **Key Features**:
+
 - Immutable event store (PostgreSQL + Kafka)
 - At-least-once delivery guarantees
 - Idempotency enforcement
@@ -148,6 +165,7 @@ All LLDs follow this mandatory structure:
 **Dependencies**: K-02 (schema registry), K-07 (audit)
 
 **Extension Points**:
+
 - Custom event handlers
 - Saga definition DSL
 - Projection builders
@@ -155,11 +173,13 @@ All LLDs follow this mandatory structure:
 ---
 
 ### K-07 Audit Framework
-**File**: `@/Users/samujjwal/Development/finance/LLD_K07_AUDIT_FRAMEWORK.md`
+
+**File**: `lld/LLD_K07_AUDIT_FRAMEWORK.md`
 
 **Purpose**: Immutable, cryptographically-chained audit logging for regulatory compliance.
 
 **Key Features**:
+
 - Hash chain for tamper detection (SHA-256)
 - Standardized audit event schema
 - Evidence export (CSV, JSON, PDF)
@@ -170,6 +190,7 @@ All LLDs follow this mandatory structure:
 **Dependencies**: K-02 (retention policies), K-05 (audit events)
 
 **Extension Points**:
+
 - Custom audit actions
 - Event enrichers
 - Compliance report templates
@@ -177,11 +198,13 @@ All LLDs follow this mandatory structure:
 ---
 
 ### K-09 AI Governance
-**File**: `@/Users/samujjwal/Development/finance/LLD_K09_AI_GOVERNANCE.md`
+
+**File**: `lld/LLD_K09_AI_GOVERNANCE.md`
 
 **Purpose**: Model registry, prompt versioning, explainability, and HITL controls for AI/ML.
 
 **Key Features**:
+
 - Model registry with versioning
 - SHAP/LIME explainability
 - Human-in-the-loop (HITL) override mechanism
@@ -192,6 +215,7 @@ All LLDs follow this mandatory structure:
 **Dependencies**: K-02 (model config), K-05 (AI decision events), K-07 (audit)
 
 **Extension Points**:
+
 - Custom explainability methods
 - Fairness metrics
 - Model optimization strategies
@@ -199,11 +223,13 @@ All LLDs follow this mandatory structure:
 ---
 
 ### K-06 Observability Stack
-**File**: `@/Users/samujjwal/Development/finance/LLD_K06_OBSERVABILITY.md`
+
+**File**: `lld/LLD_K06_OBSERVABILITY.md`
 
 **Purpose**: Metrics collection, distributed tracing, centralized logging, alerting, and SLO management.
 
 **Key Features**:
+
 - Prometheus metrics collection with custom dimensions
 - Jaeger/OpenTelemetry distributed tracing
 - ELK Stack centralized logging
@@ -215,6 +241,7 @@ All LLDs follow this mandatory structure:
 **Dependencies**: K-02 (alert thresholds, dashboard config)
 
 **Extension Points**:
+
 - Custom metric collectors
 - Dashboard templates (T1 config pack)
 - Alert routing rules (T2 rule pack)
@@ -225,11 +252,13 @@ All LLDs follow this mandatory structure:
 ---
 
 ### K-15 Dual-Calendar Service
-**File**: `@/Users/samujjwal/Development/finance/LLD_K15_DUAL_CALENDAR.md`
+
+**File**: `lld/LLD_K15_DUAL_CALENDAR.md`
 
 **Purpose**: Bikram Sambat ↔ Gregorian calendar conversion, dual-date generation, and fiscal year calculation.
 
 **Key Features**:
+
 - `DualDate(gregorian, bs)` generation for every timestamp
 - BS ↔ AD conversion with JDN algorithm + 100-year lookup table
 - Fiscal year boundaries per jurisdiction (T1 config)
@@ -241,6 +270,7 @@ All LLDs follow this mandatory structure:
 **Dependencies**: K-02 (holiday calendars, fiscal year config)
 
 **Extension Points**:
+
 - Additional calendar systems (T1 config — e.g., Islamic, Thai)
 - Custom holiday calendars per jurisdiction (T1)
 - Fiscal year boundary rules (T1)
@@ -250,11 +280,13 @@ All LLDs follow this mandatory structure:
 ---
 
 ### K-16 Ledger Framework
-**File**: `@/Users/samujjwal/Development/finance/LLD_K16_LEDGER_FRAMEWORK.md`
+
+**File**: `lld/LLD_K16_LEDGER_FRAMEWORK.md`
 
 **Purpose**: Immutable, double-entry ledger primitive for all financial tracking across domain modules.
 
 **Key Features**:
+
 - Double-entry bookkeeping with balance enforcement
 - Append-only, event-sourced ledger entries (REVOKE UPDATE/DELETE)
 - Temporal balance queries with pre-computed snapshots
@@ -265,6 +297,7 @@ All LLDs follow this mandatory structure:
 **Dependencies**: K-02 (chart of accounts, precision rules), K-05 (events), K-15 (dual-calendar), K-17 (DTC for cross-module postings)
 
 **Extension Points**:
+
 - Chart of accounts structure (T1 config pack)
 - Reconciliation format adapters (T3 — CDSC, CCIL, bank-specific)
 - Rounding rules per currency (T1)
@@ -275,11 +308,13 @@ All LLDs follow this mandatory structure:
 ---
 
 ### K-17 Distributed Transaction Coordinator
-**File**: `@/Users/samujjwal/Development/finance/LLD_K17_DISTRIBUTED_TRANSACTION_COORDINATOR.md`
+
+**File**: `lld/LLD_K17_DISTRIBUTED_TRANSACTION_COORDINATOR.md`
 
 **Purpose**: Outbox pattern, version vectors for cross-stream causal ordering, and compensation orchestration.
 
 **Key Features**:
+
 - Transactional outbox for guaranteed event publishing
 - Version vectors for cross-aggregate causal ordering
 - Compensation orchestration with retry and manual resolution
@@ -290,6 +325,7 @@ All LLDs follow this mandatory structure:
 **Dependencies**: K-05 (event delivery), K-06 (observability), K-07 (audit), K-16 (ledger), K-19 (DLQ)
 
 **Extension Points**:
+
 - Custom saga definitions (T1)
 - Compensation strategies
 - Conflict resolution plugins (T3)
@@ -299,11 +335,13 @@ All LLDs follow this mandatory structure:
 ---
 
 ### K-18 Resilience Patterns Library
-**File**: `@/Users/samujjwal/Development/finance/LLD_K18_RESILIENCE_PATTERNS.md`
+
+**File**: `lld/LLD_K18_RESILIENCE_PATTERNS.md`
 
 **Purpose**: Shared circuit breakers, bulkheads, retry policies, and timeout management.
 
 **Key Features**:
+
 - Circuit breaker with configurable thresholds (half-open probing)
 - Bulkhead isolation (thread pool and semaphore)
 - Retry policies with exponential backoff and jitter
@@ -314,6 +352,7 @@ All LLDs follow this mandatory structure:
 **Dependencies**: K-02 (configuration), K-05 (events), K-06 (metrics)
 
 **Extension Points**:
+
 - Custom resilience profiles (T1)
 - Custom failure classifiers (T3)
 - Adaptive resilience (future ML-driven)
@@ -323,11 +362,13 @@ All LLDs follow this mandatory structure:
 ---
 
 ### K-19 DLQ Management & Event Replay
-**File**: `@/Users/samujjwal/Development/finance/LLD_K19_DLQ_MANAGEMENT.md`
+
+**File**: `lld/LLD_K19_DLQ_MANAGEMENT.md`
 
 **Purpose**: Dead-letter queue monitoring, root cause analysis tooling, and safe event replay.
 
 **Key Features**:
+
 - DLQ dashboard with threshold alerts
 - Root cause analysis (RCA) requirement before replay
 - Safe replay with idempotency verification and dry-run
@@ -338,6 +379,7 @@ All LLDs follow this mandatory structure:
 **Dependencies**: K-05 (event bus), K-06 (observability), K-07 (audit), K-15 (dual-calendar)
 
 **Extension Points**:
+
 - Custom auto-retry rules (T1)
 - Custom DLQ handlers (T3)
 - AI-assisted RCA (future)
@@ -347,11 +389,13 @@ All LLDs follow this mandatory structure:
 ---
 
 ### K-08 Data Governance
-**File**: `@/Users/samujjwal/Development/finance/LLD_K08_DATA_GOVERNANCE.md`
+
+**File**: `lld/LLD_K08_DATA_GOVERNANCE.md`
 
 **Purpose**: Data lineage tracking, residency enforcement, retention lifecycle, encryption abstraction, and GDPR data subject rights.
 
 **Key Features**:
+
 - Data lineage graph with field-level tracking
 - Data residency enforcement per jurisdiction
 - Retention lifecycle management with automated purge
@@ -363,6 +407,7 @@ All LLDs follow this mandatory structure:
 **Dependencies**: K-01 (identity), K-02 (config), K-05 (events), K-06 (observability), K-07 (audit), K-14 (encryption keys)
 
 **Extension Points**:
+
 - Custom data classifiers (T2)
 - Jurisdiction-specific residency rules (T1)
 - Custom retention policies (T1)
@@ -372,11 +417,13 @@ All LLDs follow this mandatory structure:
 ---
 
 ### K-10 Deployment Abstraction Layer
-**File**: `@/Users/samujjwal/Development/finance/LLD_K10_DEPLOYMENT_ABSTRACTION.md`
+
+**File**: `lld/LLD_K10_DEPLOYMENT_ABSTRACTION.md`
 
 **Purpose**: Unified deployment across SaaS, dedicated, on-prem, hybrid, and air-gap topologies with feature flags and Ed25519 bundle signing.
 
 **Key Features**:
+
 - 5 deployment topology support (SaaS, dedicated, on-prem, hybrid, air-gap)
 - Feature flag management with gradual rollout
 - Ed25519 signed deployment bundles for air-gap
@@ -387,6 +434,7 @@ All LLDs follow this mandatory structure:
 **Dependencies**: K-02 (config), K-04 (plugin runtime), K-06 (observability), K-07 (audit)
 
 **Extension Points**:
+
 - Custom deployment strategies (T1)
 - Cloud provider adapters (T3 — AWS/Azure/GCP)
 - Custom health checks
@@ -396,11 +444,13 @@ All LLDs follow this mandatory structure:
 ---
 
 ### K-11 API Gateway
-**File**: `@/Users/samujjwal/Development/finance/LLD_K11_API_GATEWAY.md`
+
+**File**: `lld/LLD_K11_API_GATEWAY.md`
 
 **Purpose**: Single entry point with JWT/mTLS auth, rate limiting, dynamic routing, jurisdiction-aware routing, OpenAPI schema validation, and WAF.
 
 **Key Features**:
+
 - JWT + mTLS authentication
 - Token bucket rate limiting with tenant-aware quotas
 - Dynamic routing with service discovery
@@ -412,6 +462,7 @@ All LLDs follow this mandatory structure:
 **Dependencies**: K-01 (auth), K-02 (config), K-05 (events), K-06 (observability), K-07 (audit)
 
 **Extension Points**:
+
 - Custom rate limiting strategies (T1)
 - Custom middleware plugins (T3)
 - Route transformers
@@ -421,11 +472,13 @@ All LLDs follow this mandatory structure:
 ---
 
 ### K-12 Platform SDK
-**File**: `@/Users/samujjwal/Development/finance/LLD_K12_PLATFORM_SDK.md`
+
+**File**: `lld/LLD_K12_PLATFORM_SDK.md`
 
 **Purpose**: Multi-language SDK (Go, Java, Python, TypeScript, C#) with protocol abstraction, error translation, middleware hooks, and auto-generation.
 
 **Key Features**:
+
 - Multi-language support (Go, Java, Python, TypeScript, C#)
 - Protocol abstraction (REST, gRPC, WebSocket)
 - Automatic error translation with standard error codes
@@ -436,6 +489,7 @@ All LLDs follow this mandatory structure:
 **Dependencies**: All platform services, K-01 (auth), K-18 (resilience)
 
 **Extension Points**:
+
 - Custom language targets
 - Custom middleware
 - Protocol adapters
@@ -445,11 +499,13 @@ All LLDs follow this mandatory structure:
 ---
 
 ### K-13 Admin Portal
-**File**: `@/Users/samujjwal/Development/finance/LLD_K13_ADMIN_PORTAL.md`
+
+**File**: `lld/LLD_K13_ADMIN_PORTAL.md`
 
 **Purpose**: Micro-frontend admin console (React 18) with RBAC views, maker-checker UI, dual-calendar date pickers, audit log viewer, and AI insights dashboard.
 
 **Key Features**:
+
 - Micro-frontend architecture (React 18 + Module Federation)
 - RBAC-aware UI rendering
 - Maker-checker approval workflows
@@ -457,10 +513,12 @@ All LLDs follow this mandatory structure:
 - Audit log viewer with advanced filtering
 - AI insights dashboard with explainability
 - Real-time operational dashboards
+- Schema-driven forms and workflow-task rendering with value-catalog-backed controls
 
 **Dependencies**: K-01 (IAM), K-02 (config), K-04 (plugin runtime), K-06 (observability), K-07 (audit), K-09 (AI), K-10 (deployment), K-15 (dual-calendar)
 
 **Extension Points**:
+
 - Custom admin micro-frontends (T3)
 - Dashboard widget plugins
 - Theme customization (T1)
@@ -470,11 +528,13 @@ All LLDs follow this mandatory structure:
 ---
 
 ### K-14 Secrets Management
-**File**: `@/Users/samujjwal/Development/finance/LLD_K14_SECRETS_MANAGEMENT.md`
+
+**File**: `lld/LLD_K14_SECRETS_MANAGEMENT.md`
 
 **Purpose**: Multi-provider vault abstraction (Vault/AWS/Azure/GCP), auto-rotation, certificate lifecycle, break-glass access with MFA, and HSM integration.
 
 **Key Features**:
+
 - Multi-provider vault abstraction (HashiCorp Vault, AWS SM, Azure KV, GCP SM)
 - Automatic secret rotation with zero-downtime
 - Certificate lifecycle management (issuance, renewal, revocation)
@@ -485,6 +545,7 @@ All LLDs follow this mandatory structure:
 **Dependencies**: K-01 (IAM), K-02 (config), K-07 (audit), K-08 (data governance)
 
 **Extension Points**:
+
 - Custom vault providers (T3)
 - Custom rotation strategies (T1)
 - Certificate authority integrations
@@ -496,11 +557,13 @@ All LLDs follow this mandatory structure:
 ## 3. DOMAIN SUBSYSTEMS (D-XX)
 
 ### D-01 Order Management System (OMS)
-**File**: `@/Users/samujjwal/Development/finance/LLD_D01_OMS.md`
+
+**File**: `lld/LLD_D01_OMS.md`
 
 **Purpose**: Order lifecycle management, pre-trade validation, routing, and position updates.
 
 **Key Features**:
+
 - Order state machine (9 states)
 - Pre-trade validation via K-03
 - Maker-checker for large orders
@@ -511,6 +574,7 @@ All LLDs follow this mandatory structure:
 **Dependencies**: K-02 (order limits), K-03 (validation), K-05 (events), K-07 (audit), K-09 (AI)
 
 **Extension Points**:
+
 - Custom order validators (jurisdiction-specific)
 - Custom order types (e.g., ICEBERG)
 - AI optimization hooks (e.g., VWAP)
@@ -520,11 +584,13 @@ All LLDs follow this mandatory structure:
 ---
 
 ### D-02 Execution Management System (EMS)
-**File**: `@/Users/samujjwal/Development/finance/LLD_D02_EMS.md`
+
+**File**: `lld/LLD_D02_EMS.md`
 
 **Purpose**: Smart order routing, execution algorithms (VWAP/TWAP), T3 exchange adapters, TCA capture, and circuit breaker handling.
 
 **Key Features**:
+
 - Smart Order Router (SOR) with venue scoring
 - Execution algorithms: VWAP, TWAP, Implementation Shortfall
 - T3 exchange adapter framework (FIX 4.4/5.0, proprietary APIs)
@@ -535,6 +601,7 @@ All LLDs follow this mandatory structure:
 **Dependencies**: D-01 (orders), D-04 (market data), K-02, K-03, K-04, K-05, K-07, K-15, K-18
 
 **Extension Points**:
+
 - T3 exchange adapters (new venues)
 - Custom execution algorithms (T2)
 - TCA model plugins
@@ -544,11 +611,13 @@ All LLDs follow this mandatory structure:
 ---
 
 ### D-03 Portfolio Management System (PMS)
-**File**: `@/Users/samujjwal/Development/finance/LLD_D03_PMS.md`
+
+**File**: `lld/LLD_D03_PMS.md`
 
 **Purpose**: Portfolio construction, NAV calculation, rebalancing with drift detection, and position tracking via K-16 ledger.
 
 **Key Features**:
+
 - Portfolio construction with constraint optimization
 - NAV calculation (time-weighted, money-weighted returns)
 - Drift detection and automatic rebalancing triggers
@@ -559,6 +628,7 @@ All LLDs follow this mandatory structure:
 **Dependencies**: K-02, K-05, K-07, K-15, K-16, D-05 (pricing)
 
 **Extension Points**:
+
 - Custom portfolio models (T2)
 - Rebalancing strategy plugins (T2)
 - Performance attribution models
@@ -568,11 +638,13 @@ All LLDs follow this mandatory structure:
 ---
 
 ### D-04 Market Data Service
-**File**: `@/Users/samujjwal/Development/finance/LLD_D04_MARKET_DATA.md`
+
+**File**: `lld/LLD_D04_MARKET_DATA.md`
 
 **Purpose**: Feed normalization from multiple sources, L1/L2/L3 order book distribution, circuit breaker detection, and historical data storage.
 
 **Key Features**:
+
 - Feed normalization from exchange/vendor sources
 - L1 (best bid/ask), L2 (depth), L3 (full order book) distribution
 - Circuit breaker detection and MarketHaltEvent emission
@@ -584,6 +656,7 @@ All LLDs follow this mandatory structure:
 **Dependencies**: K-02, K-04, K-05, K-07, K-15
 
 **Extension Points**:
+
 - T3 feed adapters for new exchanges/vendors
 - T1 instrument mapping configs
 - Custom OHLC intervals
@@ -593,11 +666,13 @@ All LLDs follow this mandatory structure:
 ---
 
 ### D-05 Pricing Engine
-**File**: `@/Users/samujjwal/Development/finance/LLD_D05_PRICING_ENGINE.md`
+
+**File**: `lld/LLD_D05_PRICING_ENGINE.md`
 
 **Purpose**: Instrument valuation, yield curve construction, mark-to-market (MTM), and T3 model execution for complex pricing.
 
 **Key Features**:
+
 - Real-time and EOD instrument pricing (equity, fixed income, derivatives)
 - Yield curve bootstrapping (Nelson-Siegel, cubic spline)
 - T3 pricing model plugins for jurisdiction-specific instruments
@@ -608,6 +683,7 @@ All LLDs follow this mandatory structure:
 **Dependencies**: D-04 (market data), K-02, K-03, K-04, K-05, K-07, K-09, K-15
 
 **Extension Points**:
+
 - T3 pricing model plugins
 - T2 jurisdiction-specific valuation rules
 - Custom curve types and interpolation methods
@@ -617,11 +693,13 @@ All LLDs follow this mandatory structure:
 ---
 
 ### D-06 Risk Engine
-**File**: `@/Users/samujjwal/Development/finance/LLD_D06_RISK_ENGINE.md`
+
+**File**: `lld/LLD_D06_RISK_ENGINE.md`
 
 **Purpose**: Pre-trade risk checks, real-time exposure monitoring, margin calculation, margin calls, and forced liquidation.
 
 **Key Features**:
+
 - Pre-trade risk validation via K-03 pipeline (<5ms)
 - VaR calculation (parametric, historical, Monte Carlo)
 - Margin calculation (initial, variation, maintenance)
@@ -632,6 +710,7 @@ All LLDs follow this mandatory structure:
 **Dependencies**: D-03, D-05, K-02, K-03, K-05, K-07, K-15, K-16, K-18
 
 **Extension Points**:
+
 - T2 jurisdiction-specific margin rules
 - T3 custom risk model plugins
 - Stress test scenario packs
@@ -641,11 +720,13 @@ All LLDs follow this mandatory structure:
 ---
 
 ### D-07 Compliance Engine
-**File**: `@/Users/samujjwal/Development/finance/LLD_D07_COMPLIANCE_ENGINE.md`
+
+**File**: `lld/LLD_D07_COMPLIANCE_ENGINE.md`
 
 **Purpose**: Regulatory gatekeeper enforcing trading rules, lock-in periods, KYC/AML, and jurisdiction-specific compliance.
 
 **Key Features**:
+
 - Pre-trade compliance validation (lock-in, insider trading)
 - KYC/AML onboarding and ongoing due diligence
 - Lock-in period enforcement (BS calendar-aware)
@@ -656,6 +737,7 @@ All LLDs follow this mandatory structure:
 **Dependencies**: K-01, K-02, K-03, K-05, K-07, K-15, K-18, D-14
 
 **Extension Points**:
+
 - T2 jurisdiction-specific compliance rules via K-03
 - T3 regulatory portal adapters
 - Custom KYC workflows
@@ -665,11 +747,13 @@ All LLDs follow this mandatory structure:
 ---
 
 ### D-08 Market Surveillance
-**File**: `@/Users/samujjwal/Development/finance/LLD_D08_SURVEILLANCE.md`
+
+**File**: `lld/LLD_D08_SURVEILLANCE.md`
 
 **Purpose**: Market abuse detection (wash trades, spoofing, front-running), AI anomaly detection, and case management.
 
 **Key Features**:
+
 - Wash trade detection (self-dealing across related accounts)
 - Spoofing/layering detection (order book manipulation)
 - Front-running detection (staff vs client timing)
@@ -680,6 +764,7 @@ All LLDs follow this mandatory structure:
 **Dependencies**: K-02, K-03, K-05, K-06, K-07, K-09, K-15, K-18
 
 **Extension Points**:
+
 - T2 jurisdiction-specific detection rules
 - T3 exchange surveillance data adapters
 - Custom ML models via K-09
@@ -689,11 +774,13 @@ All LLDs follow this mandatory structure:
 ---
 
 ### D-09 Post-Trade Processing
-**File**: `@/Users/samujjwal/Development/finance/LLD_D09_POST_TRADE.md`
+
+**File**: `lld/LLD_D09_POST_TRADE.md`
 
 **Purpose**: Trade confirmation, netting, settlement lifecycle (T+n), clearing integration, and ledger posting via K-16.
 
 **Key Features**:
+
 - Trade confirmation generation and distribution
 - Bilateral and multilateral netting
 - Settlement lifecycle (T+0 to T+n via K-15 dual-calendar)
@@ -704,6 +791,7 @@ All LLDs follow this mandatory structure:
 **Dependencies**: D-01, K-02, K-03, K-05, K-07, K-15, K-16, K-17
 
 **Extension Points**:
+
 - T3 CSD/depository adapters
 - T2 jurisdiction-specific netting rules
 - Custom settlement cycle configs
@@ -713,11 +801,13 @@ All LLDs follow this mandatory structure:
 ---
 
 ### D-10 Regulatory Reporting
-**File**: `@/Users/samujjwal/Development/finance/LLD_D10_REGULATORY_REPORTING.md`
+
+**File**: `lld/LLD_D10_REGULATORY_REPORTING.md`
 
 **Purpose**: Automated report generation, multi-format rendering (PDF/CSV/XBRL), regulatory portal submission, and ACK tracking.
 
 **Key Features**:
+
 - Report definition management (templates, schedules)
 - Multi-format rendering: PDF, CSV, XLSX, XBRL, JSON
 - T3 regulatory portal adapter submission
@@ -728,6 +818,7 @@ All LLDs follow this mandatory structure:
 **Dependencies**: K-02, K-04, K-05, K-07, K-15, K-16
 
 **Extension Points**:
+
 - T3 regulatory portal adapters per jurisdiction
 - Custom report templates
 - T2 jurisdiction-specific data transformation rules
@@ -737,11 +828,13 @@ All LLDs follow this mandatory structure:
 ---
 
 ### D-11 Reference Data Service
-**File**: `@/Users/samujjwal/Development/finance/LLD_D11_REFERENCE_DATA.md`
+
+**File**: `lld/LLD_D11_REFERENCE_DATA.md`
 
 **Purpose**: Golden source for instruments (ISIN), legal entities, benchmarks, and versioned master data.
 
 **Key Features**:
+
 - Instrument master data management (ISIN, symbol, lots)
 - Legal entity management (issuers, brokers, custodians)
 - Benchmark/index definitions and constituents
@@ -752,6 +845,7 @@ All LLDs follow this mandatory structure:
 **Dependencies**: K-02, K-05, K-07, K-15
 
 **Extension Points**:
+
 - T3 data provider adapters for new vendors
 - T2 jurisdiction-specific instrument types
 - Custom validation rules
@@ -761,11 +855,13 @@ All LLDs follow this mandatory structure:
 ---
 
 ### D-12 Corporate Actions
-**File**: `@/Users/samujjwal/Development/finance/LLD_D12_CORPORATE_ACTIONS.md`
+
+**File**: `lld/LLD_D12_CORPORATE_ACTIONS.md`
 
 **Purpose**: Bonus shares, dividends, rights issues, stock splits — entitlement calculation, tax withholding, and ledger posting.
 
 **Key Features**:
+
 - Corporate action lifecycle management
 - Entitlement calculation (bonus, dividend, rights, splits)
 - T2 Rule Packs for jurisdiction-specific entitlement logic
@@ -777,6 +873,7 @@ All LLDs follow this mandatory structure:
 **Dependencies**: D-03, D-11, K-02, K-03, K-05, K-07, K-15, K-16
 
 **Extension Points**:
+
 - T2 jurisdiction-specific tax and entitlement rules via K-03
 - T3 CSD adapters for reconciliation
 - Custom fractional handling policies
@@ -786,11 +883,13 @@ All LLDs follow this mandatory structure:
 ---
 
 ### D-13 Client Money Reconciliation
-**File**: `@/Users/samujjwal/Development/finance/LLD_D13_CLIENT_MONEY_RECONCILIATION.md`
+
+**File**: `lld/LLD_D13_CLIENT_MONEY_RECONCILIATION.md`
 
 **Purpose**: Daily reconciliation of client money obligations against actual holdings with break detection.
 
 **Key Features**:
+
 - Daily automated reconciliation workflow
 - Break detection with severity classification (INFO/WARNING/CRITICAL)
 - Aging tier escalation (3/5/10 business days)
@@ -806,11 +905,13 @@ All LLDs follow this mandatory structure:
 ---
 
 ### D-14 Sanctions Screening
-**File**: `@/Users/samujjwal/Development/finance/LLD_D14_SANCTIONS_SCREENING.md`
+
+**File**: `lld/LLD_D14_SANCTIONS_SCREENING.md`
 
 **Purpose**: Real-time screening against sanctions lists with fuzzy matching and review workflow.
 
 **Key Features**:
+
 - Real-time screening at order placement (P99 < 50ms)
 - Fuzzy matching (Levenshtein, Jaro-Winkler, Soundex, Double Metaphone)
 - Match review workflow with maker-checker
@@ -849,6 +950,7 @@ Critical operations require dual approval:
 3. Action executed (status: APPROVED → ACTIVE)
 
 **Modules with Maker-Checker**:
+
 - K-02: Configuration changes
 - K-03: Rule pack deployment
 - D-01: Large orders (> threshold)
@@ -862,6 +964,7 @@ Command → Validation → Event Published → State Updated → Projections Reb
 ```
 
 **Event Schema**:
+
 ```json
 {
   "event_id": "uuid",
@@ -891,26 +994,26 @@ Command → Validation → Event Published → State Updated → Projections Reb
 
 ### 5.1 Latency Budgets (P99)
 
-| Module | Operation | P99 Latency | Timeout | Notes |
-|--------|-----------|-------------|---------|-------|
-| K-02 | get() | 5ms | 100ms | Hot-reload config reads |
-| K-03 | evaluate() | 10ms | 100ms | Single rule evaluation; pre-trade pipeline orchestrates D-06+D-07 |
-| K-04 | invoke() | 50ms | 5000ms | T3 plugin IPC overhead; T1/T2 < 2ms |
-| K-05 | publish() | 2ms | 100ms | Critical path (OMS, Ledger) — must match epic NFR |
-| K-07 | log() | 3ms | 100ms | Async batched; synchronous path < 10ms |
-| K-09 | predict() | 500ms | 5000ms | ML inference; non-blocking for trading path |
-| D-01 | processOrder() | 2ms | 500ms | OMS internal only; excludes pre-trade K-03 pipeline |
-| D-01 | placeOrder() (end-to-end) | 12ms | 1000ms | Includes OMS + K-03 pre-trade (D-06 risk + D-07 compliance) |
-| D-07 | compliance eval | 5ms | 100ms | Additive to D-01; invoked via K-03 pipeline |
+| Module | Operation                 | P99 Latency | Timeout | Notes                                                             |
+| ------ | ------------------------- | ----------- | ------- | ----------------------------------------------------------------- |
+| K-02   | get()                     | 5ms         | 100ms   | Hot-reload config reads                                           |
+| K-03   | evaluate()                | 10ms        | 100ms   | Single rule evaluation; pre-trade pipeline orchestrates D-06+D-07 |
+| K-04   | invoke()                  | 50ms        | 5000ms  | T3 plugin IPC overhead; T1/T2 < 2ms                               |
+| K-05   | publish()                 | 2ms         | 100ms   | Critical path (OMS, Ledger) — must match epic NFR                 |
+| K-07   | log()                     | 3ms         | 100ms   | Async batched; synchronous path < 10ms                            |
+| K-09   | predict()                 | 500ms       | 5000ms  | ML inference; non-blocking for trading path                       |
+| D-01   | processOrder()            | 2ms         | 500ms   | OMS internal only; excludes pre-trade K-03 pipeline               |
+| D-01   | placeOrder() (end-to-end) | 12ms        | 1000ms  | Includes OMS + K-03 pre-trade (D-06 risk + D-07 compliance)       |
+| D-07   | compliance eval           | 5ms         | 100ms   | Additive to D-01; invoked via K-03 pipeline                       |
 
 ### 5.2 Throughput Targets
 
-| Module | Operation | Target TPS | Peak TPS |
-|--------|-----------|------------|----------|
-| K-02 | get() | 100,000 | 200,000 |
-| K-03 | evaluate() | 50,000 | 100,000 |
-| K-05 | publish() | 100,000 | 200,000 |
-| D-01 | placeOrder() | 50,000 | 100,000 |
+| Module | Operation    | Target TPS | Peak TPS |
+| ------ | ------------ | ---------- | -------- |
+| K-02   | get()        | 100,000    | 200,000  |
+| K-03   | evaluate()   | 50,000     | 100,000  |
+| K-05   | publish()    | 100,000    | 200,000  |
+| D-01   | placeOrder() | 50,000     | 100,000  |
 
 ### 5.3 Availability
 
@@ -958,18 +1061,22 @@ Command → Validation → Event Published → State Updated → Projections Reb
 ## 7. IMPLEMENTATION ROADMAP
 
 ### Phase 1: Kernel Foundation (Weeks 1-8)
+
 - ✅ K-02 Configuration Engine
 - ✅ K-05 Event Bus & Event Store
 - ✅ K-07 Audit Framework
 
 ### Phase 2: Policy & Extensions (Weeks 9-12)
+
 - ✅ K-03 Policy/Rules Engine
 - ✅ K-04 Plugin Runtime & SDK
 
 ### Phase 3: AI & Intelligence (Weeks 13-16)
+
 - ✅ K-09 AI Governance
 
 ### Phase 4: Security, Data & Infrastructure (Weeks 17-20)
+
 - ✅ K-08 Data Governance
 - ✅ K-10 Deployment Abstraction Layer
 - ✅ K-11 API Gateway
@@ -978,6 +1085,7 @@ Command → Validation → Event Published → State Updated → Projections Reb
 - ✅ K-14 Secrets Management
 
 ### Phase 5: Core Domain Subsystems (Weeks 21-28)
+
 - ✅ D-01 Order Management System
 - ✅ D-02 Execution Management System
 - ✅ D-03 Portfolio Management System
@@ -986,6 +1094,7 @@ Command → Validation → Event Published → State Updated → Projections Reb
 - ✅ D-11 Reference Data Service
 
 ### Phase 6: Risk, Compliance & Operations (Weeks 29-36)
+
 - ✅ D-06 Risk Engine
 - ✅ D-07 Compliance Engine
 - ✅ D-08 Market Surveillance
@@ -994,6 +1103,7 @@ Command → Validation → Event Published → State Updated → Projections Reb
 - ✅ D-12 Corporate Actions
 
 ### Phase 7: Integration & Testing (Weeks 37-44)
+
 - ⏳ End-to-end integration tests
 - ⏳ Performance testing
 - ⏳ Security audit
@@ -1026,57 +1136,58 @@ Command → Validation → Event Published → State Updated → Projections Reb
 
 ## 9. GLOSSARY
 
-| Term | Definition |
-|------|------------|
-| **Aggregate** | Domain object with unique identity (e.g., Order, Position) |
-| **BS** | Bikram Sambat (Nepali calendar) |
-| **CQRS** | Command Query Responsibility Segregation |
-| **HITL** | Human-in-the-Loop |
-| **NFR** | Non-Functional Requirement |
-| **OPA** | Open Policy Agent |
-| **PSI** | Population Stability Index (drift metric) |
-| **Rego** | Policy language for OPA |
-| **Saga** | Distributed transaction pattern with compensation |
-| **SHAP** | SHapley Additive exPlanations (ML explainability) |
-| **T1/T2/T3** | Plugin taxonomy tiers: T1=Config (data-only), T2=Rules (declarative OPA/Rego), T3=Executable (signed code) |
+| Term          | Definition                                                                                                 |
+| ------------- | ---------------------------------------------------------------------------------------------------------- |
+| **Aggregate** | Domain object with unique identity (e.g., Order, Position)                                                 |
+| **BS**        | Bikram Sambat (Nepali calendar)                                                                            |
+| **CQRS**      | Command Query Responsibility Segregation                                                                   |
+| **HITL**      | Human-in-the-Loop                                                                                          |
+| **NFR**       | Non-Functional Requirement                                                                                 |
+| **OPA**       | Open Policy Agent                                                                                          |
+| **PSI**       | Population Stability Index (drift metric)                                                                  |
+| **Rego**      | Policy language for OPA                                                                                    |
+| **Saga**      | Distributed transaction pattern with compensation                                                          |
+| **SHAP**      | SHapley Additive exPlanations (ML explainability)                                                          |
+| **T1/T2/T3**  | Plugin taxonomy tiers: T1=Config (data-only), T2=Rules (declarative OPA/Rego), T3=Executable (signed code) |
 
 ---
 
 ## 10. DOCUMENT STATISTICS
 
-| Metric | Value |
-|--------|-------|
-| Total LLDs (authored) | 33 |
-| Total LLDs (pending) | 0 |
-| Kernel Modules Indexed | 19 (all authored) |
-| Domain Subsystems Indexed | 14 (all authored) |
-| ADRs | 11 (ADR-001 through ADR-011) |
-| Total Pages | ~900 |
-| API Endpoints | 200+ |
-| Event Types | 120+ |
-| Storage Tables | 110+ |
-| Test Cases | 500+ |
+| Metric                    | Value                        |
+| ------------------------- | ---------------------------- |
+| Total LLDs (authored)     | 33                           |
+| Total LLDs (pending)      | 0                            |
+| Kernel Modules Indexed    | 19 (all authored)            |
+| Domain Subsystems Indexed | 14 (all authored)            |
+| ADRs                      | 11 (ADR-001 through ADR-011) |
+| Total Pages               | ~900                         |
+| API Endpoints             | 200+                         |
+| Event Types               | 120+                         |
+| Storage Tables            | 110+                         |
+| Test Cases                | 500+                         |
 
 ---
 
 ## 11. REFERENCES
 
-- **Architecture Specification**: `@/Users/samujjwal/Development/finance/docs/All_In_One_Capital_Markets_Platform_Specification.md`
-- **Epic Files**: `@/Users/samujjwal/Development/finance/epics/EPIC-*.md`
-- **C4 Diagrams**: `@/Users/samujjwal/Development/finance/C4_*.md`
+- **Architecture Specification**: `docs/All_In_One_Capital_Markets_Platform_Specification.md`
+- **Epic Files**: `epics/EPIC-*.md`
+- **C4 Diagrams**: `c4/C4_*.md`
 
 ---
 
 ## 12. CHANGE LOG
 
-| Version | Date | Author | Changes |
-|---------|------|--------|---------|
-| 1.0.0 | 2025-03-02 | Platform Team | Initial release of all kernel + OMS LLDs |
-| 2.0.0 | 2026-03-03 | Platform Team | Post-ARB remediation: added K-17/K-18/K-19, D-13/D-14 index entries (LLDs pending), updated statistics, fixed stale assumptions |
-| 2.1.0 | 2026-03-05 | Platform Team | Hardening pass: added K-01/K-06/K-15/K-16 index entries, fixed NFR budget mismatches (K-05 publish 50ms→2ms, D-01 placeOrder 300ms→12ms, availability 99.95→99.999%), corrected T1/T2/T3 glossary definition, aligned data retention to 10yr, added latency budget decomposition notes |
-| 2.2.0 | 2026-03-05 | Platform Team | All 9 pending LLDs authored: K-01 IAM, K-06 Observability, K-15 Dual-Calendar, K-16 Ledger Framework, K-17 DTC, K-18 Resilience, K-19 DLQ, D-13 Client Money Recon, D-14 Sanctions Screening. Updated all file links, statistics, and navigation. ARB P0-01/P0-02/P0-04/P1-11/P1-13 resolved. |
-| 3.0.0 | 2026-03-08 | Platform Team | Full architecture coverage: 17 new LLDs (K-08 Data Governance, K-10 Deployment, K-11 API Gateway, K-12 SDK, K-13 Admin Portal, K-14 Secrets, D-02 EMS, D-03 PMS, D-04 Market Data, D-05 Pricing, D-06 Risk, D-07 Compliance, D-08 Surveillance, D-09 Post-Trade, D-10 Reg Reporting, D-11 Reference Data, D-12 Corporate Actions). 7 new ADRs (004–010). Total: 33 LLDs, 10 ADRs. Updated roadmap, navigation, statistics. |
-| 3.1.0 | 2026-03-09 | Platform Team | Added ADR-011 stack standardization baseline, aligned LLD index stack summary to Java 21 + ActiveJ / Fastify / React + Jotai + TanStack Query, and referenced Ghatana AI, event, workflow, and data platform products. |
+| Version | Date       | Author        | Changes                                                                                                                                                                                                                                                                                                                                                                                                                    |
+| ------- | ---------- | ------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1.0.0   | 2025-03-02 | Platform Team | Initial release of all kernel + OMS LLDs                                                                                                                                                                                                                                                                                                                                                                                   |
+| 2.0.0   | 2026-03-03 | Platform Team | Post-ARB remediation: added K-17/K-18/K-19, D-13/D-14 index entries (LLDs pending), updated statistics, fixed stale assumptions                                                                                                                                                                                                                                                                                            |
+| 2.1.0   | 2026-03-05 | Platform Team | Hardening pass: added K-01/K-06/K-15/K-16 index entries, fixed NFR budget mismatches (K-05 publish 50ms→2ms, D-01 placeOrder 300ms→12ms, availability 99.95→99.999%), corrected T1/T2/T3 glossary definition, aligned data retention to 10yr, added latency budget decomposition notes                                                                                                                                     |
+| 2.2.0   | 2026-03-05 | Platform Team | All 9 pending LLDs authored: K-01 IAM, K-06 Observability, K-15 Dual-Calendar, K-16 Ledger Framework, K-17 DTC, K-18 Resilience, K-19 DLQ, D-13 Client Money Recon, D-14 Sanctions Screening. Updated all file links, statistics, and navigation. ARB P0-01/P0-02/P0-04/P1-11/P1-13 resolved.                                                                                                                              |
+| 3.0.0   | 2026-03-08 | Platform Team | Full architecture coverage: 17 new LLDs (K-08 Data Governance, K-10 Deployment, K-11 API Gateway, K-12 SDK, K-13 Admin Portal, K-14 Secrets, D-02 EMS, D-03 PMS, D-04 Market Data, D-05 Pricing, D-06 Risk, D-07 Compliance, D-08 Surveillance, D-09 Post-Trade, D-10 Reg Reporting, D-11 Reference Data, D-12 Corporate Actions). 7 new ADRs (004–010). Total: 33 LLDs, 11 ADRs. Updated roadmap, navigation, statistics. |
+| 3.1.0   | 2026-03-09 | Platform Team | Added ADR-011 stack standardization baseline, aligned LLD index stack summary to Java 21 + ActiveJ / Fastify / React + Jotai + TanStack Query, and referenced Ghatana AI, event, workflow, and data platform products.                                                                                                                                                                                                     |
+| 3.1.1   | 2026-03-10 | Platform Team | Refreshed current summaries: corrected K-02 hierarchy to 6 levels, added metadata-asset governance to K-02 summary, added schema-driven and value-catalog-backed rendering to K-13 summary, and synchronized header version/date with the current documentation baseline.                                                                                                                                                  |
 
 ---
 
@@ -1085,60 +1196,72 @@ Command → Validation → Event Published → State Updated → Projections Reb
 ### By Concern
 
 **Configuration & Policy**:
+
 - K-02 Configuration Engine
 - K-03 Policy/Rules Engine
 
 **Identity & Security**:
+
 - K-01 Identity & Access Management
 - K-08 Data Governance
 - K-11 API Gateway
 - K-14 Secrets Management
 
 **Extensibility**:
+
 - K-04 Plugin Runtime & SDK
 - K-12 Platform SDK
 
 **Event & Workflow**:
+
 - K-05 Event Bus & Workflow Orchestration
 
 **Governance & Observability**:
+
 - K-06 Observability Stack
 - K-07 Audit Framework
 - K-09 AI Governance
 
 **Resilience & Transactions**:
+
 - K-17 Distributed Transaction Coordinator
 - K-18 Resilience Patterns Library
 - K-19 DLQ Management & Event Replay
 
 **Infrastructure & Operations**:
+
 - K-10 Deployment Abstraction Layer
 - K-13 Admin Portal
 - K-15 Dual-Calendar Service
 - K-16 Ledger Framework
 
 **Trading & Execution**:
+
 - D-01 Order Management System
 - D-02 Execution Management System
 - D-04 Market Data Service
 
 **Portfolio & Pricing**:
+
 - D-03 Portfolio Management System
 - D-05 Pricing Engine
 
 **Risk & Compliance**:
+
 - D-06 Risk Engine
 - D-07 Compliance Engine
 - D-08 Market Surveillance
 - D-14 Sanctions Screening
 
 **Post-Trade & Operations**:
+
 - D-09 Post-Trade Processing
 - D-10 Regulatory Reporting
 - D-12 Corporate Actions
 - D-13 Client Money Reconciliation
 
 **Reference Data**:
+
 - D-11 Reference Data Service
 
 ### By Dependency Order
