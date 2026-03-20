@@ -1,0 +1,94 @@
+# Environment and configuration
+.env
+.env.local
+.env*.local
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Logs
+*.log
+*.logs
+test-output.log
+build.log
+result.log
+
+# Test outputs
+e2e_output.txt
+fail.txt
+found.txt
+res.txt
+test*.txt
+test-results.json
+playwright-out.log
+
+# Temporary files
+*.tmp
+.~lock.*
+working\ query.txt
+impl-plan.md
+
+# Database
+*.db
+*.sqlite
+*.sqlite3
+investment_database.sql
+
+# Data files (temporary)
+normalized_investment_data.json
+cleaned-excel-data.json
+extracted-transactions.json
+*.csv
+clean-*.xlsx
+monthly-transactions-import.xlsx
+ready-to-import.xlsx
+
+# Build artifacts
+dist/
+build/
+out/
+*.jar
+*.war
+
+# Node/JavaScript
+node_modules/
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+npm-debug.log*
+
+# Rust/Tauri
+target/
+Cargo.lock
+.cargo/
+
+# IDE
+.DS_Store
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+# Test assets
+debug-*.png
+test-import.js
+playwright-report/
+test-results/
+
+# OS specific
+Thumbs.db
+.LSOverride
+.AppleDouble
+.AppleDB
+.ssh/
+
+# Excel lock files
+.~lock.*
+
+# Miscellaneous
+*.tmp
+.cache/
+.pytest_cache/
+coverage/

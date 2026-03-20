@@ -1,0 +1,109 @@
+{
+  "companies": [
+    {
+      "symbol": "NABIL",
+      "companyName": "Nabil Bank Limited",
+      "sector": "Banking",
+      "instrumentType": "Equity"
+    },
+    {
+      "symbol": "NIMB",
+      "companyName": "Nepal Investment Bank",
+      "sector": "Banking",
+      "instrumentType": "Equity"
+    },
+    {
+      "symbol": "SCB",
+      "companyName": "Standard Chartered Bank",
+      "sector": "Banking",
+      "instrumentType": "Equity"
+    },
+    {
+      "symbol": "HBL",
+      "companyName": "Himalayan Bank",
+      "sector": "Banking",
+      "instrumentType": "Equity"
+    },
+    {
+      "symbol": "UPPER",
+      "companyName": "Upper Tamakoshi Hydropower",
+      "sector": "Hydropower",
+      "instrumentType": "Equity"
+    }
+  ],
+  "transactions": [
+    {
+      "companySymbol": "NABIL",
+      "transactionType": "BUY",
+      "transactionDate": "2024-01-15",
+      "billNo": "B001",
+      "purchaseQuantity": 100,
+      "purchasePricePerUnit": 850,
+      "totalPurchaseAmount": 85000,
+      "salesQuantity": 0,
+      "salesPricePerUnit": 0,
+      "totalSalesAmount": 0
+    },
+    {
+      "companySymbol": "NABIL",
+      "transactionType": "SELL",
+      "transactionDate": "2024-03-20",
+      "billNo": "S001",
+      "purchaseQuantity": 0,
+      "purchasePricePerUnit": 0,
+      "totalPurchaseAmount": 0,
+      "salesQuantity": 50,
+      "salesPricePerUnit": 950,
+      "totalSalesAmount": 47500
+    },
+    {
+      "companySymbol": "UPPER",
+      "transactionType": "BUY",
+      "transactionDate": "2024-02-10",
+      "billNo": "B002",
+      "purchaseQuantity": 200,
+      "purchasePricePerUnit": 1200,
+      "totalPurchaseAmount": 240000,
+      "salesQuantity": 0,
+      "salesPricePerUnit": 0,
+      "totalSalesAmount": 0
+    },
+    {
+      "companySymbol": "NIMB",
+      "transactionType": "BUY",
+      "transactionDate": "2024-01-25",
+      "billNo": "B003",
+      "purchaseQuantity": 150,
+      "purchasePricePerUnit": 780,
+      "totalPurchaseAmount": 117000,
+      "salesQuantity": 0,
+      "salesPricePerUnit": 0,
+      "totalSalesAmount": 0
+    },
+    {
+      "companySymbol": "SCB",
+      "transactionType": "BUY",
+      "transactionDate": "2024-03-05",
+      "billNo": "B004",
+      "purchaseQuantity": 80,
+      "purchasePricePerUnit": 1250,
+      "totalPurchaseAmount": 100000,
+      "salesQuantity": 0,
+      "salesPricePerUnit": 0,
+      "totalSalesAmount": 0
+    }
+  ],
+  "expectedResults": {
+    "totalInvestment": 542000,
+    "totalCompanies": 4,
+    "totalTransactions": 5,
+    "buyTransactions": 4,
+    "sellTransactions": 1,
+    "portfolioValue": {
+      "NABIL": 47500,
+      "UPPER": 240000,
+      "NIMB": 117000,
+      "SCB": 100000
+    }
+  }
+}

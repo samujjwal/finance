@@ -1,0 +1,210 @@
+company_symbol,company_name,transaction_date,transaction_type,purchase_quantity,total_purchase_amount,sales_quantity,total_sales_amount
+HIDCL,Hydorelectricity Investment and Development Company Ltd,2024-07-20,sale,0,0.0,0,0
+SMHL,Super Madi Hydropower Limited,2024-07-20,sale,0,0.0,0,0
+SMHL,Super Madi Hydropower Limited,2024-07-21,sale,0,0.0,0,0
+FMDBL,First Micro Finance Laghubitta Bittiya Sanstha Limited,2024-07-22,sale,0,0.0,0,0
+SMHL,Super Madi Hydropower Limited,2024-07-22,sale,0,0.0,0,0
+HEI,Himalayan Everest Insurance Limited,2024-07-27,purchase,0,0.0,0,0
+SHPC,Sanima Mai Hydropower Ltd.,2024-07-27,sale,0,0.0,0,0
+SPIL,Siddhartha Premier Insurance Limited,2024-07-27,purchase,0,0.0,0,0
+HEI,Himalayan Everest Insurance Limited,2024-07-28,purchase,0,0.0,0,0
+HEI,Himalayan Everest Insurance Limited,2024-07-29,purchase,0,0.0,0,0
+AHPC,Arun Valley Hydropower Development Co. Ltd.,2025-07-17,opening,15,4375.35,0,0
+CBLD88,Civil Bank Debenture 2088,2025-07-17,opening,201,242205.0,0,0
+CCBD88,Century Debenture 2088,2025-07-17,opening,50,60945.00000000001,0,0
+CHDC,CEDB Hydropower Development Company Limited,2025-07-17,opening,0,0.0,0,0
+CLI,Citizen Life Insurance Company Limited,2025-07-17,opening,10147,4812113.28,0,0
+CLI,Citizen Life Insurance Company Limited,2025-07-17,purchase,0,0.0,0,0
+DDBL,Deprosc Laghubitta Bittiya Sanstha Limited,2025-07-17,opening,7012,6186337.0,0,0
+DDBL,Deprosc Laghubitta Bittiya Sanstha Limited,2025-07-17,sale,0,0.0,0,0
+FMDBL,First Micro Finance Laghubitta Bittiya Sanstha Limited,2025-07-17,opening,2010,1606150.8,0,0
+GWFD83,12 % Goodwill Finance Limited Debenture 2083,2025-07-17,opening,458,572454.2000000001,0,0
+H8020,Himalayan 80-20,2025-07-17,opening,3400,39440.0,0,0
+HATHY,Hathway Investment Nepal Limited,2025-07-17,opening,1696,2069357.4400000002,0,0
+HEI,Himalayan Everest Insurance Limited,2025-07-17,opening,0,0.0,0,0
+HIDCL,Hydorelectricity Investment and Development Company Ltd,2025-07-17,opening,1893,553910.73,0,0
+HIDCL,Hydorelectricity Investment and Development Company Ltd,2025-07-17,sale,0,0.0,0,0
+HLI,Himalayan Life Insurance Limited,2025-07-17,opening,4140,1685435.4000000001,0,0
+HLI,Himalayan Life Insurance Limited,2025-07-17,purchase,0,0.0,0,0
+HRL,Himalayan Reinsurance Limited,2025-07-17,opening,148,136571.44,0,0
+HRL,Himalayan Reinsurance Limited,2025-07-17,sale,0,0.0,0,0
+ICFC,ICFC Finance Limited,2025-07-17,opening,7577,4853598.890000001,0,0
+ICFC,ICFC Finance Limited,2025-07-17,purchase,0,0.0,0,0
+IGI,IGI Prudential insurance Limited,2025-07-17,opening,5674,3160361.2600000002,0,0
+ILI,IME Life Insurance Company Limited,2025-07-17,opening,10450,4828109.0,0,0
+KEF,Kumari Equity Fund,2025-07-17,opening,2000,19900.0,0,0
+KMCDB,Kalika Laghubitta Bittiya Sanstha Ltd,2025-07-17,opening,0,0.0,0,0
+KSBBL,Kamana Sewa Bikas Bank Limited,2025-07-17,opening,0,0.0,0,0
+LBBL,Lumbini Bikas Bank Ltd.,2025-07-17,opening,0,0.0,0,0
+LICN,Life Insurance Corporation (Nepal) Limited,2025-07-17,opening,2090,1858490.7,0,0
+LICN,Life Insurance Corporation (Nepal) Limited,2025-07-17,purchase,0,0.0,0,0
+MFIL,Manjushree Finance Ltd.,2025-07-17,opening,3250,2025627.5,0,0
+MNBBL,Muktinath Bikas Bank Ltd.,2025-07-17,opening,0,0.0,0,0
+MSLB,Mahuli Laghubitta Bittiya Sanstha Limited,2025-07-17,opening,4766,6176783.66,0,0
+NIBD84,8.5% Nepal Investment Bank Debenture 2084,2025-07-17,opening,25,26050.0,0,0
+NICFC,NIC Asia Flexi CAP Fund,2025-07-17,opening,2935,29790.25,0,0
+NICL,Nepal Insurance Co. Ltd.,2025-07-17,opening,3203,2066511.5399999998,0,0
+NLG,NLG Insurance Company Ltd.,2025-07-17,opening,7017,5468207.76,0,0
+NLG,NLG Insurance Company Ltd.,2025-07-17,opening,0,0.0,0,0
+NMLBBL,Nerude Mirmire Laghubitta Bittiya Sanstha Limited,2025-07-17,opening,1520,1064532.0,0,0
+PBD88,10% Prime Debenture 2088,2025-07-17,opening,10030,12046030.0,0,0
+SALICO,Sagarmatha Lumbini Insurance Co. Limited,2025-07-17,opening,0,0.0,0,0
+SBI,Nepal SBI Bank Limited,2025-07-17,opening,10924,4806341.5200000005,0,0
+SBI,Nepal SBI Bank Limited,2025-07-17,sale,0,0.0,0,0
+SBLD84,8.5% SBL Debenture 2084,2025-07-17,opening,96,105840.0,0,0
+SCB,Standard Chartered Bank Limited,2025-07-17,opening,1177,772229.7000000001,0,0
+SFMF,Sunrise First Mutual Fund,2025-07-17,opening,46876,500635.68,0,0
+SGIC,Sanima GIC Insurance Limited,2025-07-17,opening,8461,5161125.39,0,0
+SHL,Soaltee Hotel Limited,2025-07-17,opening,0,0.0,0,0
+SHPC,Sanima Mai Hydropower Ltd.,2025-07-17,opening,900,564219.0,0,0
+SJCL,SANJEN JALAVIDHYUT COMPANY LIMITED,2025-07-17,opening,7798,2474149.44,0,0
+SMHL,Super Madi Hydropower Limited,2025-07-17,opening,1940,2150257.2,0,0
+SMHL,Super Madi Hydropower Limited,2025-07-17,sale,0,0.0,0,0
+SMJC,Sagarmatha Jalabidhyut Company Limited,2025-07-17,opening,6943,3696869.7800000003,0,0
+SPIL,Siddhartha Premier Insurance Limited,2025-07-17,opening,0,0.0,0,0
+SRLI,Sanima Reliance Life Insurance Limited,2025-07-17,opening,4506,1848316.14,0,0
+TVCL,Trishuli Jal Vidhyut Company Limited,2025-07-17,opening,11172,5537290.08,0,0
+UAIL,United Ajod Insurance Limited,2025-07-17,opening,6013,3436790.28,0,0
+UAIL,United Ajod Insurance Limited,2025-07-17,purchase,0,0.0,0,0
+DDBL,Deprosc Laghubitta Bittiya Sanstha Limited,2025-07-20,sale,0,0.0,0,0
+ILI,IME Life Insurance Company Limited,2025-07-20,purchase,0,0.0,0,0
+LBBL,Lumbini Bikas Bank Ltd.,2025-07-20,purchase,0,0.0,0,0
+SJCL,SANJEN JALAVIDHYUT COMPANY LIMITED,2025-07-20,purchase,0,0.0,0,0
+DDBL,Deprosc Laghubitta Bittiya Sanstha Limited,2025-07-21,sale,0,0.0,0,0
+FMDBL,First Micro Finance Laghubitta Bittiya Sanstha Limited,2025-07-21,sale,0,0.0,0,0
+MSLB,Mahuli Laghubitta Bittiya Sanstha Limited,2025-07-21,purchase,0,0.0,0,0
+AHPC,Arun Valley Hydropower Development Co. Ltd.,2025-07-22,sale,0,0.0,0,0
+DDBL,Deprosc Laghubitta Bittiya Sanstha Limited,2025-07-22,sale,0,0.0,0,0
+HATHY,Hathway Investment Nepal Limited,2025-07-22,sale,0,0.0,0,0
+HLI,Himalayan Life Insurance Limited,2025-07-22,sale,0,0.0,0,0
+ICFC,ICFC Finance Limited,2025-07-22,sale,0,0.0,0,0
+MFIL,Manjushree Finance Ltd.,2025-07-22,sale,0,0.0,0,0
+NLG,NLG Insurance Company Ltd.,2025-07-22,sale,0,0.0,0,0
+NMLBBL,Nerude Mirmire Laghubitta Bittiya Sanstha Limited,2025-07-22,sale,0,0.0,0,0
+SBI,Nepal SBI Bank Limited,2025-07-22,sale,0,0.0,0,0
+SCB,Standard Chartered Bank Limited,2025-07-22,sale,0,0.0,0,0
+HATHY,Hathway Investment Nepal Limited,2025-07-23,purchase,0,0.0,0,0
+ICFC,ICFC Finance Limited,2025-07-23,sale,0,0.0,0,0
+LBBL,Lumbini Bikas Bank Ltd.,2025-07-23,sale,0,0.0,0,0
+MFIL,Manjushree Finance Ltd.,2025-07-23,sale,0,0.0,0,0
+MSLB,Mahuli Laghubitta Bittiya Sanstha Limited,2025-07-23,sale,0,0.0,0,0
+NICL,Nepal Insurance Co. Ltd.,2025-07-23,sale,0,0.0,0,0
+NLG,NLG Insurance Company Ltd.,2025-07-23,sale,0,0.0,0,0
+SBI,Nepal SBI Bank Limited,2025-07-23,sale,0,0.0,0,0
+SMJC,Sagarmatha Jalabidhyut Company Limited,2025-07-23,sale,0,0.0,0,0
+HATHY,Hathway Investment Nepal Limited,2025-07-24,purchase,0,0.0,0,0
+MSLB,Mahuli Laghubitta Bittiya Sanstha Limited,2025-07-24,sale,0,0.0,0,0
+AHPC,Arun Valley Hydropower Development Co. Ltd.,2025-07-27,purchase,0,0.0,0,0
+CHDC,CEDB Hydropower Development Company Limited,2025-07-27,purchase,0,0.0,0,0
+HATHY,Hathway Investment Nepal Limited,2025-07-27,purchase,0,0.0,0,0
+HATHY,Hathway Investment Nepal Limited,2025-07-27,purchase,0,0.0,0,0
+KMCDB,Kalika Laghubitta Bittiya Sanstha Ltd,2025-07-27,purchase,0,0.0,0,0
+MSLB,Mahuli Laghubitta Bittiya Sanstha Limited,2025-07-27,sale,0,0.0,0,0
+NICL,Nepal Insurance Co. Ltd.,2025-07-27,sale,0,0.0,0,0
+SMJC,Sagarmatha Jalabidhyut Company Limited,2025-07-27,sale,0,0.0,0,0
+CHDC,CEDB Hydropower Development Company Limited,2025-07-28,purchase,0,0.0,0,0
+MSLB,Mahuli Laghubitta Bittiya Sanstha Limited,2025-07-28,sale,0,0.0,0,0
+NICL,Nepal Insurance Co. Ltd.,2025-07-28,sale,0,0.0,0,0
+SMJC,Sagarmatha Jalabidhyut Company Limited,2025-07-28,sale,0,0.0,0,0
+SRLI,Sanima Reliance Life Insurance Limited,2025-07-28,purchase,0,0.0,0,0
+CHDC,CEDB Hydropower Development Company Limited,2025-07-29,purchase,0,0.0,0,0
+IGI,IGI Prudential insurance Limited,2025-07-29,purchase,0,0.0,0,0
+ILI,IME Life Insurance Company Limited,2025-07-29,purchase,0,0.0,0,0
+LICN,Life Insurance Corporation (Nepal) Limited,2025-07-29,purchase,0,0.0,0,0
+MSLB,Mahuli Laghubitta Bittiya Sanstha Limited,2025-07-29,purchase,0,0.0,0,0
+MSLB,Mahuli Laghubitta Bittiya Sanstha Limited,2025-07-29,purchase,0,0.0,0,0
+NLG,NLG Insurance Company Ltd.,2025-07-29,purchase,0,0.0,0,0
+SMJC,Sagarmatha Jalabidhyut Company Limited,2025-07-29,sale,0,0.0,0,0
+SRLI,Sanima Reliance Life Insurance Limited,2025-07-29,purchase,0,0.0,0,0
+MSLB,Mahuli Laghubitta Bittiya Sanstha Limited,2025-07-31,sale,0,0.0,0,0
+SMJC,Sagarmatha Jalabidhyut Company Limited,2025-07-31,sale,0,0.0,0,0
+MSLB,Mahuli Laghubitta Bittiya Sanstha Limited,2025-08-03,sale,0,0.0,0,0
+UAIL,United Ajod Insurance Limited,2025-08-03,sale,0,0.0,0,0
+SMJC,Sagarmatha Jalabidhyut Company Limited,2025-08-04,sale,0,0.0,0,0
+UAIL,United Ajod Insurance Limited,2025-08-04,sale,0,0.0,0,0
+UAIL,United Ajod Insurance Limited,2025-08-04,sale,0,0.0,0,0
+UAIL,United Ajod Insurance Limited,2025-08-05,sale,0,0.0,0,0
+UAIL,United Ajod Insurance Limited,2025-08-05,sale,0,0.0,0,0
+MSLB,Mahuli Laghubitta Bittiya Sanstha Limited,2025-08-06,sale,0,0.0,0,0
+UAIL,United Ajod Insurance Limited,2025-08-06,sale,0,0.0,0,0
+HATHY,Hathway Investment Nepal Limited,2025-08-07,purchase,0,0.0,0,0
+KSBBL,Kamana Sewa Bikas Bank Limited,2025-08-07,purchase,0,0.0,0,0
+MNBBL,Muktinath Bikas Bank Ltd.,2025-08-07,purchase,0,0.0,0,0
+SHL,Soaltee Hotel Limited,2025-08-07,purchase,0,0.0,0,0
+NLG,NLG Insurance Company Ltd.,2025-08-11,sale,0,0.0,0,0
+SALICO,Sagarmatha Lumbini Insurance Co. Limited,2025-08-11,purchase,0,0.0,0,0
+UAIL,United Ajod Insurance Limited,2025-08-11,sale,0,0.0,0,0
+NLG,NLG Insurance Company Ltd.,2025-08-12,sale,0,0.0,0,0
+SALICO,Sagarmatha Lumbini Insurance Co. Limited,2025-08-13,purchase,0,0.0,0,0
+AHPC,Arun Valley Hydropower Development Co. Ltd.,2025-08-17,opening,0,0.0,0,0
+CBLD88,Civil Bank Debenture 2088,2025-08-17,opening,0,0.0,0,0
+CCBD88,Century Debenture 2088,2025-08-17,opening,0,0.0,0,0
+CHDC,CEDB Hydropower Development Company Limited,2025-08-17,opening,0,0.0,0,0
+CLI,Citizen Life Insurance Company Limited,2025-08-17,opening,0,0.0,0,0
+DDBL,Deprosc Laghubitta Bittiya Sanstha Limited,2025-08-17,opening,0,0.0,0,0
+FMDBL,First Micro Finance Laghubitta Bittiya Sanstha Limited,2025-08-17,opening,0,0.0,0,0
+GILB,Global IME Laghubitta Bittiya Sanstha Ltd.,2025-08-17,opening,0,0.0,0,0
+GWFD83,12 % Goodwill Finance Limited Debenture 2083,2025-08-17,opening,0,0.0,0,0
+H8020,Himalayan 80-20,2025-08-17,opening,0,0.0,0,0
+HATHY,Hathway Investment Nepal Limited,2025-08-17,opening,0,0.0,0,0
+HEI,Himalayan Everest Insurance Limited,2025-08-17,opening,0,0.0,0,0
+HIDCL,Hydorelectricity Investment and Development Company Ltd,2025-08-17,opening,0,0.0,0,0
+HLI,Himalayan Life Insurance Limited,2025-08-17,opening,0,0.0,0,0
+HRL,Himalayan Reinsurance Limited,2025-08-17,opening,0,0.0,0,0
+ICFC,ICFC Finance Limited,2025-08-17,opening,0,0.0,0,0
+IGI,IGI Prudential insurance Limited,2025-08-17,opening,0,0.0,0,0
+ILI,IME Life Insurance Company Limited,2025-08-17,opening,0,0.0,0,0
+KEF,Kumari Equity Fund,2025-08-17,opening,0,0.0,0,0
+KMCDB,Kalika Laghubitta Bittiya Sanstha Ltd,2025-08-17,opening,0,0.0,0,0
+KPCL,Kalika power Company Ltd,2025-08-17,opening,0,0.0,0,0
+KSBBL,Kamana Sewa Bikas Bank Limited,2025-08-17,opening,0,0.0,0,0
+LBBL,Lumbini Bikas Bank Ltd.,2025-08-17,opening,0,0.0,0,0
+LICN,Life Insurance Corporation (Nepal) Limited,2025-08-17,opening,0,0.0,0,0
+MANDU,Mandu Hydropower Limited,2025-08-17,opening,0,0.0,0,0
+MFIL,Manjushree Finance Ltd.,2025-08-17,opening,0,0.0,0,0
+MNBBL,Muktinath Bikas Bank Ltd.,2025-08-17,opening,0,0.0,0,0
+MSLB,Mahuli Laghubitta Bittiya Sanstha Limited,2025-08-17,opening,0,0.0,0,0
+NHDL,Nepal Hydro Developers Ltd.,2025-08-17,opening,0,0.0,0,0
+NIBD84,8.5% Nepal Investment Bank Debenture 2084,2025-08-17,opening,0,0.0,0,0
+NICFC,NIC Asia Flexi CAP Fund,2025-08-17,opening,0,0.0,0,0
+NICL,Nepal Insurance Co. Ltd.,2025-08-17,opening,0,0.0,0,0
+NMFBS,National Laghubitta Bittiya Sanstha Limited,2025-08-17,opening,0,0.0,0,0
+NMLBBL,Nerude Mirmire Laghubitta Bittiya Sanstha Limited,2025-08-17,opening,0,0.0,0,0
+PBD88,10% Prime Debenture 2088,2025-08-17,opening,0,0.0,0,0
+RSDC,RSDC Laghubitta Bittiya Sanstha Ltd.,2025-08-17,opening,0,0.0,0,0
+SALICO,Sagarmatha Lumbini Insurance Co. Limited,2025-08-17,opening,0,0.0,0,0
+SBI,Nepal SBI Bank Limited,2025-08-17,opening,0,0.0,0,0
+SBLD84,8.5% SBL Debenture 2084,2025-08-17,opening,0,0.0,0,0
+SCB,Standard Chartered Bank Limited,2025-08-17,opening,0,0.0,0,0
+SFMF,Sunrise First Mutual Fund,2025-08-17,opening,0,0.0,0,0
+SGIC,Sanima GIC Insurance Limited,2025-08-17,opening,0,0.0,0,0
+SHL,Soaltee Hotel Limited,2025-08-17,opening,0,0.0,0,0
+SHL,Soaltee Hotel Limited,2025-08-17,opening,0,0.0,0,0
+SHLB,Shrijanshil Laghubitta Bittiya Sanstha Limited,2025-08-17,opening,0,0.0,0,0
+SHPC,Sanima Mai Hydropower Ltd.,2025-08-17,opening,0,0.0,0,0
+SJCL,SANJEN JALAVIDHYUT COMPANY LIMITED,2025-08-17,opening,0,0.0,0,0
+SMHL,Super Madi Hydropower Limited,2025-08-17,opening,0,0.0,0,0
+SMJC,Sagarmatha Jalabidhyut Company Limited,2025-08-17,opening,0,0.0,0,0
+SNLI,Sun Nepal Life Insurance Company Limited,2025-08-17,opening,0,0.0,0,0
+SPIL,Siddhartha Premier Insurance Limited,2025-08-17,opening,0,0.0,0,0
+SRLI,Sanima Reliance Life Insurance Limited,2025-08-17,opening,0,0.0,0,0
+TAMOR,Sanima Middle Tamor Hydropower Limited,2025-08-17,opening,0,0.0,0,0
+TRH,Taragaon Regency Hotel Limited,2025-08-17,opening,0,0.0,0,0
+TVCL,Trishuli Jal Vidhyut Company Limited,2025-08-17,opening,0,0.0,0,0
+UAIL,United Ajod Insurance Limited,2025-08-17,opening,0,0.0,0,0
+UPCL,UNIVERSAL POWER COMPANY LTD,2025-08-17,opening,0,0.0,0,0
+USLB,Unnati Sahakarya Laghubitta Bittiya Sanstha Limited,2025-08-17,opening,0,0.0,0,0
+VLUCL,Vision Lumbini Urja Company Limited,2025-08-17,opening,0,0.0,0,0
+HRL,Himalayan Reinsurance Limited,2025-08-21,sale,0,0.0,0,0
+HATHY,Hathway Investment Nepal Limited,2025-08-26,purchase,0,0.0,0,0
+HIDCL,Hydorelectricity Investment and Development Company Ltd,2025-08-26,purchase,0,0.0,0,0
+HRL,Himalayan Reinsurance Limited,2025-08-26,purchase,0,0.0,0,0
+MNBBL,Muktinath Bikas Bank Ltd.,2025-08-28,purchase,0,0.0,0,0
+CHDC,CEDB Hydropower Development Company Limited,2025-08-31,purchase,0,0.0,0,0
+HATHY,Hathway Investment Nepal Limited,2025-08-31,purchase,0,0.0,0,0
+SHL,Soaltee Hotel Limited,2025-08-31,purchase,0,0.0,0,0
+IGI,IGI Prudential insurance Limited,2025-09-17,opening,0,0.0,0,0
+KSBBL,Kamana Sewa Bikas Bank Limited,2025-09-17,opening,0,0.0,0,0
+MNBBL,Muktinath Bikas Bank Ltd.,2025-09-17,opening,0,0.0,0,0
+SGIC,Sanima GIC Insurance Limited,2025-09-17,opening,0,0.0,0,0
+SRLI,Sanima Reliance Life Insurance Limited,2025-09-17,opening,0,0.0,0,0

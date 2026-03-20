@@ -1,0 +1,54 @@
+# Environment and configuration
+.env
+.env.local
+.env*.local
+
+# Logs
+*.log
+test-output.log
+result.log
+playwright-out.log
+
+# Test outputs
+test-results.json
+playwright-report/
+test-results/
+e2e/output/
+
+# Temporary data files
+cleaned-excel-data.json
+extracted-transactions.json
+monthly-transactions.json
+
+# Build artifacts
+dist/
+build/
+
+# Node/JavaScript
+node_modules/
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+npm-debug.log*
+
+# IDE
+.DS_Store
+.vscode/settings.json
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+# Rust/Tauri
+target/
+src-tauri/target/
+Cargo.lock
+
+# Test files and temp scripts  
+test-import.js
+debug-*.png
+*.xlsx
+*.csv
+
+# OS specific
+Thumbs.db
+.AppleDouble

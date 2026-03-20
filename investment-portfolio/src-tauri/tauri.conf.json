@@ -1,0 +1,49 @@
+{
+  "$schema": "../node_modules/@tauri-apps/cli/schema.json",
+  "productName": "JCL Investment Portfolio",
+  "version": "1.0.0",
+  "identifier": "com.jcl.investment-portfolio",
+  "build": {
+    "beforeBuildCommand": "npm run build",
+    "beforeDevCommand": "npm run dev",
+    "frontendDist": "../dist",
+    "devUrl": "http://localhost:1420"
+  },
+  "app": {
+    "windows": [
+      {
+        "fullscreen": false,
+        "height": 800,
+        "resizable": true,
+        "title": "JCL Investment Portfolio",
+        "width": 1200
+      }
+    ],
+    "security": {
+      "csp": "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; connect-src 'self' http://localhost:3001 ws://localhost:3001; font-src 'self';"
+    }
+  },
+  "bundle": {
+    "active": true,
+    "category": "Finance",
+    "copyright": "JCL Investment",
+    "icon": [
+      "icons/32x32.png",
+      "icons/128x128.png",
+      "icons/128x128@2x.png",
+      "icons/icon.icns",
+      "icons/icon.ico"
+    ],
+    "longDescription": "Professional Investment Portfolio Management Application with desktop integration",
+    "shortDescription": "Manage and analyze your investment portfolio",
+    "targets": "all"
+  },
+  "plugins": {
+    "shell": {
+      "open": true,
+      "execute": {
+        "open": ""
+      }
+    }
+  }
+}
