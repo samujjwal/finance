@@ -1,1 +1,4 @@
-../lib/node_modules/npm/bin/npx-cli.js
+#!/usr/bin/env bash
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+NODE_RUNTIME_DIR="$(find "$(cd "$SCRIPT_DIR/.." && pwd)" -maxdepth 1 -type d -name 'node-v*-win-*' | head -1)"
+exec "$NODE_RUNTIME_DIR/node.exe" "$NODE_RUNTIME_DIR/node_modules/npm/bin/npx-cli.js" "$@"

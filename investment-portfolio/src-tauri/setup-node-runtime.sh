@@ -5,7 +5,7 @@
 
 set -e
 
-NODE_VERSION="18.19.0"
+NODE_VERSION="20.19.0"
 ARCH=$(uname -m)
 OS=$(uname -s | tr '[:upper:]' '[:lower:]')
 

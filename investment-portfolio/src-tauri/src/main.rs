@@ -120,7 +120,7 @@ fn main() {
             get_api_url,
         ])
         .manage(server_manager.clone())
-        .setup(move |app| {
+        .setup(move |_app| {
             log::info!("Tauri application setup started");
             
             // Start the backend server automatically

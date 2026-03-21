@@ -18,7 +18,7 @@ RESOURCES_DIR="$PROJECT_ROOT/src-tauri/resources"
 mkdir -p "$SCRIPT_DIR"
 mkdir -p "$RESOURCES_DIR/node"
 
-NODE_VERSION="18.19.0"
+NODE_VERSION="20.19.0"
 BASE_URL="https://nodejs.org/dist/v${NODE_VERSION}"
 
 echo -e "${BLUE}========================================${NC}"
@@ -88,15 +88,20 @@ NODE_DIR="node-v${NODE_VERSION}-${OS,,}-${NODE_ARCH}"
 if [ -d "$NODE_DIR" ]; then
     # Copy node binary to consistent location
     mkdir -p "bin"
+  mkdir -p "lib/node_modules"
     if [ "$OS" = "Darwin" ]; then
         cp "$NODE_DIR/bin/node" "bin/node"
         cp "$NODE_DIR/bin/npm" "bin/npm" 2>/dev/null || true
+    cp "$NODE_DIR/bin/npx" "bin/npx" 2>/dev/null || true
     else
         cp "$NODE_DIR/bin/node" "bin/node"
         cp "$NODE_DIR/bin/npm" "bin/npm" 2>/dev/null || true
+    cp "$NODE_DIR/bin/npx" "bin/npx" 2>/dev/null || true
     fi
+  cp -R "$NODE_DIR/lib/node_modules/npm" "lib/node_modules/npm" 2>/dev/null || true
     chmod +x "bin/node"
     chmod +x "bin/npm" 2>/dev/null || true
+  chmod +x "bin/npx" 2>/dev/null || true
     echo -e "${GREEN}✓ Extracted to bin/${NC}"
     
     # Clean up extracted dir to save space

@@ -27,6 +27,7 @@
     "active": true,
     "category": "Finance",
     "copyright": "JCL Investment",
+    "publisher": "JCL Investment",
     "icon": [
       "icons/32x32.png",
       "icons/128x128.png",
@@ -36,7 +37,24 @@
     ],
     "longDescription": "Professional Investment Portfolio Management Application with desktop integration",
     "shortDescription": "Manage and analyze your investment portfolio",
-    "targets": "all"
+    "targets": "all",
+    "resources": {
+      "resources/node/bin": "node/bin",
+      "resources/server": "server"
+    },
+    "windows": {
+      "webviewInstallMode": {
+        "type": "embedBootstrapper"
+      },
+      "nsis": {
+        "installMode": "currentUser",
+        "displayLanguageSelector": false,
+        "languages": ["English"]
+      },
+      "wix": {
+        "language": "en-US"
+      }
+    }
   },
   "plugins": {
     "shell": {

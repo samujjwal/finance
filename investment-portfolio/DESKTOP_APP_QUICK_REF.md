@@ -181,7 +181,7 @@ Companies:
 ## Key Technology Stack
 
 - **Frontend**: React 19, TypeScript, Vite, Tailwind CSS
-- **Backend**: NestJS, Express.js, Node.js 18
+- **Backend**: NestJS, Express.js, Node.js 20.19+
 - **Desktop**: Tauri 2.0, Rust 1.60+
 - **Database**: SQLite 3, Prisma ORM 5
 - **Build**: Cargo, npm, TypeScript compiler

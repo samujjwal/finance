@@ -1,6 +1,7 @@
 use log::{LevelFilter, SetLoggerError};
 use env_logger::Builder;
 use std::io::Write;
+use std::sync::OnceLock;
 
 struct CustomLogger {
     log_file: std::sync::Mutex<Option<std::fs::File>>,
@@ -44,7 +45,7 @@ impl log::Log for CustomLogger {
     }
 }
 
-static mut LOGGER: Option<CustomLogger> = None;
+static LOGGER: OnceLock<CustomLogger> = OnceLock::new();
 
 fn init_custom_logger() -> Result<(), SetLoggerError> {
     let log_dir = std::env::current_exe()
@@ -70,19 +71,14 @@ fn init_custom_logger() -> Result<(), SetLoggerError> {
         log_file: std::sync::Mutex::new(log_file),
     };
 
-    unsafe {
-        LOGGER = Some(logger);
-    }
-
     let max_level = if cfg!(debug_assertions) {
         LevelFilter::Debug
     } else {
         LevelFilter::Info
     };
 
-    unsafe {
-        log::set_logger(LOGGER.as_ref().unwrap())?;
-    }
+    let logger_ref = LOGGER.get_or_init(|| logger);
+    log::set_logger(logger_ref)?;
     log::set_max_level(max_level);
 
     log::info!("Logger initialized. Log file: {:?}", log_file_path);

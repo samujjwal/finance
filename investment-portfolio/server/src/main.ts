@@ -8,6 +8,24 @@ import { AllExceptionsFilter } from "./common/all-exceptions.filter";
 import { PrismaService } from "./prisma/prisma.service";
 import { FeeRatesService } from "./fee-rates/fee-rates.service";
 
+function buildAllowedOrigins(configuredOrigin?: string): string[] {
+  const configured = (configuredOrigin || "")
+    .split(",")
+    .map((origin) => origin.trim())
+    .filter(Boolean);
+
+  return Array.from(
+    new Set([
+      "http://localhost:1420",
+      "http://localhost:3001",
+      "http://tauri.localhost",
+      "https://tauri.localhost",
+      "tauri://localhost",
+      ...configured,
+    ]),
+  );
+}
+
 /** Ensure a root user exists and fee rates are seeded before serving traffic */
 async function bootstrapDatabase(app: INestApplication) {
   const prisma = app.get(PrismaService);
@@ -38,10 +56,18 @@ async function bootstrapDatabase(app: INestApplication) {
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   const configService = app.get(ConfigService);
+  const allowedOrigins = buildAllowedOrigins(configService.get<string>("CORS_ORIGIN"));
 
   // Enable CORS
   app.enableCors({
-    origin: configService.get("CORS_ORIGIN") || "http://localhost:1420",
+    origin: (origin, callback) => {
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+        return;
+      }
+
+      callback(new Error(`CORS blocked for origin: ${origin}`), false);
+    },
     credentials: true,
   });
 

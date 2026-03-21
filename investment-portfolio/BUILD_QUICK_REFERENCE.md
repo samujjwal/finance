@@ -71,7 +71,7 @@ curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
 
 ## Bundled Components
 
-- **Node.js 18.19.0** - Runtime (stripped, ~50 MB)
+- **Node.js 20.19.0** - Runtime (stripped, ~50 MB)
 - **NestJS Backend** - API server (~5 MB compiled)
 - **React 19 Frontend** - UI (~3 MB bundled)
 - **SQLite** - Database (via Prisma ORM)

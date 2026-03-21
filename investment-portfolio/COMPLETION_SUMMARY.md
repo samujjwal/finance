@@ -13,7 +13,7 @@ The JCL Investment Portfolio desktop application bundling system is now fully do
 A comprehensive 6-step build pipeline that:
 
 - Detects platform (Linux, macOS, Windows)
-- Downloads and bundles Node.js 18.19.0
+- Downloads and bundles Node.js 20.19.0
 - Compiles NestJS backend
 - Prepares production server bundle
 - Builds optimized React frontend
@@ -147,7 +147,7 @@ Developer quick reference including:
 
 Every bundle contains:
 
-1. **Node.js Runtime** (18.19.0)
+1. **Node.js Runtime** (20.19.0)
    - `bin/node` - Node.js executable
    - `bin/npm` - npm package manager
    - Core modules only

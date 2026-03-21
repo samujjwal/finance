@@ -22,7 +22,7 @@ This is a complete production desktop application that bundles:
 
 ### Requirements
 
-- Node.js 18+ and npm
+- Node.js 20.19+ and npm
 - Rust and Cargo (for Tauri)
 - Git
 

@@ -20,35 +20,60 @@ impl ServerManager {
         }
     }
 
+    fn find_existing_path(candidates: &[PathBuf]) -> Option<PathBuf> {
+        for candidate in candidates {
+            if candidate.exists() {
+                return Some(candidate.clone());
+            }
+        }
+
+        None
+    }
+
+    fn has_server_entry(server_root: &PathBuf) -> bool {
+        server_root.join("main.js").exists()
+            || server_root.join("dist").join("main.js").exists()
+            || server_root.join("dist").join("src").join("main.js").exists()
+    }
+
+    fn get_server_entry_path(server_root: &PathBuf) -> PathBuf {
+        let root_entry = server_root.join("main.js");
+        if root_entry.exists() {
+            return root_entry;
+        }
+
+        let dist_entry = server_root.join("dist").join("main.js");
+        if dist_entry.exists() {
+            return dist_entry;
+        }
+
+        server_root.join("dist").join("src").join("main.js")
+    }
+
     /// Get the path to the bundled Node.js runtime
-    /// Tries multiple locations: resources/node/bin, app bundle, system PATH
+    /// Tries installed bundle layout, resources layout, then system PATH.
     fn get_node_runtime_path() -> Option<PathBuf> {
-        // 1. Try resources directory relative to executable
         if let Ok(exe_path) = std::env::current_exe() {
             if let Some(exe_dir) = exe_path.parent() {
-                // Windows: exe_dir/resources/node/bin/node.exe
-                // Linux/Mac: exe_dir/resources/node/bin/node
                 let node_exe_name = if cfg!(target_os = "windows") { "node.exe" } else { "node" };
-                
-                // Try bundled location (for packaged app)
-                let bundled_node = exe_dir.join("resources").join("node").join("bin").join(node_exe_name);
-                if bundled_node.exists() {
-                    info!("Found bundled Node.js at: {}", bundled_node.display());
-                    return Some(bundled_node);
-                }
-                
-                // Try relative to app root (for development)
+
+                let mut candidates = vec![
+                    exe_dir.join("node").join("bin").join(node_exe_name),
+                    exe_dir.join("resources").join("node").join("bin").join(node_exe_name),
+                ];
+
                 if let Some(parent) = exe_dir.parent() {
-                    let dev_node = parent.join("resources").join("node").join("bin").join(node_exe_name);
-                    if dev_node.exists() {
-                        info!("Found Node.js at: {}", dev_node.display());
-                        return Some(dev_node);
-                    }
+                    candidates.push(parent.join("node").join("bin").join(node_exe_name));
+                    candidates.push(parent.join("resources").join("node").join("bin").join(node_exe_name));
+                }
+
+                if let Some(node_path) = Self::find_existing_path(&candidates) {
+                    info!("Found Node.js at: {}", node_path.display());
+                    return Some(node_path);
                 }
             }
         }
 
-        // 2. Try system Node.js
         if cfg!(target_os = "windows") {
             if let Ok(output) = Command::new("where").arg("node.exe").output() {
                 if output.status.success() {
@@ -81,23 +106,24 @@ impl ServerManager {
     }
 
     /// Get the path to the server bundle (where dist/main.js is located)
-    /// Looks for bundled resources first, then development location
+    /// Looks for installed bundle layout first, then resources/dev locations.
     fn get_server_bundle_path() -> PathBuf {
         if let Ok(exe_path) = std::env::current_exe() {
             if let Some(exe_dir) = exe_path.parent() {
-                // Try bundled location (for packaged app)
-                let bundled_server = exe_dir.join("resources").join("server");
-                if bundled_server.exists() && bundled_server.join("dist").join("main.js").exists() {
-                    info!("Found bundled server at: {}", bundled_server.display());
-                    return bundled_server;
-                }
-                
-                // Try relative to app root (for development)
+                let mut candidates = vec![
+                    exe_dir.join("server"),
+                    exe_dir.join("resources").join("server"),
+                ];
+
                 if let Some(parent) = exe_dir.parent() {
-                    let dev_server = parent.join("server");
-                    if dev_server.exists() && dev_server.join("dist").join("main.js").exists() {
-                        info!("Found server at: {}", dev_server.display());
-                        return dev_server;
+                    candidates.push(parent.join("server"));
+                    candidates.push(parent.join("resources").join("server"));
+                }
+
+                for candidate in candidates {
+                    if Self::has_server_entry(&candidate) {
+                        info!("Found server at: {}", candidate.display());
+                        return candidate;
                     }
                 }
             }
@@ -130,6 +156,46 @@ impl ServerManager {
         Ok(db_path)
     }
 
+    /// Run `prisma migrate deploy` to initialise or upgrade the SQLite schema.
+    /// Non-fatal: logs a warning and continues if the CLI is not found or fails.
+    fn run_prisma_migrations(node_path: &PathBuf, server_path: &PathBuf, db_dir: &PathBuf) {
+        let prisma_cli = server_path
+            .join("node_modules")
+            .join("prisma")
+            .join("build")
+            .join("index.js");
+
+        if !prisma_cli.exists() {
+            warn!("Prisma CLI not found at {}, skipping migrations", prisma_cli.display());
+            return;
+        }
+
+        info!("Running Prisma database migrations...");
+        match Command::new(node_path)
+            .arg(&prisma_cli)
+            .args(["migrate", "deploy"])
+            .current_dir(server_path)
+            .env(
+                "DATABASE_URL",
+                format!("file:{}", db_dir.join("investment_portfolio.db").to_string_lossy()),
+            )
+            .output()
+        {
+            Ok(out) if out.status.success() => {
+                info!("Database migrations applied successfully");
+            }
+            Ok(out) => {
+                let stderr = String::from_utf8_lossy(&out.stderr);
+                if !stderr.is_empty() {
+                    warn!("Migration output: {}", stderr);
+                }
+            }
+            Err(e) => {
+                warn!("Failed to run Prisma migrations ({}), server may not function correctly", e);
+            }
+        }
+    }
+
     /// Start the NestJS server
     pub fn start(&self) -> Result<(), String> {
         let mut running = self.is_running.lock().unwrap();
@@ -155,9 +221,14 @@ impl ServerManager {
         info!("Server path: {}", server_path.display());
         info!("Database path: {}", db_dir.display());
 
+        // Apply any pending Prisma migrations before starting the server
+        Self::run_prisma_migrations(&node_path, &server_path, &db_dir);
+
+        let server_entry = Self::get_server_entry_path(&server_path);
+
         let child = Command::new(&node_path)
-            .arg(server_path.join("dist/main.js"))
-            .current_dir(&db_dir)
+            .arg(&server_entry)
+            .current_dir(&server_path)
             .env("NODE_ENV", "production")
             .env("PORT", self.server_port.to_string())
             .env("DATABASE_URL", format!("file:{}",
@@ -186,7 +257,7 @@ impl ServerManager {
             Ok(())
         } else {
             error!("Server did not respond after 30 seconds");
-            self.stop(); // Clean up
+            let _ = self.stop(); // Clean up
             Err("Server did not respond after startup".to_string())
         }
     }
@@ -258,26 +329,6 @@ impl ServerManager {
     /// Check server health
     pub fn get_server_port(&self) -> u16 {
         self.server_port
-    }
-
-    pub async fn health_check(&self) -> Result<serde_json::Value, String> {
-        let url = format!("http://localhost:{}/api/auth/setup-status", self.server_port);
-        
-        match reqwest::get(&url).await {
-            Ok(resp) => {
-                match resp.json::<serde_json::Value>().await {
-                    Ok(json) => Ok(json),
-                    Err(e) => {
-                        error!("Failed to parse health response: {}", e);
-                        Err(format!("Failed to parse health response: {}", e))
-                    }
-                }
-            }
-            Err(e) => {
-                error!("Health check failed: {}", e);
-                Err(format!("Health check failed: {}", e))
-            }
-        }
     }
 }
 

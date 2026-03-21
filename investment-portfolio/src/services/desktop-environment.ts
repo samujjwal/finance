@@ -91,7 +91,7 @@ export function useDesktopEnvironment() {
  */
 export function isDesktopApp(): boolean {
   if (typeof window === "undefined") return false;
-  return "__TAURI__" in window;
+  return "__TAURI__" in window || "__TAURI_INTERNALS__" in window;
 }
 
 /**

@@ -12,5 +12,5 @@ export function isDevelopment(): boolean {
 
 /** Returns true when running inside a Tauri desktop window */
 export function isDesktop(): boolean {
-  return typeof window !== "undefined" && "__TAURI__" in window;
+  return typeof window !== "undefined" && ("__TAURI__" in window || "__TAURI_INTERNALS__" in window);
 }
