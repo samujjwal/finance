@@ -39,6 +39,38 @@ export class CompaniesService {
     });
   }
 
+  /** Upsert: create if not exists, update if exists. Used by bulk import. */
+  async upsert(createCompanyDto: CreateCompanyDto) {
+    return this.prisma.company.upsert({
+      where: { symbol: createCompanyDto.symbol },
+      update: {
+        companyName: createCompanyDto.companyName,
+        symbol2: createCompanyDto.symbol2,
+        sector: createCompanyDto.sector,
+        symbol3: createCompanyDto.symbol3,
+        instrumentType: createCompanyDto.instrumentType,
+      },
+      create: createCompanyDto,
+    });
+  }
+
+  /** Bulk upsert companies – returns { imported, updated } counts. */
+  async upsertBulk(dtos: CreateCompanyDto[]) {
+    let created = 0;
+    let updated = 0;
+    for (const dto of dtos) {
+      const existing = await this.prisma.company.findUnique({ where: { symbol: dto.symbol } });
+      if (existing) {
+        await this.prisma.company.update({ where: { symbol: dto.symbol }, data: dto });
+        updated++;
+      } else {
+        await this.prisma.company.create({ data: dto });
+        created++;
+      }
+    }
+    return { created, updated };
+  }
+
   async update(symbol: string, updateCompanyDto: UpdateCompanyDto) {
     const company = await this.findOne(symbol);
 
@@ -59,6 +91,9 @@ export class CompaniesService {
     if (transactionCount > 0) {
       throw new ConflictException('Cannot delete company with existing transactions');
     }
+
+    // Delete portfolio holdings (FK constraint — no cascade in schema)
+    await this.prisma.portfolioHolding.deleteMany({ where: { companySymbol: symbol } });
 
     return this.prisma.company.delete({
       where: { symbol },

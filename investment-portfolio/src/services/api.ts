@@ -95,6 +95,13 @@ class ApiService {
     });
   }
 
+  async createCompaniesBulk(companies: any[]) {
+    return this.makeRequest("companies/bulk", {
+      method: "POST",
+      body: JSON.stringify(companies),
+    });
+  }
+
   async updateCompany(symbol: string, companyData: any) {
     return this.makeRequest(`companies/${symbol}`, {
       method: "PUT",
@@ -122,6 +129,13 @@ class ApiService {
     return this.makeRequest("transactions", {
       method: "POST",
       body: JSON.stringify(transactionData),
+    });
+  }
+
+  async createTransactionsBulk(transactions: any[]) {
+    return this.makeRequest("transactions/bulk", {
+      method: "POST",
+      body: JSON.stringify(transactions),
     });
   }
 

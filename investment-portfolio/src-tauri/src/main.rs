@@ -6,11 +6,18 @@ mod server_manager;
 
 use std::sync::{Arc, Mutex};
 use logging::{setup_logging, log_system_info, handle_panic};
+use serde::Deserialize;
 use server_manager::ServerManager;
-use tauri::State;
+use tauri::{AppHandle, Emitter, State};
 use serde_json::json;
 
 const SERVER_PORT: u16 = 41337;
+
+#[derive(Debug, Deserialize)]
+#[serde(rename_all = "camelCase")]
+struct ResetAppDataPayload {
+    rename_database_to: Option<String>,
+}
 
 #[tauri::command]
 fn greet(name: &str) -> String {
@@ -93,6 +100,33 @@ fn get_api_url() -> Result<String, String> {
     Ok(format!("http://localhost:{}", SERVER_PORT))
 }
 
+#[tauri::command]
+async fn reset_app_data_and_exit(
+    app: AppHandle,
+    server: State<'_, Arc<Mutex<ServerManager>>>,
+    payload: ResetAppDataPayload,
+) -> Result<serde_json::Value, String> {
+    let backup_path = {
+        let manager = server.lock().unwrap();
+        manager.stop()?;
+        ServerManager::cleanup_app_data(payload.rename_database_to)?
+    };
+
+    let result = json!({
+        "success": true,
+        "backupPath": backup_path.map(|path| path.to_string_lossy().to_string())
+    });
+
+    let app_to_exit = app.clone();
+    std::thread::spawn(move || {
+        std::thread::sleep(std::time::Duration::from_millis(150));
+        let _ = app_to_exit.emit("maintenance-reset-complete", json!({ "success": true }));
+        app_to_exit.exit(0);
+    });
+
+    Ok(result)
+}
+
 fn main() {
     // Initialize logging and panic handler first
     if let Err(e) = setup_logging() {
@@ -120,6 +154,7 @@ fn main() {
             get_server_status,
             get_database_path,
             get_api_url,
+            reset_app_data_and_exit,
         ])
         .manage(server_manager.clone())
         .setup(move |_app| {

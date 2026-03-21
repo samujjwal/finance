@@ -31,30 +31,79 @@ export function ImportExport({ companies, onImport }: ImportExportProps) {
         setError(`Import completed with warnings: ${result.errors.join(', ')}`);
       }
 
-      // Import transactions via API
+      // Import companies FIRST via bulk upsert (transactions have a foreign-key to companies)
+      let companiesImported = 0;
+      try {
+        const compRes = await apiService.createCompaniesBulk(result.companies);
+        if (compRes.success) {
+          const d = (compRes as any).data;
+          companiesImported = (d?.created ?? 0) + (d?.updated ?? 0);
+        } else {
+          throw new Error('bulk company upsert failed');
+        }
+      } catch {
+        // Fallback: one-by-one
+        for (const company of result.companies) {
+          try { await apiService.createCompany(company); companiesImported++; } catch { /* may already exist */ }
+        }
+      }
+
+      // Bulk-import all transactions in one request
       let imported = 0;
       let failed = 0;
-
-      for (const transaction of result.transactions) {
-        try {
-          await apiService.createTransaction(transaction);
-          imported++;
-        } catch (err) {
-          failed++;
-          console.error('Failed to import transaction:', err);
+      const failedSymbols: string[] = [];
+      try {
+        const bulkRes = await apiService.createTransactionsBulk(result.transactions);
+        if (bulkRes.success && Array.isArray((bulkRes as any).data)) {
+          const summary = (bulkRes as any).summary;
+          imported = summary?.imported ?? (bulkRes as any).data.length;
+          failed = summary?.failed ?? 0;
+          if (failed > 0) {
+            const errs: Array<{ symbol?: string }> = (bulkRes as any).errors ?? [];
+            for (const e of errs) {
+              const sym = e.symbol || '?';
+              if (!failedSymbols.includes(sym)) failedSymbols.push(sym);
+            }
+          }
+        } else {
+          // Fall back to one-by-one on bulk failure
+          for (const transaction of result.transactions) {
+            try {
+              await apiService.createTransaction(transaction);
+              imported++;
+            } catch (err) {
+              failed++;
+              const sym = (transaction as any).companySymbol || '?';
+              if (!failedSymbols.includes(sym)) failedSymbols.push(sym);
+              console.error('Failed to import transaction:', err);
+            }
+          }
+        }
+      } catch (err) {
+        console.error('Bulk import failed, falling back to sequential:', err);
+        for (const transaction of result.transactions) {
+          try {
+            await apiService.createTransaction(transaction);
+            imported++;
+          } catch (err2) {
+            failed++;
+            const sym = (transaction as any).companySymbol || '?';
+            if (!failedSymbols.includes(sym)) failedSymbols.push(sym);
+          }
         }
       }
 
-      // Import companies via API
-      for (const company of result.companies) {
-        try {
-          await apiService.createCompany(company);
-        } catch (err) {
-          console.error('Failed to import company:', err);
-        }
+      // Recompute portfolio holdings from the newly imported transactions
+      try {
+        await apiService.recalculatePortfolio();
+      } catch (err) {
+        console.error('Failed to recalculate portfolio:', err);
       }
 
-      setSuccess(`Successfully imported ${imported} transactions${failed > 0 ? ` (${failed} failed)` : ''}`);
+      const failNote = failed > 0
+        ? ` (${failed} failed${failedSymbols.length ? ': ' + failedSymbols.slice(0, 5).join(', ') : ''})`
+        : '';
+      setSuccess(`Imported ${companiesImported} companies and ${imported} transactions${failNote}.`);
       onImport();
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to import file');

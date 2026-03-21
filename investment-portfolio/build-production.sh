@@ -15,6 +15,15 @@ NC='\033[0m'
 PROJECT_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 OS=$(uname -s)
 
+# Windows builds are handled by a dedicated script to keep platform concerns
+# isolated and to avoid interfering with the Mac / Linux path.
+# Nothing below this block runs on Windows.
+case "$OS" in
+  MSYS*|MINGW*|CYGWIN*)
+    exec "$PROJECT_ROOT/scripts/build-windows.sh" "$@"
+    ;;
+esac
+
 prepend_path_if_exists() {
     if [ -d "$1" ]; then
         export PATH="$1:$PATH"

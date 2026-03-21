@@ -50,6 +50,22 @@ export const tauriServerCommands = {
   async getApiUrl(): Promise<string> {
     return await invoke('get_api_url');
   },
+
+  /**
+   * Remove all runtime app data and terminate the desktop app.
+   * When renameDatabaseTo is provided, the database is preserved in a backup
+   * folder outside the live app-data root.
+   */
+  async resetAppDataAndExit(renameDatabaseTo?: string): Promise<{
+    success: boolean;
+    backupPath?: string | null;
+  }> {
+    return await invoke('reset_app_data_and_exit', {
+      payload: {
+        renameDatabaseTo,
+      },
+    });
+  },
 };
 
 /**

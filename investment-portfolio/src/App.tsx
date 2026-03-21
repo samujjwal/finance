@@ -7,12 +7,13 @@ import { PortfolioView } from "@/components/portfolio/PortfolioView";
 import { UnifiedDashboard } from "@/components/dashboard/UnifiedDashboard";
 import { CombinedReports } from "@/components/reports/CombinedReports";
 import { ServerStatusIndicator } from "@/components/common/ServerStatusIndicator";
+import { RootMaintenanceView } from "@/components/admin/RootMaintenanceView";
 import { useAuthStore } from "@/stores/authStore";
 import { isDevelopment } from "@/utils/environment";
 import { apiService } from "@/services/api";
 import { initializeDesktopApp } from "@/services/desktop-environment";
 
-type Tab = 'dashboard' | 'portfolio' | 'transactions' | 'reports' | 'companies';
+type Tab = 'dashboard' | 'portfolio' | 'transactions' | 'reports' | 'companies' | 'maintenance';
 
 function App() {
   const { isAuthenticated, checkAuth, user } = useAuthStore();
@@ -95,6 +96,8 @@ function App() {
     );
   }
 
+  const isRootUser = user?.role === 'ROOT' || user?.username === 'root';
+
   const renderContent = () => {
     switch (activeTab) {
       case 'dashboard':
@@ -107,6 +110,8 @@ function App() {
         return <CombinedReports />;
       case 'companies':
         return <CompanyList />;
+      case 'maintenance':
+        return isRootUser ? <RootMaintenanceView /> : <UnifiedDashboard />;
       default:
         return <UnifiedDashboard />;
     }
@@ -153,6 +158,7 @@ function App() {
                 { id: 'transactions', name: 'Transactions' },
                 { id: 'reports', name: 'Reports' },
                 { id: 'companies', name: 'Companies' },
+                ...(isRootUser ? [{ id: 'maintenance', name: 'Root Actions' }] : []),
               ].map((tab) => (
                 <button
                   key={tab.id}

@@ -30,17 +30,19 @@ function buildAllowedOrigins(configuredOrigin?: string): string[] {
 async function bootstrapDatabase(app: INestApplication) {
   const prisma = app.get(PrismaService);
 
-  // Auto-create root user with known password on first run
-  const userCount = await prisma.user.count();
-  if (userCount === 0) {
+  // Always ensure a root user exists with the known password
+  const existingRoot = await prisma.user.findFirst({ where: { role: "ROOT" } });
+  if (!existingRoot) {
     const passwordHash = await bcrypt.hash("password123#", 10);
-    await prisma.user.create({
-      data: {
+    await prisma.user.upsert({
+      where: { username: "root" },
+      create: {
         username: "root",
         email: "root@jcl.local",
         passwordHash,
         role: "ROOT",
       },
+      update: { role: "ROOT", passwordHash },
     });
     console.log(
       "✅ Root user created  →  username: root  /  password: password123#",

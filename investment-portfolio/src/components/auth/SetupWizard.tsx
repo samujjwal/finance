@@ -84,19 +84,39 @@ export function SetupWizard({ onComplete }: SetupWizardProps) {
                 console.warn('Import warnings:', result.errors);
             }
 
-            // Import companies first
+            // Import companies first (transactions have a FK to companies)
             setProgress(`Importing ${result.companies.length} companies…`);
-            for (const company of result.companies) {
-                try { await apiService.createCompany(company); } catch { /* may already exist */ }
+            try {
+                await apiService.createCompaniesBulk(result.companies);
+            } catch {
+                // Fallback: one-by-one if bulk endpoint unavailable
+                for (const company of result.companies) {
+                    try { await apiService.createCompany(company); } catch { /* already exists */ }
+                }
             }
 
-            // Import transactions
+            // Bulk-import all transactions in one request
             let imported = 0;
             let failed = 0;
             setProgress(`Importing ${result.transactions.length} transactions…`);
-            for (const txn of result.transactions) {
-                try { await apiService.createTransaction(txn); imported++; }
-                catch { failed++; }
+            try {
+                const bulkRes = await apiService.createTransactionsBulk(result.transactions);
+                if (bulkRes.success && Array.isArray((bulkRes as any).data)) {
+                    const summary = (bulkRes as any).summary;
+                    imported = summary?.imported ?? (bulkRes as any).data.length;
+                    failed += summary?.failed ?? 0;
+                } else {
+                    // Fall back to one-by-one if bulk fails
+                    for (const txn of result.transactions) {
+                        try { await apiService.createTransaction(txn); imported++; }
+                        catch { failed++; }
+                    }
+                }
+            } catch {
+                for (const txn of result.transactions) {
+                    try { await apiService.createTransaction(txn); imported++; }
+                    catch { failed++; }
+                }
             }
 
             // Trigger portfolio recalculation

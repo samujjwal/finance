@@ -28,6 +28,7 @@ export interface ExcelTransactionRow {
   "Sales Commission": number;
   "DP Charges Sales": number;
   "Total Commission on Sales": number;
+  "Total Investment Cost": number;
   "Capital Gain Tax": number;
   "Net Receivables": number;
   "TC AP TAX": number;
@@ -201,46 +202,143 @@ export async function importTransactionsFromExcel(file: File): Promise<{
         return;
       }
 
+      // Helper: extract the actual scalar value from an ExcelJS cell value.
+      // Formula cells come back as { formula: "...", result: value } objects;
+      // we always want the resolved result.
+      const getCellVal = (val: any): any => {
+        if (val === null || val === undefined) return null;
+        if (val instanceof Date) return val;
+        if (typeof val === "object" && "result" in val) {
+          // Formula result may itself be an error object ({ error: "#DIV/0!" })
+          const r = (val as any).result;
+          return r && typeof r === "object" && "error" in r ? null : r;
+        }
+        return val;
+      };
+
+      // Helper: convert Excel date serial or Date object to ISO date string
+      const convertExcelDate = (val: any): string => {
+        const v = getCellVal(val);
+        if (v instanceof Date) {
+          return v.toISOString().split("T")[0];
+        }
+        if (typeof v === "number" && v > 0) {
+          // Excel date serial: days since Dec 30, 1899
+          const d = new Date(Date.UTC(1899, 11, 30) + v * 86400000);
+          return d.toISOString().split("T")[0];
+        }
+        return String(v || "");
+      };
+
+      // Helper: safe numeric extraction (handles formula objects and nulls)
+      const getNum = (val: any): number => {
+        const v = getCellVal(val);
+        const n = Number(v);
+        return isNaN(n) ? 0 : n;
+      };
+
+      // Helper: map raw transaction type strings to BUY or SELL
+      const normalizeType = (raw: any): "BUY" | "SELL" => {
+        const t = String(getCellVal(raw) || "").toLowerCase().trim();
+        if (t === "sale" || t === "sell" || t.startsWith("sale") || t.startsWith("sell")) return "SELL";
+        // Opening balance, Buy, Purchase, IPO, Rights, Bonus → BUY
+        return "BUY";
+      };
+
+      // Track whether we have already processed the first Opening row
+      // for this company sheet.  The first Opening row (in the Shrawan
+      // section) represents the initial holding brought forward from the
+      // previous year and should be imported once.  Every subsequent
+      // Opening row is just a monthly carry-forward accumulator — it
+      // duplicates units already recorded in the first Opening (or
+      // subsequent buys) and must be skipped.
+      let firstOpeningImported = false;
+
       const transactionData: ExcelTransactionRow[] = [];
       worksheet.eachRow((row, rowNumber) => {
-        if (rowNumber === 1) return; // Skip header
+        // Skip the 6-row header block:
+        //   Row 1-3: company info (name, address, statement title)
+        //   Row 4:   empty spacer
+        //   Row 5:   month section header (e.g. "1. Shrawan")
+        //   Row 6:   column headers (S.No, SYMBOL, Bill No, ...)
+        if (rowNumber <= 6) return;
         const values = row.values as any[];
-        if (values[10]) {
-          // Txn Type
-          transactionData.push({
-            SN: values[1],
-            SYMBOL: values[2],
-            "Company Name": values[3],
-            SYMBOL2: values[4] || "",
-            Sector: values[5] || "",
-            SYMBOL3: values[6] || "",
-            Instrument: values[7] || "",
-            "Bill No": values[8] || "",
-            "Txn Date": values[9] || "",
-            "Txn Type": values[10],
-            "Purchase QTY": values[11] || 0,
-            PPPU: values[12] || 0,
-            "Total Purchase Amount": values[13] || 0,
-            "Sales Qty": values[14] || 0,
-            "Sales Price": values[15] || 0,
-            "Sales Amt": values[16] || 0,
-            "TC AP NFRS": values[17] || 0,
-            "Closing Unit": values[18] || 0,
-            "WACC NFRS": values[19] || 0,
-            "P/L NFRS": values[20] || 0,
-            "Purchase Commission": values[21] || 0,
-            "DP Charges": values[22] || 0,
-            "Total Commission on Purchase": values[23] || 0,
-            "Sales Commission": values[24] || 0,
-            "DP Charges Sales": values[25] || 0,
-            "Total Commission on Sales": values[26] || 0,
-            "Capital Gain Tax": values[27] || 0,
-            "Net Receivables": values[28] || 0,
-            "TC AP TAX": values[29] || 0,
-            "WACC AP TAX": values[30] || 0,
-            "P/L AP TAX": values[31] || 0,
-          });
+
+        // Extract key discriminators upfront
+        const sno = getCellVal(values[1]);
+        const sym = getCellVal(values[2]);
+        const rawType = getCellVal(values[5]);
+
+        // Skip section-header rows ("1. Shrawan"), column-header rows
+        // ("S.No"), total rows ("Total"), and carry-forward accumulator
+        // rows (null SYMBOL or null Txn Type).
+        if (!sym || typeof sym !== "string") return;
+        if (sym.trim().toUpperCase() === "SYMBOL") return;
+        if (typeof sno !== "number") return;  // "Total ", "S.No", etc.
+        if (!rawType) return;                  // accumulator rows have no type
+
+        // Actual column layout (ExcelJS 1-indexed):
+        // [1]=S.No  [2]=SYMBOL  [3]=Bill No  [4]=Txn Date  [5]=Txn Type
+        // [6]=Purchase QTY  [7]=PPPU  [8]=Total Purchase Amount
+        // [9]=Sales Qty  [10]=SPPU  [11]=Sales Amt
+        // [12]=Principal Cost NFRS  [13]=TC AP NFRS  [14]=Unit Sum
+        // [15]=WACC AP NFRS  [16]=P/L AP NFRS  [17]=blank
+        // [18]=Purchase Commission  [19]=DP Charges  [20]=Total Commission on Purchase
+        // [21]=Total Investment Cost  [22]=Sales Commission  [23]=DP Charges(sales)
+        // [24]=Total Commission on Sales  [25]=Capital Gain Tax  [26]=Net Receivables
+        // [27]=Principal Amt AP TAX  [28]=TC AP TAX  [29]=WACC AP TAX  [30]=P/L AP TAX
+
+        const typeStr = String(rawType).trim().toLowerCase();
+
+        if (typeStr === "opening") {
+          if (firstOpeningImported) {
+            // Subsequent "Opening" rows are monthly carry-forward totals —
+            // they duplicate data already captured; skip them entirely.
+            return;
+          }
+          // Always mark the flag on the FIRST Opening row (even if qty=0)
+          // so that carry-forward Opening rows in later months are skipped.
+          firstOpeningImported = true;
+          // First Opening row: represents units held at the start of the
+          // fiscal year.  Skip if qty is zero (no initial position).
+          const qty = getNum(values[6]);
+          if (qty === 0) return;
         }
+
+        transactionData.push({
+          SN: sno,
+          SYMBOL: sym.trim(),
+          "Company Name": "",
+          SYMBOL2: "",
+          Sector: "",
+          SYMBOL3: "",
+          Instrument: "",
+          "Bill No": getCellVal(values[3]) ? String(getCellVal(values[3])).trim() : "",
+          "Txn Date": convertExcelDate(values[4]),
+          "Txn Type": normalizeType(rawType),
+          "Purchase QTY": getNum(values[6]),
+          PPPU: getNum(values[7]),
+          "Total Purchase Amount": getNum(values[8]),
+          "Sales Qty": getNum(values[9]),
+          "Sales Price": getNum(values[10]),
+          "Sales Amt": getNum(values[11]),
+          "TC AP NFRS": getNum(values[13]),
+          "Closing Unit": getNum(values[14]),
+          "WACC NFRS": getNum(values[15]),
+          "P/L NFRS": getNum(values[16]),
+          "Purchase Commission": getNum(values[18]),
+          "DP Charges": getNum(values[19]),
+          "Total Commission on Purchase": getNum(values[20]),
+          "Sales Commission": getNum(values[22]),
+          "DP Charges Sales": getNum(values[23]),
+          "Total Commission on Sales": getNum(values[24]),
+          "Total Investment Cost": getNum(values[21]),
+          "Capital Gain Tax": getNum(values[25]),
+          "Net Receivables": getNum(values[26]),
+          "TC AP TAX": getNum(values[28]),
+          "WACC AP TAX": getNum(values[29]),
+          "P/L AP TAX": getNum(values[30]),
+        });
       });
 
       transactionData.forEach((row) => {
@@ -272,6 +370,7 @@ export async function importTransactionsFromExcel(file: File): Promise<{
             row["Txn Type"] === "SELL" ? row["DP Charges Sales"] : 0,
           totalSalesCommission:
             row["Txn Type"] === "SELL" ? row["Total Commission on Sales"] : 0,
+          totalInvestmentCost: row["Total Investment Cost"] || undefined,
           capitalGainTax: row["Capital Gain Tax"],
           netReceivables: row["Net Receivables"],
           tcTax: row["TC AP TAX"],

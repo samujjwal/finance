@@ -5,6 +5,29 @@ use std::thread;
 use std::time::Duration;
 use log::{info, error, debug, warn};
 
+/// On Windows, set CREATE_NO_WINDOW so node.exe never opens a visible console
+/// terminal in the background while the Tauri app is running.
+#[cfg(target_os = "windows")]
+fn no_window(cmd: &mut Command) {
+    use std::os::windows::process::CommandExt;
+    cmd.creation_flags(0x0800_0000); // CREATE_NO_WINDOW
+}
+#[cfg(not(target_os = "windows"))]
+fn no_window(_cmd: &mut Command) {}
+
+/// On Windows, delete the Zone.Identifier alternate data stream that Windows
+/// Defender / SmartScreen attaches to files downloaded from the internet.
+/// This prevents the "Allow this app?" SmartScreen dialog from appearing the
+/// first time the bundled node.exe is executed.
+#[cfg(target_os = "windows")]
+fn unblock_if_needed(path: &PathBuf) {
+    let ads = format!("{}:Zone.Identifier", path.display());
+    let _ = std::fs::remove_file(&ads); // silently ignored if stream is absent
+    debug!("Unblocked (Zone.Identifier removed): {}", path.display());
+}
+#[cfg(not(target_os = "windows"))]
+fn unblock_if_needed(_path: &PathBuf) {}
+
 pub struct ServerManager {
     process: Arc<Mutex<Option<Child>>>,
     is_running: Arc<Mutex<bool>>,
@@ -145,6 +168,114 @@ impl ServerManager {
         app_data.join("jcl-investment-portfolio")
     }
 
+    /// Get the full SQLite database file path.
+    pub fn get_database_file_path() -> PathBuf {
+        Self::get_database_path().join("investment_portfolio.db")
+    }
+
+    /// Store preserved databases outside the live app-data root so a reset can
+    /// still remove all runtime state and behave like a first install.
+    pub fn get_database_backup_path() -> PathBuf {
+        let data_root = Self::get_database_path();
+        data_root
+            .parent()
+            .map(|parent| parent.join("jcl-investment-portfolio-backups"))
+            .unwrap_or_else(|| PathBuf::from("jcl-investment-portfolio-backups"))
+    }
+
+    fn sanitize_backup_name(name: &str) -> String {
+        let trimmed = name.trim();
+        let base = if trimmed.is_empty() {
+            format!(
+                "investment_portfolio_backup_{}",
+                std::time::SystemTime::now()
+                    .duration_since(std::time::UNIX_EPOCH)
+                    .map(|duration| duration.as_secs())
+                    .unwrap_or(0)
+            )
+        } else {
+            trimmed.to_string()
+        };
+
+        let sanitized: String = base
+            .chars()
+            .map(|ch| match ch {
+                'a'..='z' | 'A'..='Z' | '0'..='9' | '-' | '_' | '.' => ch,
+                _ => '_',
+            })
+            .collect();
+
+        if sanitized.to_lowercase().ends_with(".db") {
+            sanitized
+        } else {
+            format!("{}.db", sanitized)
+        }
+    }
+
+    fn unique_backup_target(file_name: &str) -> PathBuf {
+        let backup_root = Self::get_database_backup_path();
+        let candidate = backup_root.join(file_name);
+        if !candidate.exists() {
+            return candidate;
+        }
+
+        let stem = PathBuf::from(file_name)
+            .file_stem()
+            .map(|value| value.to_string_lossy().to_string())
+            .unwrap_or_else(|| "investment_portfolio_backup".to_string());
+        let extension = PathBuf::from(file_name)
+            .extension()
+            .map(|value| value.to_string_lossy().to_string())
+            .unwrap_or_else(|| "db".to_string());
+
+        for index in 1..=9999 {
+            let next = backup_root.join(format!("{}_{}.{}", stem, index, extension));
+            if !next.exists() {
+                return next;
+            }
+        }
+
+        backup_root.join(format!(
+            "{}_{}.{}",
+            stem,
+            std::time::SystemTime::now()
+                .duration_since(std::time::UNIX_EPOCH)
+                .map(|duration| duration.as_secs())
+                .unwrap_or(0),
+            extension
+        ))
+    }
+
+    pub fn cleanup_app_data(rename_database_to: Option<String>) -> Result<Option<PathBuf>, String> {
+        let data_root = Self::get_database_path();
+        let database_file = Self::get_database_file_path();
+        let mut backup_path = None;
+
+        if database_file.exists() {
+            if let Some(name) = rename_database_to {
+                let sanitized_name = Self::sanitize_backup_name(&name);
+                let target = Self::unique_backup_target(&sanitized_name);
+                if let Some(parent) = target.parent() {
+                    std::fs::create_dir_all(parent).map_err(|error| {
+                        format!("Failed to create backup directory: {}", error)
+                    })?;
+                }
+                std::fs::rename(&database_file, &target).map_err(|error| {
+                    format!("Failed to preserve database backup: {}", error)
+                })?;
+                backup_path = Some(target);
+            }
+        }
+
+        if data_root.exists() {
+            std::fs::remove_dir_all(&data_root).map_err(|error| {
+                format!("Failed to remove app data directory: {}", error)
+            })?;
+        }
+
+        Ok(backup_path)
+    }
+
     /// Ensure database directory exists
     pub fn ensure_database_dir() -> Result<PathBuf, String> {
         let db_path = Self::get_database_path();
@@ -171,15 +302,17 @@ impl ServerManager {
         }
 
         info!("Running Prisma database push...");
-        match Command::new(node_path)
+        let mut prisma_cmd = Command::new(node_path);
+        prisma_cmd
             .arg(&prisma_cli)
             .args(["db", "push", "--skip-generate"])
             .current_dir(server_path)
             .env(
                 "DATABASE_URL",
                 format!("file:{}", db_dir.join("investment_portfolio.db").to_string_lossy()),
-            )
-            .output()
+            );
+        no_window(&mut prisma_cmd);
+        match prisma_cmd.output()
         {
             Ok(out) if out.status.success() => {
                 info!("Database schema applied successfully");
@@ -230,7 +363,12 @@ impl ServerManager {
 
         let server_entry = Self::get_server_entry_path(&server_path);
 
-        let child = Command::new(&node_path)
+        // Remove Zone.Identifier stream so Windows does not prompt before the
+        // first execution of the bundled node.exe.
+        unblock_if_needed(&node_path);
+
+        let mut server_cmd = Command::new(&node_path);
+        server_cmd
             .arg(&server_entry)
             .current_dir(&server_path)
             .env("NODE_ENV", "production")
@@ -240,8 +378,11 @@ impl ServerManager {
             .env("CORS_ORIGIN", "http://localhost:1420")
             .env("JWT_SECRET", "jcl-investment-portfolio-secret-key-change-in-production")
             .stdout(Stdio::piped())
-            .stderr(Stdio::piped())
-            .spawn()
+            .stderr(Stdio::piped());
+        // Hide the console window on Windows — the user should never see a
+        // black terminal flash up in the background.
+        no_window(&mut server_cmd);
+        let child = server_cmd.spawn()
             .map_err(|e| {
                 error!("Failed to spawn server process: {}", e);
                 format!("Failed to spawn server process: {}", e)

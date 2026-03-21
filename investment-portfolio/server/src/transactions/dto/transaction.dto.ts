@@ -113,6 +113,47 @@ export class CreateTransactionDto {
   @IsOptional()
   @IsNumber()
   netReceivables?: number;
+
+  // NFRS / Tax fields from NEPSE Excel statement
+  @ApiProperty({ description: "Total cost as per NFRS (running accumulated cost)", required: false })
+  @IsOptional()
+  @IsNumber()
+  principalCostNfrs?: number;
+
+  @ApiProperty({ description: "Closing unit sum (total units held)", required: false })
+  @IsOptional()
+  @IsNumber()
+  unitSum?: number;
+
+  @ApiProperty({ description: "Weighted average cost as per NFRS", required: false })
+  @IsOptional()
+  @IsNumber()
+  waccNfrs?: number;
+
+  @ApiProperty({ description: "Profit/Loss as per NFRS", required: false })
+  @IsOptional()
+  @IsNumber()
+  profitLossNfrs?: number;
+
+  @ApiProperty({ description: "Total cost as per tax (AP TAX)", required: false })
+  @IsOptional()
+  @IsNumber()
+  tcTax?: number;
+
+  @ApiProperty({ description: "Weighted average cost as per tax", required: false })
+  @IsOptional()
+  @IsNumber()
+  waccTax?: number;
+
+  @ApiProperty({ description: "Profit/Loss as per tax", required: false })
+  @IsOptional()
+  @IsNumber()
+  profitLossTax?: number;
+
+  @ApiProperty({ description: "Principal amount as per tax (sales unit cost)", required: false })
+  @IsOptional()
+  @IsNumber()
+  principalAmountTax?: number;
 }
 
 export class UpdateTransactionDto {
@@ -220,6 +261,47 @@ export class UpdateTransactionDto {
   @IsOptional()
   @IsNumber()
   netReceivables?: number;
+
+  // NFRS / Tax fields
+  @ApiProperty({ required: false })
+  @IsOptional()
+  @IsNumber()
+  principalCostNfrs?: number;
+
+  @ApiProperty({ required: false })
+  @IsOptional()
+  @IsNumber()
+  unitSum?: number;
+
+  @ApiProperty({ required: false })
+  @IsOptional()
+  @IsNumber()
+  waccNfrs?: number;
+
+  @ApiProperty({ required: false })
+  @IsOptional()
+  @IsNumber()
+  profitLossNfrs?: number;
+
+  @ApiProperty({ required: false })
+  @IsOptional()
+  @IsNumber()
+  tcTax?: number;
+
+  @ApiProperty({ required: false })
+  @IsOptional()
+  @IsNumber()
+  waccTax?: number;
+
+  @ApiProperty({ required: false })
+  @IsOptional()
+  @IsNumber()
+  profitLossTax?: number;
+
+  @ApiProperty({ required: false })
+  @IsOptional()
+  @IsNumber()
+  principalAmountTax?: number;
 }
 
 export class TransactionFilterDto {

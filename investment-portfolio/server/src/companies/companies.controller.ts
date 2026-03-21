@@ -38,6 +38,16 @@ export class CompaniesController {
     };
   }
 
+  @Post('bulk')
+  @ApiOperation({ summary: 'Bulk upsert companies (create or update)' })
+  async upsertBulk(@Body() dtos: CreateCompanyDto[]) {
+    const result = await this.companiesService.upsertBulk(dtos);
+    return {
+      success: true,
+      data: result,
+    };
+  }
+
   @Put(':symbol')
   @ApiOperation({ summary: 'Update company' })
   async update(@Param('symbol') symbol: string, @Body() updateCompanyDto: UpdateCompanyDto) {

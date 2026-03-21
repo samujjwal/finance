@@ -151,15 +151,26 @@ export class TransactionsController {
   }
 
   @Post("bulk")
-  @ApiOperation({ summary: "Create multiple transactions" })
+  @ApiOperation({ summary: "Create multiple transactions; returns per-item results" })
   async createBulk(@Body() createDtos: CreateTransactionDto[]) {
-    const results = [];
-    for (const dto of createDtos) {
-      results.push(await this.transactionsService.create(dto));
+    if (!Array.isArray(createDtos)) {
+      throw new BadRequestException("Request body must be an array of transactions");
     }
+    const results: any[] = [];
+    for (const dto of createDtos) {
+      try {
+        const created = await this.transactionsService.create(dto);
+        results.push({ success: true, data: created });
+      } catch (err: any) {
+        results.push({ success: false, error: err?.message || String(err), dto });
+      }
+    }
+    const succeeded = results.filter(r => r.success);
     return {
       success: true,
-      data: results,
+      data: succeeded.map(r => r.data),
+      summary: { total: results.length, imported: succeeded.length, failed: results.length - succeeded.length },
+      errors: results.filter(r => !r.success).map(r => ({ error: r.error, symbol: r.dto?.companySymbol })),
     };
   }
 

@@ -10,7 +10,7 @@ export interface User {
   id: string;
   username: string;
   email: string;
-  role: "ADMIN" | "EDITOR" | "VIEWER" | "READ_ONLY" | "USER";
+  role: "ROOT" | "ADMIN" | "EDITOR" | "VIEWER" | "READ_ONLY" | "USER";
   organizationId?: string;
   createdAt: string;
   lastLogin?: string;
