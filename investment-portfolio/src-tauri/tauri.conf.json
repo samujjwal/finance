@@ -12,15 +12,15 @@
   "app": {
     "windows": [
       {
-        "fullscreen": false,
+        "title": "JCL Investment Portfolio",
+        "width": 1200,
         "height": 800,
         "resizable": true,
-        "title": "JCL Investment Portfolio",
-        "width": 1200
+        "center": true
       }
     ],
     "security": {
-      "csp": "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; connect-src 'self' http://localhost:3001 ws://localhost:3001; font-src 'self';"
+      "csp": "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; connect-src 'self' http://localhost:41337 ws://localhost:41337; font-src 'self';"
     }
   },
   "bundle": {
@@ -40,7 +40,8 @@
     "targets": "all",
     "resources": {
       "resources/node/bin": "node/bin",
-      "resources/server": "server"
+      "resources/server": "server",
+      "../dist": "dist"
     },
     "windows": {
       "webviewInstallMode": {
@@ -58,10 +59,7 @@
   },
   "plugins": {
     "shell": {
-      "open": true,
-      "execute": {
-        "open": ""
-      }
+      "open": true
     }
   }
 }

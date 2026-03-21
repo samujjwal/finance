@@ -156,7 +156,7 @@ impl ServerManager {
         Ok(db_path)
     }
 
-    /// Run `prisma migrate deploy` to initialise or upgrade the SQLite schema.
+    /// Run `prisma db push` to initialise or upgrade the SQLite schema.
     /// Non-fatal: logs a warning and continues if the CLI is not found or fails.
     fn run_prisma_migrations(node_path: &PathBuf, server_path: &PathBuf, db_dir: &PathBuf) {
         let prisma_cli = server_path
@@ -170,10 +170,10 @@ impl ServerManager {
             return;
         }
 
-        info!("Running Prisma database migrations...");
+        info!("Running Prisma database push...");
         match Command::new(node_path)
             .arg(&prisma_cli)
-            .args(["migrate", "deploy"])
+            .args(["db", "push", "--skip-generate"])
             .current_dir(server_path)
             .env(
                 "DATABASE_URL",
@@ -182,16 +182,20 @@ impl ServerManager {
             .output()
         {
             Ok(out) if out.status.success() => {
-                info!("Database migrations applied successfully");
+                info!("Database schema applied successfully");
             }
             Ok(out) => {
                 let stderr = String::from_utf8_lossy(&out.stderr);
+                let stdout = String::from_utf8_lossy(&out.stdout);
                 if !stderr.is_empty() {
-                    warn!("Migration output: {}", stderr);
+                    warn!("Prisma db push stderr: {}", stderr);
+                }
+                if !stdout.is_empty() {
+                    info!("Prisma db push stdout: {}", stdout);
                 }
             }
             Err(e) => {
-                warn!("Failed to run Prisma migrations ({}), server may not function correctly", e);
+                warn!("Failed to run Prisma db push ({}), server may not function correctly", e);
             }
         }
     }
@@ -234,6 +238,7 @@ impl ServerManager {
             .env("DATABASE_URL", format!("file:{}",
                 db_dir.join("investment_portfolio.db").display()))
             .env("CORS_ORIGIN", "http://localhost:1420")
+            .env("JWT_SECRET", "jcl-investment-portfolio-secret-key-change-in-production")
             .stdout(Stdio::piped())
             .stderr(Stdio::piped())
             .spawn()

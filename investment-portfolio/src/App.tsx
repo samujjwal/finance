@@ -20,28 +20,42 @@ function App() {
   // null = still querying; true = first-run wizard required; false = normal
   const [firstRun, setFirstRun] = useState<boolean | null>(null);
   const [appReady, setAppReady] = useState(false);
+  const [debugInfo, setDebugInfo] = useState<string>('');
 
   useEffect(() => {
     // Initialize desktop environment first (if running in Tauri)
     const initApp = async () => {
       try {
         await initializeDesktopApp();
-        setAppReady(true);
       } catch (err) {
         console.warn('Desktop initialization warning:', err);
-        setAppReady(true); // Continue anyway
       }
 
-      // Now check auth and setup status
-      checkAuth();
-      // Check setup status without authentication – decides whether to show wizard
-      apiService.getSetupStatus().then((res) => {
+      // Check setup status FIRST (without authentication) – decides whether to show wizard
+      try {
+        const res = await apiService.getSetupStatus();
+        const debugMsg = `Setup status: ${JSON.stringify(res)}`;
+        console.log(debugMsg);
+        setDebugInfo(debugMsg);
         if (res.success && res.data) {
-          setFirstRun((res.data as any).firstRun === true);
+          const isFirstRun = (res.data as any).firstRun === true;
+          setFirstRun(isFirstRun);
+          setDebugInfo(prev => prev + ` | firstRun=${isFirstRun}`);
         } else {
           setFirstRun(false);
+          setDebugInfo(prev => prev + ' | firstRun=false (no data)');
         }
-      }).catch(() => setFirstRun(false));
+      } catch (err) {
+        const errorMsg = `Setup error: ${err}`;
+        console.error(errorMsg);
+        setDebugInfo(errorMsg);
+        setFirstRun(false);
+      }
+
+      // Now check auth (after setup status)
+      await checkAuth();
+      
+      setAppReady(true);
     };
 
     initApp();
@@ -51,7 +65,10 @@ function App() {
   if (firstRun === null || !appReady) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <div className="text-gray-500 text-sm">Loading…</div>
+        <div className="text-center">
+          <div className="text-gray-500 text-sm">Loading…</div>
+          <div className="text-xs text-gray-400 mt-2">{debugInfo}</div>
+        </div>
       </div>
     );
   }
@@ -59,6 +76,23 @@ function App() {
   // First-run: show the setup wizard (it handles its own login/registration)
   if (firstRun) {
     return <SetupWizard onComplete={() => setFirstRun(false)} />;
+  }
+
+  // Not authenticated: show login form
+  if (!isAuthenticated) {
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <div className="container mx-auto px-4 py-8">
+          <div className="text-center mb-8">
+            <h1 className="text-3xl font-bold text-gray-900">
+              JCL Investment Portfolio
+            </h1>
+            <p className="text-gray-600 mt-2">Sign in to access your portfolio</p>
+          </div>
+          <LoginForm />
+        </div>
+      </div>
+    );
   }
 
   const renderContent = () => {

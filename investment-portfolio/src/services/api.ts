@@ -25,6 +25,14 @@ class ApiService {
         headers,
       });
 
+      // Handle 401 Unauthorized - clear auth and reload to login
+      // Skip for setup-status endpoint which is unauthenticated
+      if (response.status === 401 && !endpoint.includes('setup-status')) {
+        localStorage.removeItem("auth_token");
+        window.location.reload();
+        return { success: false, error: "Unauthorized - please login again" };
+      }
+
       const data = await response.json();
       return response.ok
         ? { success: true, data: data.data || data }
@@ -36,13 +44,12 @@ class ApiService {
 
   private getApiBaseUrl(): string {
     // For development, use local API server
-    // For production, this can be configured via environment variables
     if (import.meta.env.DEV) {
       return "http://localhost:3001/api";
     }
 
-    // Production URL - can be configured based on deployment
-    return import.meta.env.VITE_API_URL || "http://localhost:3001/api";
+    // Production - bundled app uses port 41337
+    return "http://localhost:41337/api";
   }
 
   // Authentication

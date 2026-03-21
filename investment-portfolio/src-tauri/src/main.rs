@@ -10,7 +10,7 @@ use server_manager::ServerManager;
 use tauri::State;
 use serde_json::json;
 
-const SERVER_PORT: u16 = 3001;
+const SERVER_PORT: u16 = 41337;
 
 #[tauri::command]
 fn greet(name: &str) -> String {
@@ -108,7 +108,9 @@ fn main() {
     let server_manager = Arc::new(Mutex::new(ServerManager::new(SERVER_PORT)));
     let server_manager_clone = server_manager.clone();
 
-    tauri::Builder::default()
+    log::info!("Building Tauri application...");
+    
+    let result = tauri::Builder::default()
         .plugin(tauri_plugin_shell::init())
         .invoke_handler(tauri::generate_handler![
             greet,
@@ -123,18 +125,20 @@ fn main() {
         .setup(move |_app| {
             log::info!("Tauri application setup started");
             
-            // Start the backend server automatically
-            log::info!("Attempting to start backend server...");
-            let manager = server_manager_clone.lock().unwrap();
-            match manager.start() {
-                Ok(_) => {
-                    log::info!("Backend server started successfully");
+            // Start the backend server asynchronously to avoid blocking the UI
+            log::info!("Starting backend server asynchronously...");
+            let manager_clone = server_manager_clone.clone();
+            std::thread::spawn(move || {
+                let manager = manager_clone.lock().unwrap();
+                match manager.start() {
+                    Ok(_) => {
+                        log::info!("Backend server started successfully");
+                    }
+                    Err(e) => {
+                        log::error!("Failed to start backend server: {}", e);
+                    }
                 }
-                Err(e) => {
-                    log::error!("Failed to start backend server: {}", e);
-                    // Continue anyway - user can try to restart from UI
-                }
-            }
+            });
 
             log::info!("Tauri application setup completed");
             Ok(())
@@ -148,7 +152,14 @@ fn main() {
                 _ => {}
             }
         })
-        .run(tauri::generate_context!())
-        .expect("error while running tauri application");
+        .run(tauri::generate_context!());
+        
+    match result {
+        Ok(_) => log::info!("Tauri application exited normally"),
+        Err(e) => {
+            log::error!("Tauri application error: {}", e);
+            eprintln!("error while running tauri application: {}", e);
+        }
+    }
 }
 

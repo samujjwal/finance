@@ -84,7 +84,7 @@ elif [[ $NODE_FILE == *.tar.gz ]]; then
 fi
 
 # Move binaries to a consistent location
-NODE_DIR="node-v${NODE_VERSION}-${OS,,}-${NODE_ARCH}"
+NODE_DIR="node-v${NODE_VERSION}-$(echo "$OS" | tr '[:upper:]' '[:lower:]')-${NODE_ARCH}"
 if [ -d "$NODE_DIR" ]; then
     # Copy node binary to consistent location
     mkdir -p "bin"
