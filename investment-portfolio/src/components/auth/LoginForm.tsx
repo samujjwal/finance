@@ -3,6 +3,7 @@ import { Button } from '@/components/ui/Button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/Card';
 import { useAuthStore } from '@/stores/authStore';
 import { LoginRequest } from '@/types/api';
+import { Lock, AlertCircle, Clock } from 'lucide-react';
 
 export function LoginForm() {
   const [credentials, setCredentials] = useState<LoginRequest>({
@@ -32,6 +33,62 @@ export function LoginForm() {
       [name]: value,
     }));
   };
+
+  // Determine error type for customized display
+  const getErrorDetails = (error: string | null) => {
+    if (!error) return null;
+
+    const errorLower = error.toLowerCase();
+
+    if (errorLower.includes('locked')) {
+      return {
+        type: 'locked',
+        icon: <Lock className="w-5 h-5 text-red-600" />,
+        title: 'Account Locked',
+        message: error,
+        bgColor: 'bg-red-50',
+        borderColor: 'border-red-200',
+        textColor: 'text-red-800',
+      };
+    }
+
+    if (errorLower.includes('pending approval')) {
+      return {
+        type: 'pending',
+        icon: <Clock className="w-5 h-5 text-yellow-600" />,
+        title: 'Account Pending Approval',
+        message: error,
+        bgColor: 'bg-yellow-50',
+        borderColor: 'border-yellow-200',
+        textColor: 'text-yellow-800',
+      };
+    }
+
+    if (errorLower.includes('suspended') || errorLower.includes('rejected') || errorLower.includes('inactive')) {
+      return {
+        type: 'suspended',
+        icon: <AlertCircle className="w-5 h-5 text-orange-600" />,
+        title: 'Account Access Denied',
+        message: error,
+        bgColor: 'bg-orange-50',
+        borderColor: 'border-orange-200',
+        textColor: 'text-orange-800',
+      };
+    }
+
+    // Default error
+    return {
+      type: 'error',
+      icon: <AlertCircle className="w-5 h-5 text-red-600" />,
+      title: 'Login Failed',
+      message: error,
+      bgColor: 'bg-red-50',
+      borderColor: 'border-red-200',
+      textColor: 'text-red-800',
+    };
+  };
+
+  const errorDetails = getErrorDetails(typeof error === 'string' ? error : null);
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
@@ -74,23 +131,47 @@ export function LoginForm() {
                   type="password"
                   required
                   minLength={6}
+                  maxLength={10}
                   value={credentials.password}
                   onChange={handleChange}
                   className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                  placeholder="Enter your password (min 6 chars)"
+                  placeholder="Enter your password (6-10 chars)"
                 />
+                <p className="mt-1 text-xs text-gray-500">
+                  Password must contain uppercase, lowercase, and a number
+                </p>
               </div>
 
-              {error && (
-                <div className="text-red-600 text-sm">
-                  {typeof error === 'string' ? error : 'An error occurred'}
+              {errorDetails && (
+                <div className={`${errorDetails.bgColor} ${errorDetails.borderColor} border rounded-lg p-4`}>
+                  <div className="flex items-start space-x-3">
+                    {errorDetails.icon}
+                    <div>
+                      <h4 className={`font-semibold ${errorDetails.textColor}`}>
+                        {errorDetails.title}
+                      </h4>
+                      <p className={`text-sm mt-1 ${errorDetails.textColor}`}>
+                        {errorDetails.message}
+                      </p>
+                      {errorDetails.type === 'locked' && (
+                        <p className="text-xs text-gray-600 mt-2">
+                          Please contact your system administrator to unlock your account.
+                        </p>
+                      )}
+                      {errorDetails.type === 'pending' && (
+                        <p className="text-xs text-gray-600 mt-2">
+                          Your account is awaiting administrator approval. You will be notified once approved.
+                        </p>
+                      )}
+                    </div>
+                  </div>
                 </div>
               )}
 
               <Button
                 type="submit"
                 className="w-full"
-                disabled={isLoading}
+                disabled={isLoading || errorDetails?.type === 'locked'}
               >
                 {isLoading ? 'Signing in...' : 'Sign in'}
               </Button>

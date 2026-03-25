@@ -9,6 +9,7 @@ import {
   UseGuards,
   Query,
   BadRequestException,
+  Request,
 } from "@nestjs/common";
 import { ApiTags, ApiOperation, ApiBearerAuth } from "@nestjs/swagger";
 import { JwtAuthGuard } from "../auth/jwt-auth.guard";
@@ -18,6 +19,8 @@ import {
   CreateTransactionDto,
   UpdateTransactionDto,
   TransactionFilterDto,
+  ApproveTransactionDto,
+  SubmitForApprovalDto,
 } from "./dto/transaction.dto";
 
 @ApiTags("transactions")
@@ -151,10 +154,14 @@ export class TransactionsController {
   }
 
   @Post("bulk")
-  @ApiOperation({ summary: "Create multiple transactions; returns per-item results" })
+  @ApiOperation({
+    summary: "Create multiple transactions; returns per-item results",
+  })
   async createBulk(@Body() createDtos: CreateTransactionDto[]) {
     if (!Array.isArray(createDtos)) {
-      throw new BadRequestException("Request body must be an array of transactions");
+      throw new BadRequestException(
+        "Request body must be an array of transactions",
+      );
     }
     const results: any[] = [];
     for (const dto of createDtos) {
@@ -162,15 +169,25 @@ export class TransactionsController {
         const created = await this.transactionsService.create(dto);
         results.push({ success: true, data: created });
       } catch (err: any) {
-        results.push({ success: false, error: err?.message || String(err), dto });
+        results.push({
+          success: false,
+          error: err?.message || String(err),
+          dto,
+        });
       }
     }
-    const succeeded = results.filter(r => r.success);
+    const succeeded = results.filter((r) => r.success);
     return {
       success: true,
-      data: succeeded.map(r => r.data),
-      summary: { total: results.length, imported: succeeded.length, failed: results.length - succeeded.length },
-      errors: results.filter(r => !r.success).map(r => ({ error: r.error, symbol: r.dto?.companySymbol })),
+      data: succeeded.map((r) => r.data),
+      summary: {
+        total: results.length,
+        imported: succeeded.length,
+        failed: results.length - succeeded.length,
+      },
+      errors: results
+        .filter((r) => !r.success)
+        .map((r) => ({ error: r.error, symbol: r.dto?.companySymbol })),
     };
   }
 
@@ -202,6 +219,89 @@ export class TransactionsController {
     return {
       success: true,
       message: "Transaction deleted successfully",
+    };
+  }
+
+  // ── Approval Workflow routes ───────
+
+  @Get("pending-approvals")
+  @ApiOperation({ summary: "Get transactions pending approval" })
+  async getPendingApprovals() {
+    return {
+      success: true,
+      data: await this.transactionsService.getPendingApprovals(),
+    };
+  }
+
+  @Get("approval-stats")
+  @ApiOperation({ summary: "Get transaction approval statistics" })
+  async getApprovalStats() {
+    return {
+      success: true,
+      data: await this.transactionsService.getApprovalStats(),
+    };
+  }
+
+  @Post(":id/submit")
+  @ApiOperation({ summary: "Submit transaction for approval" })
+  async submitForApproval(
+    @Param("id") id: string,
+    @Body() dto: SubmitForApprovalDto,
+    @Request() req: any,
+  ) {
+    return {
+      success: true,
+      data: await this.transactionsService.submitForApproval(
+        id,
+        req.user?.id || "SYSTEM",
+        dto,
+      ),
+    };
+  }
+
+  @Post(":id/approve")
+  @ApiOperation({ summary: "Approve a transaction" })
+  async approveTransaction(
+    @Param("id") id: string,
+    @Body() dto: ApproveTransactionDto,
+    @Request() req: any,
+  ) {
+    return {
+      success: true,
+      data: await this.transactionsService.approveTransaction(
+        id,
+        req.user?.id || "SYSTEM",
+        dto,
+      ),
+    };
+  }
+
+  @Post(":id/reject")
+  @ApiOperation({ summary: "Reject a transaction" })
+  async rejectTransaction(
+    @Param("id") id: string,
+    @Body() dto: ApproveTransactionDto,
+    @Request() req: any,
+  ) {
+    return {
+      success: true,
+      data: await this.transactionsService.rejectTransaction(
+        id,
+        req.user?.id || "SYSTEM",
+        dto,
+      ),
+    };
+  }
+
+  @Post(":id/withdraw")
+  @ApiOperation({ summary: "Withdraw transaction from approval" })
+  async withdrawFromApproval(@Param("id") id: string, @Request() req: any) {
+    return {
+      success: true,
+      data: await this.transactionsService.withdrawFromApproval(
+        id,
+        req.user?.id || "SYSTEM",
+      ),
     };
   }
 }

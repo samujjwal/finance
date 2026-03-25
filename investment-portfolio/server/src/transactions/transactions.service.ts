@@ -2,20 +2,36 @@ import {
   Injectable,
   NotFoundException,
   ConflictException,
+  ForbiddenException,
+  BadRequestException,
 } from "@nestjs/common";
 import { PrismaService } from "../prisma/prisma.service";
 import { FeeRatesService } from "../fee-rates/fee-rates.service";
+import { ApprovalService } from "../approval/approval.service";
+import { AuditService } from "../audit/audit.service";
 import {
   CreateTransactionDto,
   UpdateTransactionDto,
   TransactionFilterDto,
+  ApproveTransactionDto,
+  SubmitForApprovalDto,
 } from "./dto/transaction.dto";
+
+// Transaction approval states
+export enum TransactionStatus {
+  DRAFT = "DRAFT",
+  PENDING = "PENDING",
+  APPROVED = "APPROVED",
+  REJECTED = "REJECTED",
+}
 
 @Injectable()
 export class TransactionsService {
   constructor(
     private prisma: PrismaService,
     private feeRates: FeeRatesService,
+    private approvalService: ApprovalService,
+    private auditService: AuditService,
   ) {}
 
   async findAll(filters?: TransactionFilterDto) {
@@ -27,6 +43,10 @@ export class TransactionsService {
 
     if (filters?.transactionType) {
       where.transactionType = filters.transactionType;
+    }
+
+    if (filters?.approvalStatus) {
+      where.status = filters.approvalStatus;
     }
 
     if (filters?.dateFrom || filters?.dateTo) {
@@ -95,7 +115,7 @@ export class TransactionsService {
           data.purchaseQuantity * data.purchasePricePerUnit;
       }
       // Auto-fill commission/charge fields when not provided by the client
-      if (data.totalPurchaseAmount && !data.totalInvestmentCost) {
+      if (data.totalPurchaseAmount && !data.totalPurchaseCost) {
         const charges = await this.feeRates.calculateCharges(
           data.totalPurchaseAmount,
           false,
@@ -105,7 +125,7 @@ export class TransactionsService {
         data.purchaseDpCharges = data.purchaseDpCharges ?? charges.dpCharge;
         data.totalPurchaseCommission =
           data.totalPurchaseCommission ?? charges.total;
-        data.totalInvestmentCost =
+        data.totalPurchaseCost =
           data.totalPurchaseAmount +
           (data.totalPurchaseCommission ?? charges.total);
       }
@@ -173,11 +193,272 @@ export class TransactionsService {
     });
   }
 
-  async remove(id: string) {
-    await this.findOne(id);
+  async remove(id: string, userId?: string) {
+    const transaction = await this.findOne(id);
+
+    // Only allow deletion of DRAFT or REJECTED transactions
+    if (transaction.status === TransactionStatus.APPROVED) {
+      throw new ForbiddenException(
+        "Cannot delete approved transactions. Please create a reversal transaction instead.",
+      );
+    }
+    if (transaction.status === TransactionStatus.PENDING) {
+      throw new ForbiddenException(
+        "Cannot delete pending transactions. Please withdraw from approval first.",
+      );
+    }
+
+    // Audit log the deletion
+    if (userId) {
+      await this.auditService.log({
+        action: "DELETE",
+        entityType: "Transaction",
+        entityId: id,
+        userId,
+        comment: `Deleted transaction for ${transaction.companySymbol}`,
+        oldValues: transaction,
+      });
+    }
 
     return this.prisma.transaction.delete({
       where: { id },
     });
+  }
+
+  /**
+   * Submit transaction for approval
+   */
+  async submitForApproval(
+    id: string,
+    userId: string,
+    dto?: SubmitForApprovalDto,
+  ) {
+    const transaction = await this.findOne(id);
+
+    // Validate current status
+    if (transaction.status === TransactionStatus.PENDING) {
+      throw new BadRequestException("Transaction is already pending approval");
+    }
+    if (transaction.status === TransactionStatus.APPROVED) {
+      throw new BadRequestException("Transaction is already approved");
+    }
+
+    // Create approval workflow
+    const workflow = await this.approvalService.createWorkflow({
+      entityType: "TRANSACTION",
+      entityId: id,
+      action:
+        dto?.notes ||
+        `Submit transaction for approval: ${transaction.transactionType} ${transaction.companySymbol}`,
+      requestedBy: userId,
+    });
+
+    // Update transaction status
+    const updated = await this.prisma.transaction.update({
+      where: { id },
+      data: { status: TransactionStatus.PENDING },
+      include: { company: true },
+    });
+
+    // Audit log
+    await this.auditService.log({
+      action: "SUBMIT_FOR_APPROVAL",
+      entityType: "Transaction",
+      entityId: id,
+      userId,
+      comment: `Submitted transaction for approval: ${transaction.transactionType} ${transaction.companySymbol}`,
+    });
+
+    return { transaction: updated, workflow };
+  }
+
+  /**
+   * Approve a transaction
+   */
+  async approveTransaction(
+    id: string,
+    approverId: string,
+    dto?: ApproveTransactionDto,
+  ) {
+    const transaction = await this.findOne(id);
+
+    // Validate current status
+    if (transaction.status !== TransactionStatus.PENDING) {
+      throw new BadRequestException("Transaction is not pending approval");
+    }
+
+    // Find and approve the workflow
+    const workflows = await this.approvalService.getWorkflowsForEntity(
+      "TRANSACTION",
+      id,
+    );
+    const workflow = workflows?.[0];
+    if (!workflow) {
+      throw new NotFoundException("Approval workflow not found");
+    }
+
+    const approvedWorkflow = await this.approvalService.approveWorkflow({
+      workflowId: workflow.id,
+      approvedBy: approverId,
+    });
+
+    // Update transaction status
+    const updated = await this.prisma.transaction.update({
+      where: { id },
+      data: {
+        status: TransactionStatus.APPROVED,
+        approvedAt: new Date(),
+        approvedBy: approverId,
+      },
+      include: { company: true },
+    });
+
+    // Audit log
+    await this.auditService.log({
+      action: "APPROVE",
+      entityType: "Transaction",
+      entityId: id,
+      userId: approverId,
+      comment: `Approved transaction: ${transaction.transactionType} ${transaction.companySymbol}`,
+    });
+
+    return { transaction: updated, workflow: approvedWorkflow };
+  }
+
+  /**
+   * Reject a transaction
+   */
+  async rejectTransaction(
+    id: string,
+    approverId: string,
+    dto: ApproveTransactionDto,
+  ) {
+    if (!dto.rejectionReason) {
+      throw new BadRequestException("Rejection reason is required");
+    }
+
+    const transaction = await this.findOne(id);
+
+    // Validate current status
+    if (transaction.status !== TransactionStatus.PENDING) {
+      throw new BadRequestException("Transaction is not pending approval");
+    }
+
+    // Find and reject the workflow
+    const workflows = await this.approvalService.getWorkflowsForEntity(
+      "TRANSACTION",
+      id,
+    );
+    const workflow = workflows?.[0];
+    if (!workflow) {
+      throw new NotFoundException("Approval workflow not found");
+    }
+
+    const rejectedWorkflow = await this.approvalService.rejectWorkflow({
+      workflowId: workflow.id,
+      approvedBy: approverId,
+      rejectionReason: dto.rejectionReason,
+    });
+
+    // Update transaction status
+    const updated = await this.prisma.transaction.update({
+      where: { id },
+      data: {
+        status: TransactionStatus.REJECTED,
+      },
+      include: { company: true },
+    });
+
+    // Audit log
+    await this.auditService.log({
+      action: "REJECT",
+      entityType: "Transaction",
+      entityId: id,
+      userId: approverId,
+      comment: `Rejected transaction: ${transaction.transactionType} ${transaction.companySymbol}`,
+      newValues: { status: TransactionStatus.REJECTED },
+    });
+
+    return { transaction: updated, workflow: rejectedWorkflow };
+  }
+
+  /**
+   * Withdraw transaction from approval
+   */
+  async withdrawFromApproval(id: string, userId: string) {
+    const transaction = await this.findOne(id);
+
+    // Validate current status
+    if (transaction.status !== TransactionStatus.PENDING) {
+      throw new BadRequestException("Transaction is not pending approval");
+    }
+
+    // Find and delete the workflow (no cancel method available)
+    const workflows = await this.approvalService.getWorkflowsForEntity(
+      "TRANSACTION",
+      id,
+    );
+    const workflow = workflows?.[0];
+    if (workflow) {
+      await this.prisma.approvalWorkflow.delete({ where: { id: workflow.id } });
+    }
+
+    // Update transaction status back to DRAFT
+    const updated = await this.prisma.transaction.update({
+      where: { id },
+      data: { status: TransactionStatus.DRAFT },
+      include: { company: true },
+    });
+
+    // Audit log
+    await this.auditService.log({
+      action: "WITHDRAW",
+      entityType: "Transaction",
+      entityId: id,
+      userId,
+      comment: `Withdrawn transaction from approval: ${transaction.transactionType} ${transaction.companySymbol}`,
+    });
+
+    return updated;
+  }
+
+  /**
+   * Get transactions pending approval
+   */
+  async getPendingApprovals() {
+    return this.prisma.transaction.findMany({
+      where: { status: TransactionStatus.PENDING },
+      include: { company: true },
+      orderBy: { createdAt: "asc" },
+    });
+  }
+
+  /**
+   * Get transaction approval statistics
+   */
+  async getApprovalStats() {
+    const [total, draft, pending, approved, rejected] = await Promise.all([
+      this.prisma.transaction.count(),
+      this.prisma.transaction.count({
+        where: { status: TransactionStatus.DRAFT },
+      }),
+      this.prisma.transaction.count({
+        where: { status: TransactionStatus.PENDING },
+      }),
+      this.prisma.transaction.count({
+        where: { status: TransactionStatus.APPROVED },
+      }),
+      this.prisma.transaction.count({
+        where: { status: TransactionStatus.REJECTED },
+      }),
+    ]);
+
+    return {
+      total,
+      draft,
+      pending,
+      approved,
+      rejected,
+    };
   }
 }

@@ -27,7 +27,7 @@ class ApiService {
 
       // Handle 401 Unauthorized - clear auth and reload to login
       // Skip for setup-status endpoint which is unauthenticated
-      if (response.status === 401 && !endpoint.includes('setup-status')) {
+      if (response.status === 401 && !endpoint.includes("setup-status")) {
         localStorage.removeItem("auth_token");
         window.location.reload();
         return { success: false, error: "Unauthorized - please login again" };
@@ -238,6 +238,199 @@ class ApiService {
       method: "POST",
       body: JSON.stringify(options),
     });
+  }
+
+  // ===== USER MANAGEMENT =====
+  async getUsers(filters?: any) {
+    const queryString = filters ? `?${new URLSearchParams(filters)}` : "";
+    return this.makeRequest(`users${queryString}`);
+  }
+
+  async getUser(id: string) {
+    return this.makeRequest(`users/${id}`);
+  }
+
+  async createUser(userData: any) {
+    return this.makeRequest("users", {
+      method: "POST",
+      body: JSON.stringify(userData),
+    });
+  }
+
+  async approveUser(
+    id: string,
+    action: "APPROVE" | "REJECT",
+    rejectionReason?: string,
+  ) {
+    return this.makeRequest(`users/${id}/approve`, {
+      method: "POST",
+      body: JSON.stringify({ action, rejectionReason }),
+    });
+  }
+
+  async suspendUser(id: string, reason: string) {
+    return this.makeRequest(`users/${id}/suspend`, {
+      method: "POST",
+      body: JSON.stringify({ reason }),
+    });
+  }
+
+  async reactivateUser(id: string, reason: string) {
+    return this.makeRequest(`users/${id}/reactivate`, {
+      method: "POST",
+      body: JSON.stringify({ reason }),
+    });
+  }
+
+  async unlockUser(id: string, reason?: string) {
+    return this.makeRequest(`users/${id}/unlock`, {
+      method: "POST",
+      body: JSON.stringify({ reason }),
+    });
+  }
+
+  async getLockedUsers() {
+    return this.makeRequest("users/locked/list");
+  }
+
+  // ===== ROLE MANAGEMENT =====
+  async getRoles(filters?: any) {
+    const queryString = filters ? `?${new URLSearchParams(filters)}` : "";
+    return this.makeRequest(`roles${queryString}`);
+  }
+
+  async getRole(id: string) {
+    return this.makeRequest(`roles/${id}`);
+  }
+
+  async createRole(roleData: any) {
+    return this.makeRequest("roles", {
+      method: "POST",
+      body: JSON.stringify(roleData),
+    });
+  }
+
+  async approveRole(
+    id: string,
+    action: "APPROVE" | "REJECT",
+    rejectionReason?: string,
+  ) {
+    return this.makeRequest(`roles/${id}/approve`, {
+      method: "POST",
+      body: JSON.stringify({ action, rejectionReason }),
+    });
+  }
+
+  async assignFunctionsToRole(id: string, functionIds: string[]) {
+    return this.makeRequest(`roles/${id}/functions`, {
+      method: "POST",
+      body: JSON.stringify({ functionIds }),
+    });
+  }
+
+  async removeFunctionFromRole(roleId: string, functionId: string) {
+    return this.makeRequest(`roles/${roleId}/functions/${functionId}/remove`, {
+      method: "POST",
+    });
+  }
+
+  async suspendRole(id: string, reason: string) {
+    return this.makeRequest(`roles/${id}/suspend`, {
+      method: "POST",
+      body: JSON.stringify({ reason }),
+    });
+  }
+
+  async deleteRole(id: string) {
+    return this.makeRequest(`roles/${id}/delete`, {
+      method: "POST",
+    });
+  }
+
+  async getAllFunctions() {
+    return this.makeRequest("roles/functions");
+  }
+
+  async assignRoleToUser(
+    userId: string,
+    roleId: string,
+    effectiveFrom?: Date,
+    effectiveTo?: Date,
+  ) {
+    return this.makeRequest("roles/assign-to-user", {
+      method: "POST",
+      body: JSON.stringify({ userId, roleId, effectiveFrom, effectiveTo }),
+    });
+  }
+
+  async removeRoleFromUser(userId: string, roleId: string) {
+    return this.makeRequest("roles/remove-from-user", {
+      method: "POST",
+      body: JSON.stringify({ userId, roleId }),
+    });
+  }
+
+  async getCurrentUserFunctions() {
+    // Get current user first, then fetch their functions
+    const userResponse = await this.getCurrentUser();
+    if (
+      userResponse.success &&
+      userResponse.data &&
+      (userResponse.data as any).id
+    ) {
+      return this.makeRequest(
+        `roles/user/${(userResponse.data as any).id}/functions`,
+      );
+    }
+    return { success: false, error: "Could not get current user functions" };
+  }
+
+  // ===== APPROVAL WORKFLOWS =====
+  async getPendingApprovals() {
+    return this.makeRequest("approvals/pending");
+  }
+
+  async getApprovalsByEntityType() {
+    return this.makeRequest("approvals/by-entity-type");
+  }
+
+  async getApprovalStats() {
+    return this.makeRequest("approvals/stats");
+  }
+
+  async getApprovalsForEntity(entityType: string, entityId: string) {
+    return this.makeRequest(`approvals/${entityType}/${entityId}`);
+  }
+
+  async approveWorkflow(id: string) {
+    return this.makeRequest(`approvals/${id}/approve`, {
+      method: "POST",
+    });
+  }
+
+  async rejectWorkflow(id: string, rejectionReason: string) {
+    return this.makeRequest(`approvals/${id}/reject`, {
+      method: "POST",
+      body: JSON.stringify({ rejectionReason }),
+    });
+  }
+
+  // ===== AUDIT LOGS =====
+  async getAuditLogs(filters?: any) {
+    const queryString = filters ? `?${new URLSearchParams(filters)}` : "";
+    return this.makeRequest(`audit/logs${queryString}`);
+  }
+
+  async getRecentAuditLogs(limit: number = 50) {
+    return this.makeRequest(`audit/recent?limit=${limit}`);
+  }
+
+  async getAuditStats() {
+    return this.makeRequest("audit/stats");
+  }
+
+  async getAuditLogsForEntity(entityType: string, entityId: string) {
+    return this.makeRequest(`audit/entity/${entityType}/${entityId}`);
   }
 }
 

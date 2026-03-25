@@ -42,9 +42,9 @@ export class PortfolioService {
 
       if (transaction.transactionType === "BUY") {
         const qty = transaction.purchaseQuantity || 0;
-        // Prefer totalInvestmentCost (includes commissions) over raw purchase amount
+        // Prefer totalPurchaseCost (includes commissions) over raw purchase amount
         const cost =
-          transaction.totalInvestmentCost ||
+          transaction.totalPurchaseCost ||
           transaction.totalPurchaseAmount ||
           0;
         holding.totalQuantity += qty;

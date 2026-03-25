@@ -1,0 +1,235 @@
+﻿Software Requirements Specification (SRS)
+Module: User Role Management & User Management
+1. User Role Management
+1.1 Overview
+User Role Management enables creation, modification, approval, and lifecycle management of roles. Roles are linked to functions and user types, which are ultimately assigned to users.
+* A role → contains functions
+* A user → can have multiple roles
+* Roles → must be approved before use
+1.2 Create User Role
+Requirement ID: RS-IA-RM-00-01-1
+Description
+Authorized users can create roles and assign functions. Approval is required before use.
+Stimulus/Response
+* User creates role
+* System saves and sends for approval
+Functional Requirements
+* Input fields:
+   * User Role ID (mandatory, unique, max 8, alphanumeric)
+   * User Role Name (mandatory)
+   * User Type (mandatory dropdown)
+   * Status = Pending Approval
+* System behavior:
+   * Valid → Create role (Pending Approval)
+   * Invalid → Error message
+Exclusions
+None
+1.3 View User Role
+Requirement ID: RS-IA-RM-00-10-3
+Functional Requirements
+Displays:
+* Role ID
+* Role Name
+* User Type
+* Assigned Functions
+* Status
+1.4 Assign Functions to Role
+Requirement ID: RS-IA-RM-00-07-1
+Description
+Attach/detach system functions to a role.
+Functional Requirements
+* Show:
+   * Assigned functions
+   * Available functions
+* Allow attach/detach
+* Requires approval after change
+1.5 View Audit Trail
+Requirement ID: RS-IA-RM–Audit
+Functional Requirements
+Displays:
+* Action
+* Timestamp
+* User
+* Status
+1.6 Delete User Role
+Requirement ID: RS-IA-RM-00-19-1
+Rules
+* Allowed only if:
+   * Pending OR Rejected
+Flow
+* Validate eligibility
+* Confirm deletion
+* Delete role
+1.7 Approve / Reject User Role
+Requirement ID: RS-IA-RM-00-04-2
+Functional Requirements
+* Mandatory rejection comment (max 2500 chars)
+* Status updates:
+Action
+	Result
+	Create
+	Active
+	Modify
+	Updated
+	Disable
+	Inactive
+	1.8 Reapply User Role
+Requirement ID: RS-IA-RM-00-13-1
+Functional Requirements
+* Editable if rejected
+* On submission:
+   * Validate
+   * Send for approval
+   * Status → Pending Approval
+1.9 Suspend User Role
+Requirement ID: RS-IA-RM-00-15-3
+Rules
+* Only ACTIVE roles
+Functional Requirements
+* Mandatory comment
+* Confirmation required
+* Status → Suspended
+* Not usable for new users
+1.10 Reactivate User Role
+Requirement ID: RS-IA-RM-00-16-1
+Functional Requirements
+* Mandatory comment
+* Requires approval
+* Cannot be used until approved
+ 
+2. User Management
+2.1 Overview
+User Management handles the full lifecycle of users with a dual control (maker-checker) mechanism.
+* Users linked to:
+   * Branch
+   * Roles
+   * User Types
+* Approval required for most actions
+2.2 Create User
+Requirement ID: RS-IA-UM-01-01-1
+Functional Requirements
+Mandatory fields:
+* Branch ID
+* User ID (unique, max 15)
+* Password (max 10, confirm required)
+* First Name, Surname
+* Designation
+* Telephone
+Optional:
+* Email
+* Extension
+* Mobile
+User Type: dropdown
+System Behavior
+* Valid → Pending Approval
+* Invalid → Error
+2.3 Search User
+Requirement ID: RS-IA-UM-Search
+Functional Requirements
+* Filters:
+   * User ID
+   * Name
+   * Type
+   * Status
+* Features:
+   * Blind search
+   * Context-sensitive results
+2.4 View User
+Requirement ID: RS-IA-UM-01-10-3
+Displays
+* Company ID
+* User ID
+* Branch
+* Name
+* Email
+* Contacts
+* Roles
+* Status
+2.5 Assign User Roles
+Requirement ID: RS-IA-UM-01-07-1
+Functional Requirements
+* Show assigned/unassigned roles
+* Attach/detach roles
+* Requires approval
+2.6 Modify User
+Requirement ID: RS-IA-UM-01-11-1
+Rules
+* Editable:
+   * Pending / Rejected
+* Non-editable:
+   * User ID, Company ID (after approval)
+Flow
+* Modify → Validate → Send for approval
+2.7 Suspend User
+Requirement ID: RS-IA-UM-01-11-1
+Rules
+* Only ACTIVE users
+Functional Requirements
+* Reason:
+   * Temporarily inactive
+   * Suspect
+* Mandatory comment
+* Immediate suspension
+* Login disabled
+Exclusion
+* No approval required
+2.8 Revoke User
+Requirement ID: RS-IA-UM-01-16-1
+Functional Requirements
+* Only suspended users
+* Mandatory comment
+* Requires approval
+* Displays suspension details
+2.9 Approve / Reject User
+Requirement ID: RS-IA-UM-01-04-2
+Functional Requirements
+* Mandatory rejection comment
+* Status outcomes:
+Action
+	Result
+	Create
+	Active
+	Modify
+	Updated
+	Revoke
+	Active
+	Delete
+	Inactive
+	2.10 Reapply User
+Requirement ID: RS-IA-UM-01-13-1
+Functional Requirements
+* Only rejected users
+* Editable fields
+* On submit:
+   * Validate
+   * Send for approval
+   * Status → Pending Approval
+2.11 Delete User
+Requirement ID: RS-IA-UM-01-22-1
+Functional Requirements
+* Mandatory comment
+* Confirmation required
+* Requires approval
+* User becomes inactive
+2.12 Clear Locked Users
+Requirement ID: RS-IA-UM-01-23-3
+Functional Requirements
+* Show:
+   * Lock reason
+   * Lock timestamp
+* Unlock → user can log in
+2.13 User Password Reset
+   * Reset by Admin
+   * Self-reset through email provided
+ 
+ 
+3. Approval Workflow Summary
+Approval Required
+* Create (User / Role)
+* Modify
+* Assign Roles / Functions
+* Revoke
+* Delete
+* Reactivate
+No Approval Required
+* Suspend User

@@ -62,12 +62,13 @@ export class ReportsService {
 
       if (t.transactionType === "BUY") {
         const qty = t.purchaseQuantity || 0;
-        const cost = t.totalInvestmentCost || t.totalPurchaseAmount || 0;
+        const cost = t.totalPurchaseCost || t.totalPurchaseAmount || 0;
         entry.purchaseQuantity += qty;
         entry.totalPurchaseAmount += t.totalPurchaseAmount || 0;
         entry.purchaseCommission += t.purchaseCommission || 0;
         entry.purchaseDpCharges += t.purchaseDpCharges || 0;
-        entry.totalPurchaseCommission += t.totalPurchaseCommission || 0;
+        entry.totalPurchaseCommission +=
+          (t.purchaseCommission || 0) + (t.purchaseDpCharges || 0);
         entry.investmentCostWithCommission += cost;
         state.qty += qty;
         state.totalCost += cost;
@@ -77,13 +78,14 @@ export class ReportsService {
         const costOfSold = prevCostPerUnit * qty;
         const saleProceeds =
           (t.totalSalesAmount || 0) -
-          (t.totalSalesCommission || 0) -
+          ((t.salesCommission || 0) + (t.salesDpCharges || 0)) -
           (t.capitalGainTax || 0);
         entry.salesQuantity += qty;
         entry.salesAmount += t.totalSalesAmount || 0;
         entry.salesCommission += t.salesCommission || 0;
         entry.salesDpCharges += t.salesDpCharges || 0;
-        entry.totalSalesCommission += t.totalSalesCommission || 0;
+        entry.totalSalesCommission +=
+          (t.salesCommission || 0) + (t.salesDpCharges || 0);
         entry.capitalGainTax += t.capitalGainTax || 0;
         entry.netReceivables += t.netReceivables || saleProceeds;
         entry.profitLossNfrs += saleProceeds - costOfSold;

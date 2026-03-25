@@ -87,7 +87,7 @@ export class CreateTransactionDto {
   @ApiProperty({ required: false })
   @IsOptional()
   @IsNumber()
-  totalInvestmentCost?: number;
+  totalPurchaseCost?: number;
 
   @ApiProperty({ required: false })
   @IsOptional()
@@ -115,17 +115,26 @@ export class CreateTransactionDto {
   netReceivables?: number;
 
   // NFRS / Tax fields from NEPSE Excel statement
-  @ApiProperty({ description: "Total cost as per NFRS (running accumulated cost)", required: false })
+  @ApiProperty({
+    description: "Total cost as per NFRS (running accumulated cost)",
+    required: false,
+  })
   @IsOptional()
   @IsNumber()
   principalCostNfrs?: number;
 
-  @ApiProperty({ description: "Closing unit sum (total units held)", required: false })
+  @ApiProperty({
+    description: "Closing unit sum (total units held)",
+    required: false,
+  })
   @IsOptional()
   @IsNumber()
   unitSum?: number;
 
-  @ApiProperty({ description: "Weighted average cost as per NFRS", required: false })
+  @ApiProperty({
+    description: "Weighted average cost as per NFRS",
+    required: false,
+  })
   @IsOptional()
   @IsNumber()
   waccNfrs?: number;
@@ -135,12 +144,18 @@ export class CreateTransactionDto {
   @IsNumber()
   profitLossNfrs?: number;
 
-  @ApiProperty({ description: "Total cost as per tax (AP TAX)", required: false })
+  @ApiProperty({
+    description: "Total cost as per tax (AP TAX)",
+    required: false,
+  })
   @IsOptional()
   @IsNumber()
   tcTax?: number;
 
-  @ApiProperty({ description: "Weighted average cost as per tax", required: false })
+  @ApiProperty({
+    description: "Weighted average cost as per tax",
+    required: false,
+  })
   @IsOptional()
   @IsNumber()
   waccTax?: number;
@@ -150,7 +165,10 @@ export class CreateTransactionDto {
   @IsNumber()
   profitLossTax?: number;
 
-  @ApiProperty({ description: "Principal amount as per tax (sales unit cost)", required: false })
+  @ApiProperty({
+    description: "Principal amount as per tax (sales unit cost)",
+    required: false,
+  })
   @IsOptional()
   @IsNumber()
   principalAmountTax?: number;
@@ -235,7 +253,7 @@ export class UpdateTransactionDto {
   @ApiProperty({ required: false })
   @IsOptional()
   @IsNumber()
-  totalInvestmentCost?: number;
+  totalPurchaseCost?: number;
 
   @ApiProperty({ required: false })
   @IsOptional()
@@ -328,4 +346,26 @@ export class TransactionFilterDto {
   @IsOptional()
   @IsString()
   dateTo?: string;
+
+  @ApiProperty({ description: "Filter by approval status", required: false })
+  @IsOptional()
+  @IsString()
+  approvalStatus?: string;
+}
+
+export class ApproveTransactionDto {
+  @ApiProperty({
+    description: "Rejection reason (if rejecting)",
+    required: false,
+  })
+  @IsOptional()
+  @IsString()
+  rejectionReason?: string;
+}
+
+export class SubmitForApprovalDto {
+  @ApiProperty({ description: "Notes for approver", required: false })
+  @IsOptional()
+  @IsString()
+  notes?: string;
 }

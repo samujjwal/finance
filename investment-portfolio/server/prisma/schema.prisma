@@ -11,16 +11,56 @@ datasource db {
 }
 
 model User {
-  id             String        @id @default(cuid())
-  username       String        @unique
-  email          String        @unique
-  passwordHash   String        @map("password_hash")
-  role           String        @default("USER")
-  organizationId String?       @map("organization_id")
-  createdAt      DateTime      @default(now()) @map("created_at")
-  lastLogin      DateTime?     @map("last_login")
-  updatedAt      DateTime      @updatedAt @map("updated_at")
-  userSessions   UserSession[]
+  id                    String    @id @default(cuid())
+  userId                String    @unique @map("user_id")
+  username              String    @unique
+  email                 String?   @unique
+  passwordHash          String    @map("password_hash")
+  firstName             String    @map("first_name")
+  surname               String
+  designation           String?
+  branchId              String    @map("branch_id")
+  userTypeId            String    @map("user_type_id")
+  telephone             String?
+  mobile                String?
+  extension             String?
+  status                String    @default("ACTIVE")
+  failedLoginAttempts   Int       @default(0) @map("failed_login_attempts")
+  lockedUntil           DateTime? @map("locked_until")
+  lockReason            String?   @map("lock_reason")
+  isActive              Boolean   @default(true) @map("is_active")
+  lastPasswordChange    DateTime? @map("last_password_change")
+  organizationId        String?   @map("organization_id")
+  createdBy             String?   @map("created_by")
+  approvedBy            String?   @map("approved_by")
+  approvedAt            DateTime? @map("approved_at")
+  rejectionReason       String?   @map("rejection_reason")
+  suspensionReason      String?   @map("suspension_reason")
+  lastLogin             DateTime? @map("last_login")
+  createdAt             DateTime  @default(now()) @map("created_at")
+  updatedAt             DateTime  @updatedAt @map("updated_at")
+
+  // Relations
+  branch                Branch    @relation(fields: [branchId], references: [id])
+  userType              UserType  @relation(fields: [userTypeId], references: [id])
+  userRoles             UserRole[]
+  userSessions          UserSession[]
+  createdUsers          User[]    @relation("UserCreatedBy")
+  creator               User?     @relation("UserCreatedBy", fields: [createdBy], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  approvedUsers         User[]    @relation("UserApprovedBy")
+  approver              User?     @relation("UserApprovedBy", fields: [approvedBy], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  auditLogs             AuditLog[]
+  requestedWorkflows    ApprovalWorkflow[] @relation("RequestedBy")
+  approvedWorkflows     ApprovalWorkflow[] @relation("ApprovedBy")
+  transactionsCreated   Transaction[] @relation("TransactionCreatedBy")
+  transactionsApproved  Transaction[] @relation("TransactionApprovedBy")
+  rolesCreated          Role[] @relation("RoleCreatedBy")
+  rolesApproved         Role[] @relation("RoleApprovedBy")
+  roleFunctionsAssigned RoleFunction[] @relation("RoleFunctionAssignedBy")
+  roleFunctionsApproved RoleFunction[] @relation("RoleFunctionApprovedBy")
+  userRolesAssigned     UserRole[] @relation("UserRoleAssignedBy")
+  userRolesApproved     UserRole[] @relation("UserRoleApprovedBy")
+  systemConfigsUpdated  SystemConfig[]
 
   @@map("users")
 }
@@ -66,32 +106,41 @@ model Transaction {
   purchaseQuantity        Int      @default(0) @map("purchase_quantity")
   purchasePricePerUnit    Float?   @map("purchase_price_per_unit")
   totalPurchaseAmount     Float?   @map("total_purchase_amount")
+  purchaseCommission      Float?   @map("purchase_commission")
+  purchaseDpCharges       Float?   @map("purchase_dp_charges")
+  sebonFeePurchase        Float?   @map("sebon_fee_purchase")
+  otherChargesPurchase    Float?   @map("other_charges_purchase")
+  totalPurchaseCost       Float?   @map("total_purchase_cost")
   salesQuantity           Int      @default(0) @map("sales_quantity")
   salesPricePerUnit       Float?   @map("sales_price_per_unit")
   totalSalesAmount        Float?   @map("total_sales_amount")
+  salesCommission         Float?   @map("sales_commission")
+  salesDpCharges          Float?   @map("sales_dp_charges")
+  sebonFeeSales           Float?   @map("sebon_fee_sales")
+  otherChargesSales       Float?   @map("other_charges_sales")
+  totalSalesCharges       Float?   @map("total_sales_charges")
   principalCostNfrs       Float?   @map("principal_cost_nfrs")
   transactionCostNfrs     Float?   @map("transaction_cost_nfrs")
   unitSum                 Float?   @map("unit_sum")
   waccNfrs                Float?   @map("wacc_nfrs")
   profitLossNfrs          Float?   @map("profit_loss_nfrs")
-  purchaseCommission      Float?   @map("purchase_commission")
-  purchaseDpCharges       Float?   @map("purchase_dp_charges")
-  totalPurchaseCommission Float?   @map("total_purchase_commission")
-  totalInvestmentCost     Float?   @map("total_investment_cost")
-  salesCommission         Float?   @map("sales_commission")
-  salesDpCharges          Float?   @map("sales_dp_charges")
-  totalSalesCommission    Float?   @map("total_sales_commission")
   capitalGainTax          Float?   @map("capital_gain_tax")
   netReceivables          Float?   @map("net_receivables")
   principalAmountTax      Float?   @map("principal_amount_tax")
   tcTax                   Float?   @map("tc_tax")
   waccTax                 Float?   @map("wacc_tax")
   profitLossTax           Float?   @map("profit_loss_tax")
+  status                  String   @default("DRAFT") @map("status")
+  approvedBy              String?  @map("approved_by")
+  approvedAt              DateTime? @map("approved_at")
+  createdBy               String   @map("created_by")
   createdAt               DateTime @default(now()) @map("created_at")
   updatedAt               DateTime @updatedAt @map("updated_at")
 
   // Relations
-  company Company @relation(fields: [companySymbol], references: [symbol])
+  company  Company @relation(fields: [companySymbol], references: [symbol])
+  approver User?   @relation("TransactionApprovedBy", fields: [approvedBy], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  creator  User    @relation("TransactionCreatedBy", fields: [createdBy], references: [id], onDelete: Cascade)
 
   @@map("transactions")
 }
@@ -135,8 +184,13 @@ model PortfolioHolding {
   id                  String   @id @default(cuid())
   companySymbol       String   @unique @map("company_symbol")
   totalQuantity       Int      @default(0) @map("total_quantity")
+  availableQuantity   Int      @default(0) @map("available_quantity")
+  pledgedQuantity     Int      @default(0) @map("pledged_quantity")
   weightedAverageCost Float?   @map("weighted_average_cost")
   totalCost           Float?   @map("total_cost")
+  marketValue         Float?   @map("market_value")
+  unrealizedGainLoss  Float?   @map("unrealized_gain_loss")
+  unrealizedGainLossPercent Float? @map("unrealized_gain_loss_percent")
   lastUpdated         DateTime @default(now()) @map("last_updated")
   createdAt           DateTime @default(now()) @map("created_at")
   updatedAt           DateTime @updatedAt @map("updated_at")
@@ -155,6 +209,176 @@ model Validation {
   updatedAt      DateTime @updatedAt @map("updated_at")
 
   @@map("validation")
+}
+
+// ========== USER MANAGEMENT ==========
+
+model UserType {
+  id          String   @id
+  name        String   @unique
+  description String?
+  isActive    Boolean  @default(true)
+  users       User[]
+  roles       Role[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("user_types")
+}
+
+model Function {
+  id          String   @id
+  name        String   @unique
+  description String?
+  module      String
+  isActive    Boolean  @default(true)
+  roleFunctions RoleFunction[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("functions")
+}
+
+model Branch {
+  id        String   @id
+  name      String
+  code      String   @unique
+  address   String?
+  phone     String?
+  isActive  Boolean  @default(true)
+  users     User[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("branches")
+}
+
+// ========== ROLE MANAGEMENT ==========
+
+model Role {
+  id               String         @id
+  name             String
+  userTypeId       String         @map("user_type_id")
+  description      String?
+  status           String         @default("PENDING_APPROVAL")
+  isSystem         Boolean        @default(false) @map("is_system")
+  createdBy        String?        @map("created_by")
+  approvedBy       String?        @map("approved_by")
+  approvedAt       DateTime?      @map("approved_at")
+  rejectionReason  String?        @map("rejection_reason")
+  suspensionReason String?        @map("suspension_reason")
+  createdAt        DateTime       @default(now()) @map("created_at")
+  updatedAt        DateTime       @updatedAt @map("updated_at")
+
+  // Relations
+  userType         UserType       @relation(fields: [userTypeId], references: [id])
+  roleFunctions    RoleFunction[]
+  userRoles        UserRole[]
+  creator          User?          @relation("RoleCreatedBy", fields: [createdBy], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  approver         User?          @relation("RoleApprovedBy", fields: [approvedBy], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@map("roles")
+}
+
+model RoleFunction {
+  id              String    @id @default(cuid())
+  roleId          String    @map("role_id")
+  functionId      String    @map("function_id")
+  assignedBy      String?   @map("assigned_by")
+  assignedAt      DateTime  @default(now()) @map("assigned_at")
+  status          String    @default("PENDING_APPROVAL")
+  approvedBy      String?   @map("approved_by")
+  approvedAt      DateTime? @map("approved_at")
+  rejectionReason String?   @map("rejection_reason")
+
+  role       Role     @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  function   Function @relation(fields: [functionId], references: [id], onDelete: Cascade)
+  assigner   User?    @relation("RoleFunctionAssignedBy", fields: [assignedBy], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  approver   User?    @relation("RoleFunctionApprovedBy", fields: [approvedBy], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@map("role_functions")
+}
+
+model UserRole {
+  id              String    @id @default(cuid())
+  userId          String    @map("user_id")
+  roleId          String    @map("role_id")
+  assignedBy      String?   @map("assigned_by")
+  assignedAt      DateTime  @default(now()) @map("assigned_at")
+  status          String    @default("PENDING_APPROVAL")
+  approvedBy      String?   @map("approved_by")
+  approvedAt      DateTime? @map("approved_at")
+  rejectionReason String?   @map("rejection_reason")
+  effectiveFrom   DateTime  @default(now()) @map("effective_from")
+  effectiveTo     DateTime? @map("effective_to")
+
+  user     User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  role     Role  @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  assigner User? @relation("UserRoleAssignedBy", fields: [assignedBy], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  approver User? @relation("UserRoleApprovedBy", fields: [approvedBy], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@map("user_roles")
+}
+
+// ========== AUDIT & WORKFLOW ==========
+
+model AuditLog {
+  id         String   @id @default(cuid())
+  entityType String   @map("entity_type")
+  entityId   String   @map("entity_id")
+  action     String
+  oldValues  String?  @map("old_values")
+  newValues  String?  @map("new_values")
+  userId     String   @map("user_id")
+  timestamp  DateTime @default(now())
+  ipAddress  String?  @map("ip_address")
+  userAgent  String?  @map("user_agent")
+  comment    String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([entityType, entityId])
+  @@index([userId])
+  @@index([timestamp])
+  @@map("audit_logs")
+}
+
+model ApprovalWorkflow {
+  id              String    @id @default(cuid())
+  entityType      String    @map("entity_type")
+  entityId        String    @map("entity_id")
+  action          String
+  requestedBy     String    @map("requested_by")
+  requestedAt     DateTime  @default(now()) @map("requested_at")
+  status          String    @default("PENDING")
+  approvedBy      String?   @map("approved_by")
+  approvedAt      DateTime? @map("approved_at")
+  rejectionReason String?   @map("rejection_reason")
+
+  requester User  @relation("RequestedBy", fields: [requestedBy], references: [id], onDelete: Cascade)
+  approver  User? @relation("ApprovedBy", fields: [approvedBy], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@index([entityType, entityId])
+  @@index([status])
+  @@index([requestedBy])
+  @@map("approval_workflows")
+}
+
+// ========== SYSTEM CONFIGURATION ==========
+
+model SystemConfig {
+  id          String   @id @default(cuid())
+  key         String   @unique
+  value       String?
+  description String?
+  category    String
+  isEditable  Boolean  @default(true) @map("is_editable")
+  updatedBy   String?  @map("updated_by")
+  updatedAt   DateTime @default(now()) @map("updated_at")
+
+  user User? @relation(fields: [updatedBy], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@map("system_config")
 }
 
 // Nepal NEPSE fee and tax rate table – authoritative source for all charge calculations

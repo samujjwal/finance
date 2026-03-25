@@ -7,6 +7,12 @@ import { TransactionsModule } from "./transactions/transactions.module";
 import { PortfolioModule } from "./portfolio/portfolio.module";
 import { ReportsModule } from "./reports/reports.module";
 import { FeeRatesModule } from "./fee-rates/fee-rates.module";
+import { AuditModule } from "./audit/audit.module";
+import { ApprovalModule } from "./approval/approval.module";
+import { UsersModule } from "./users/users.module";
+import { RolesModule } from "./roles/roles.module";
+
+import { PermissionModule } from "./permissions/permission.module";
 
 @Module({
   imports: [
@@ -21,6 +27,11 @@ import { FeeRatesModule } from "./fee-rates/fee-rates.module";
     TransactionsModule,
     PortfolioModule,
     ReportsModule,
+    AuditModule,
+    ApprovalModule,
+    UsersModule,
+    RolesModule,
+    PermissionModule,
   ],
 })
 export class AppModule {}

@@ -33,14 +33,13 @@ export class AuthController {
     summary: "Check whether the application needs first-run setup",
   })
   async getSetupStatus() {
-    const nonRootCount = await this.prisma.user.count({
-      where: { role: { not: "ROOT" } },
-    });
+    const totalUsers = await this.prisma.user.count();
+    const hasSetup = totalUsers > 0;
     return {
       success: true,
       data: {
-        firstRun: nonRootCount === 0,
-        userCount: nonRootCount,
+        firstRun: !hasSetup,
+        userCount: totalUsers,
       },
     };
   }

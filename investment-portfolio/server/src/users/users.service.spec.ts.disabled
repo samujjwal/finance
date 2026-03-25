@@ -1,0 +1,592 @@
+import { Test, TestingModule } from "@nestjs/testing";
+import { UserService } from "./users.service";
+import { PrismaService } from "../prisma/prisma.service";
+import { ApprovalService } from "../approval/approval.service";
+import { AuditService } from "../audit/audit.service";
+import { BadRequestException, NotFoundException } from "@nestjs/common";
+import * as bcrypt from "bcrypt";
+
+describe("UsersService", () => {
+  let service: UserService;
+  let prisma: PrismaService;
+  let approvalService: ApprovalService;
+  let auditService: AuditService;
+
+  const mockPrisma = {
+    user: {
+      findUnique: jest.fn(),
+      findMany: jest.fn(),
+      create: jest.fn(),
+      update: jest.fn(),
+      delete: jest.fn(),
+      count: jest.fn(),
+    },
+    userRole: {
+      findMany: jest.fn(),
+      create: jest.fn(),
+      delete: jest.fn(),
+    },
+    role: {
+      findUnique: jest.fn(),
+      findMany: jest.fn(),
+    },
+    userType: {
+      findUnique: jest.fn(),
+    },
+    branch: {
+      findUnique: jest.fn(),
+    },
+    approvalWorkflow: {
+      findMany: jest.fn(),
+    },
+    auditLog: {
+      create: jest.fn(),
+    },
+  };
+
+  const mockApprovalService = {
+    createWorkflow: jest.fn(),
+    approveWorkflow: jest.fn(),
+    rejectWorkflow: jest.fn(),
+    getWorkflowsForEntity: jest.fn(),
+  };
+
+  const mockAuditService = {
+    log: jest.fn(),
+  };
+
+  beforeEach(async () => {
+    const module: TestingModule = await Test.createTestingModule({
+      providers: [
+        UsersService,
+        {
+          provide: PrismaService,
+          useValue: mockPrisma,
+        },
+        {
+          provide: ApprovalService,
+          useValue: mockApprovalService,
+        },
+        {
+          provide: AuditService,
+          useValue: mockAuditService,
+        },
+      ],
+    }).compile();
+
+    service = module.get<UserService>(UserService);
+    prisma = module.get<PrismaService>(PrismaService);
+    approvalService = module.get<ApprovalService>(ApprovalService);
+    auditService = module.get<AuditService>(AuditService);
+  });
+
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+
+  describe("create", () => {
+    it("should create a new user successfully", async () => {
+      const createUserDto = {
+        username: "newuser",
+        email: "newuser@example.com",
+        password: "Password123",
+        firstName: "New",
+        surname: "User",
+        userId: "USER002",
+        userTypeId: "1",
+        branchId: "1",
+      };
+
+      const existingUser = null;
+      const userType = { id: 1, name: "Regular" };
+      const branch = { id: 1, name: "Head Office" };
+      const hashedPassword = await bcrypt.hash("Password123", 10);
+      const createdUser = {
+        id: "1",
+        ...createUserDto,
+        passwordHash: hashedPassword,
+        status: "PENDING_APPROVAL",
+        isActive: false,
+        createdAt: new Date(),
+      };
+
+      const workflow = {
+        id: "workflow1",
+        entityType: "USER",
+        entityId: "1",
+        status: "PENDING",
+      };
+
+      mockPrisma.user.findUnique.mockResolvedValue(existingUser);
+      mockPrisma.userType.findUnique.mockResolvedValue(userType);
+      mockPrisma.branch.findUnique.mockResolvedValue(branch);
+      jest
+        .spyOn(bcrypt, "hash")
+        .mockImplementation(() => Promise.resolve(hashedPassword));
+      mockPrisma.user.create.mockResolvedValue(createdUser);
+      mockApprovalService.createWorkflow.mockResolvedValue(workflow);
+
+      const result = await service.createUser(createUserDto, "SYSTEM");
+
+      expect(result).toEqual(createdUser);
+      expect(bcrypt.hash).toHaveBeenCalledWith("Password123", 10);
+      expect(mockPrisma.user.create).toHaveBeenCalledWith({
+        data: {
+          ...createUserDto,
+          passwordHash: hashedPassword,
+          status: "PENDING_APPROVAL",
+          isActive: false,
+        },
+      });
+      expect(mockApprovalService.createWorkflow).toHaveBeenCalledWith({
+        entityType: "USER",
+        entityId: "1",
+        requestedBy: "SYSTEM",
+      });
+      expect(mockAuditService.log).toHaveBeenCalledWith({
+        entityType: "USER",
+        entityId: "1",
+        action: "CREATE",
+        newValues: expect.any(Object),
+        userId: "SYSTEM",
+        comment: "User created pending approval",
+      });
+    });
+
+    it("should throw BadRequestException when username already exists", async () => {
+      const createUserDto = {
+        username: "existinguser",
+        email: "new@example.com",
+        password: "Password123",
+        firstName: "New",
+        surname: "User",
+        userId: "USER003",
+        userTypeId: "1",
+        branchId: "1",
+      };
+
+      const existingUser = { id: "1", username: "existinguser" };
+      mockPrisma.user.findUnique.mockResolvedValue(existingUser);
+
+      await expect(service.create(createUserDto)).rejects.toThrow(
+        BadRequestException,
+      );
+    });
+
+    it("should throw NotFoundException when user type does not exist", async () => {
+      const createUserDto = {
+        username: "newuser",
+        email: "newuser@example.com",
+        password: "Password123",
+        firstName: "New",
+        surname: "User",
+        userId: "USER003",
+        userTypeId: "999",
+        branchId: "1",
+      };
+
+      mockPrisma.user.findUnique.mockResolvedValue(null);
+      mockPrisma.userType.findUnique.mockResolvedValue(null);
+
+      await expect(service.create(createUserDto)).rejects.toThrow(
+        NotFoundException,
+      );
+    });
+  });
+
+  describe("approveUser", () => {
+    it("should approve a user successfully", async () => {
+      const userId = "1";
+      const approverId = "approver1";
+
+      const user = {
+        id: userId,
+        username: "newuser",
+        status: "PENDING_APPROVAL",
+        isActive: false,
+      };
+
+      const workflow = {
+        id: "workflow1",
+        entityType: "USER",
+        entityId: userId,
+        status: "PENDING",
+      };
+
+      const approvedWorkflow = {
+        ...workflow,
+        status: "APPROVED",
+        approvedBy: approverId,
+        approvedAt: new Date(),
+      };
+
+      const approvedUser = {
+        ...user,
+        status: "ACTIVE",
+        isActive: true,
+      };
+
+      mockPrisma.user.findUnique.mockResolvedValue(user);
+      mockApprovalService.getWorkflowsForEntity.mockResolvedValue([workflow]);
+      mockApprovalService.approveWorkflow.mockResolvedValue(approvedWorkflow);
+      mockPrisma.user.update.mockResolvedValue(approvedUser);
+
+      const result = await service.approveUser(userId, approverId);
+
+      expect(result).toEqual(approvedUser);
+      expect(mockApprovalService.getWorkflowsForEntity).toHaveBeenCalledWith(
+        "USER",
+        userId,
+      );
+      expect(mockApprovalService.approveWorkflow).toHaveBeenCalledWith({
+        workflowId: "workflow1",
+        approvedBy: approverId,
+      });
+      expect(mockPrisma.user.update).toHaveBeenCalledWith({
+        where: { id: userId },
+        data: { status: "ACTIVE", isActive: true },
+      });
+      expect(mockAuditService.log).toHaveBeenCalledWith({
+        entityType: "USER",
+        entityId: userId,
+        action: "APPROVE",
+        oldValues: { status: "PENDING_APPROVAL", isActive: false },
+        newValues: { status: "ACTIVE", isActive: true },
+        userId: approverId,
+        comment: "User approved and activated",
+      });
+    });
+
+    it("should throw NotFoundException when user is not found", async () => {
+      const userId = "1";
+      const approverId = "approver1";
+
+      mockPrisma.user.findUnique.mockResolvedValue(null);
+
+      await expect(service.approveUser(userId, approverId)).rejects.toThrow(
+        NotFoundException,
+      );
+    });
+
+    it("should throw BadRequestException when user is not pending approval", async () => {
+      const userId = "1";
+      const approverId = "approver1";
+
+      const user = {
+        id: userId,
+        status: "ACTIVE",
+      };
+
+      mockPrisma.user.findUnique.mockResolvedValue(user);
+
+      await expect(service.approveUser(userId, approverId)).rejects.toThrow(
+        BadRequestException,
+      );
+    });
+  });
+
+  describe("rejectUser", () => {
+    it("should reject a user successfully", async () => {
+      const userId = "1";
+      const approverId = "approver1";
+      const dto = { rejectionReason: "Invalid credentials" };
+
+      const user = {
+        id: userId,
+        status: "PENDING_APPROVAL",
+        isActive: false,
+      };
+
+      const workflow = {
+        id: "workflow1",
+        entityType: "USER",
+        entityId: userId,
+        status: "PENDING",
+      };
+
+      const rejectedWorkflow = {
+        ...workflow,
+        status: "REJECTED",
+        approvedBy: approverId,
+        rejectionReason: dto.rejectionReason,
+        rejectedAt: new Date(),
+      };
+
+      const rejectedUser = {
+        ...user,
+        status: "REJECTED",
+      };
+
+      mockPrisma.user.findUnique.mockResolvedValue(user);
+      mockApprovalService.getWorkflowsForEntity.mockResolvedValue([workflow]);
+      mockApprovalService.rejectWorkflow.mockResolvedValue(rejectedWorkflow);
+      mockPrisma.user.update.mockResolvedValue(rejectedUser);
+
+      const result = await service.rejectUser(
+        userId,
+        approverId,
+        dto.rejectionReason,
+      );
+
+      expect(result).toEqual(rejectedUser);
+      expect(mockApprovalService.rejectWorkflow).toHaveBeenCalledWith({
+        workflowId: "workflow1",
+        approvedBy: approverId,
+        rejectionReason: dto.rejectionReason,
+      });
+      expect(mockPrisma.user.update).toHaveBeenCalledWith({
+        where: { id: userId },
+        data: { status: "REJECTED" },
+      });
+      expect(mockAuditService.log).toHaveBeenCalledWith({
+        entityType: "USER",
+        entityId: userId,
+        action: "REJECT",
+        oldValues: { status: "PENDING_APPROVAL" },
+        newValues: { status: "REJECTED" },
+        userId: approverId,
+        comment: dto.rejectionReason,
+      });
+    });
+  });
+
+  describe("suspendUser", () => {
+    it("should suspend a user successfully", async () => {
+      const userId = "1";
+      const suspendedById = "admin1";
+      const dto = { reason: "Policy violation" };
+
+      const user = {
+        id: userId,
+        status: "ACTIVE",
+        isActive: true,
+      };
+
+      const suspendedUser = {
+        ...user,
+        status: "SUSPENDED",
+        isActive: false,
+      };
+
+      mockPrisma.user.findUnique.mockResolvedValue(user);
+      mockPrisma.user.update.mockResolvedValue(suspendedUser);
+
+      const result = await service.suspendUser(userId, {
+        reason: dto.reason,
+        suspendedBy: suspendedById,
+      });
+
+      expect(result).toEqual(suspendedUser);
+      expect(mockPrisma.user.update).toHaveBeenCalledWith({
+        where: { id: userId },
+        data: { status: "SUSPENDED", isActive: false },
+      });
+      expect(mockAuditService.log).toHaveBeenCalledWith({
+        entityType: "USER",
+        entityId: userId,
+        action: "SUSPEND",
+        oldValues: { status: "ACTIVE", isActive: true },
+        newValues: { status: "SUSPENDED", isActive: false },
+        userId: suspendedById,
+        comment: dto.reason,
+      });
+    });
+
+    it("should throw BadRequestException when user is already suspended", async () => {
+      const userId = "1";
+      const suspendedById = "admin1";
+      const dto = { reason: "Policy violation" };
+
+      const user = {
+        id: userId,
+        status: "SUSPENDED",
+        isActive: false,
+      };
+
+      mockPrisma.user.findUnique.mockResolvedValue(user);
+
+      await expect(
+        service.suspendUser(userId, suspendedById, dto),
+      ).rejects.toThrow(BadRequestException);
+    });
+  });
+
+  describe("reactivateUser", () => {
+    it("should reactivate a suspended user successfully", async () => {
+      const userId = "1";
+      const reactivatedById = "admin1";
+
+      const user = {
+        id: userId,
+        status: "SUSPENDED",
+        isActive: false,
+      };
+
+      const workflow = {
+        id: "workflow1",
+        entityType: "USER",
+        entityId: userId,
+        status: "PENDING",
+      };
+
+      const reactivatedWorkflow = {
+        ...workflow,
+        status: "APPROVED",
+        approvedBy: reactivatedById,
+        approvedAt: new Date(),
+      };
+
+      const reactivatedUser = {
+        ...user,
+        status: "ACTIVE",
+        isActive: true,
+      };
+
+      mockPrisma.user.findUnique.mockResolvedValue(user);
+      mockApprovalService.createWorkflow.mockResolvedValue(workflow);
+      mockApprovalService.approveWorkflow.mockResolvedValue(
+        reactivatedWorkflow,
+      });
+      expect(mockAuditService.log).toHaveBeenCalledWith({
+        entityType: "USER",
+        entityId: userId,
+        action: "UNLOCK",
+        oldValues: { failedLoginAttempts: 5, lockedUntil: user.lockedUntil },
+        newValues: { failedLoginAttempts: 0, lockedUntil: null },
+        userId: unlockedById,
+        comment: "User account unlocked",
+      });
+    });
+
+    it("should throw BadRequestException when user is not locked", async () => {
+      const userId = "1";
+      const unlockedById = "admin1";
+
+      const user = {
+        id: userId,
+        status: "ACTIVE",
+        isActive: true,
+        failedLoginAttempts: 0,
+        lockedUntil: null,
+      };
+
+      mockPrisma.user.findUnique.mockResolvedValue(user);
+
+      await expect(service.unlockUser(userId, unlockedById)).rejects.toThrow(
+        BadRequestException,
+      );
+    });
+  });
+
+  describe("findAll", () => {
+    it("should return paginated users", async () => {
+      const users = [
+        {
+          id: "1",
+          username: "user1",
+          email: "user1@example.com",
+          status: "ACTIVE",
+          isActive: true,
+        },
+        {
+          id: "2",
+          username: "user2",
+          email: "user2@example.com",
+          status: "PENDING_APPROVAL",
+          isActive: false,
+        },
+      ];
+
+      const total = 2;
+
+      mockPrisma.user.findMany.mockResolvedValue(users);
+      mockPrisma.user.count.mockResolvedValue(total);
+
+      const result = await service.getUsers({ status: "ACTIVE" });
+
+      expect(result).toEqual({ users, total });
+      expect(mockPrisma.user.findMany).toHaveBeenCalledWith({
+        where: { status: "ACTIVE" },
+        skip: 0,
+        take: 10,
+        include: {
+          userRoles: {
+            include: { role: true },
+          },
+          userType: true,
+          branch: true,
+        },
+        orderBy: { createdAt: "desc" },
+      });
+    });
+
+    it("should filter users by status", async () => {
+      const users = [
+        {
+          id: "1",
+          username: "user1",
+          status: "ACTIVE",
+          isActive: true,
+        },
+      ];
+
+      const total = 1;
+
+      mockPrisma.user.findMany.mockResolvedValue(users);
+      mockPrisma.user.count.mockResolvedValue(total);
+
+      const result = await service.findAll({
+        page: 1,
+        limit: 10,
+        status: "ACTIVE",
+      });
+
+      expect(result).toEqual({ users, total });
+      expect(mockPrisma.user.findMany).toHaveBeenCalledWith({
+        where: { status: "ACTIVE" },
+        skip: 0,
+        take: 10,
+        include: expect.any(Object),
+        orderBy: { createdAt: "desc" },
+      });
+    });
+  });
+
+  describe("findOne", () => {
+    it("should return a user by ID", async () => {
+      const userId = "1";
+      const user = {
+        id: userId,
+        username: "user1",
+        email: "user1@example.com",
+        status: "ACTIVE",
+        isActive: true,
+      };
+
+      mockPrisma.user.findUnique.mockResolvedValue(user);
+
+      const result = await service.getUserById(userId);
+
+      expect(result).toEqual(user);
+      expect(mockPrisma.user.findUnique).toHaveBeenCalledWith({
+        where: { id: userId },
+        include: {
+          userRoles: {
+            include: { role: true },
+          },
+          userType: true,
+          branch: true,
+        },
+      });
+    });
+
+    it("should return null when user is not found", async () => {
+      const userId = "999";
+      mockPrisma.user.findUnique.mockResolvedValue(null);
+
+      const result = await service.getUserById(userId);
+
+      expect(result).toBeNull();
+    });
+  });
+});

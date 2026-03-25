@@ -1,0 +1,537 @@
+import { Test, TestingModule } from "@nestjs/testing";
+import { TransactionsService } from "./transactions.service";
+import { PrismaService } from "../prisma/prisma.service";
+import { ApprovalService } from "../approval/approval.service";
+import { AuditService } from "../audit/audit.service";
+import { FeeRatesService } from "../fee-rates/fee-rates.service";
+import { BadRequestException, NotFoundException } from "@nestjs/common";
+import { TransactionType } from "./dto/transaction.dto";
+
+describe("TransactionsService", () => {
+  let service: TransactionsService;
+  let prisma: PrismaService;
+  let approvalService: ApprovalService;
+  let auditService: AuditService;
+  let feeRatesService: FeeRatesService;
+
+  const mockPrisma = {
+    transaction: {
+      findUnique: jest.fn(),
+      findMany: jest.fn(),
+      create: jest.fn(),
+      update: jest.fn(),
+      delete: jest.fn(),
+      count: jest.fn(),
+    },
+    company: {
+      findUnique: jest.fn(),
+    },
+    approvalWorkflow: {
+      findMany: jest.fn(),
+      delete: jest.fn(),
+    },
+    auditLog: {
+      create: jest.fn(),
+    },
+  };
+
+  const mockApprovalService = {
+    getWorkflowsForEntity: jest.fn(),
+    approveWorkflow: jest.fn(),
+    rejectWorkflow: jest.fn(),
+    cancelWorkflow: jest.fn(),
+  };
+
+  const mockAuditService = {
+    log: jest.fn(),
+  };
+
+  const mockFeeRatesService = {
+    calculateCharges: jest.fn(),
+  };
+
+  beforeEach(async () => {
+    const module: TestingModule = await Test.createTestingModule({
+      providers: [
+        TransactionsService,
+        {
+          provide: PrismaService,
+          useValue: mockPrisma,
+        },
+        {
+          provide: ApprovalService,
+          useValue: mockApprovalService,
+        },
+        {
+          provide: AuditService,
+          useValue: mockAuditService,
+        },
+        {
+          provide: FeeRatesService,
+          useValue: mockFeeRatesService,
+        },
+      ],
+    }).compile();
+
+    service = module.get<TransactionsService>(TransactionsService);
+    prisma = module.get<PrismaService>(PrismaService);
+    approvalService = module.get<ApprovalService>(ApprovalService);
+    auditService = module.get<AuditService>(AuditService);
+    feeRatesService = module.get<FeeRatesService>(FeeRatesService);
+  });
+
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+
+  describe("create", () => {
+    it("should create a transaction successfully", async () => {
+      const createTransactionDto = {
+        companySymbol: "NABIL",
+        transactionType: TransactionType.BUY,
+        transactionDate: "2024-01-01",
+        purchaseQuantity: 100,
+        purchasePricePerUnit: 1000,
+      };
+
+      const company = {
+        id: "1",
+        symbol: "NABIL",
+        companyName: "Nabil Bank",
+        instrumentType: "EQUITY",
+      };
+      const charges = {
+        brokerage: 25,
+        sebonFee: 10,
+        dpCharge: 25,
+        totalCharge: 60,
+      };
+      const createdTransaction = {
+        id: "1",
+        ...createTransactionDto,
+        totalPurchaseAmount: 100000,
+        brokerage: 25,
+        sebonFee: 10,
+        dpCharge: 25,
+        totalCharges: 60,
+        status: "DRAFT",
+        createdAt: new Date(),
+      };
+
+      mockPrisma.company.findUnique.mockResolvedValue(company);
+      mockFeeRatesService.calculateCharges.mockResolvedValue(charges);
+      mockPrisma.transaction.create.mockResolvedValue(createdTransaction);
+
+      const result = await service.create(createTransactionDto);
+
+      expect(result).toEqual(createdTransaction);
+      expect(mockPrisma.company.findUnique).toHaveBeenCalledWith({
+        where: { symbol: "NABIL" },
+      });
+      expect(mockFeeRatesService.calculateCharges).toHaveBeenCalledWith({
+        transactionType: "BUY",
+        amount: 100000,
+        instrumentType: company.instrumentType || "EQUITY",
+      });
+      expect(mockPrisma.transaction.create).toHaveBeenCalledWith({
+        data: {
+          ...createTransactionDto,
+          totalPurchaseAmount: 100000,
+          brokerage: 25,
+          sebonFee: 10,
+          dpCharge: 25,
+          totalCharges: 60,
+          status: "DRAFT",
+        },
+        include: { company: true },
+      });
+      expect(mockAuditService.log).toHaveBeenCalledWith({
+        entityType: "TRANSACTION",
+        entityId: "1",
+        action: "CREATE",
+        newValues: expect.any(Object),
+        userId: undefined,
+        comment: "Transaction created",
+      });
+    });
+
+    it("should throw NotFoundException when company does not exist", async () => {
+      const createTransactionDto = {
+        companySymbol: "NONEXISTENT",
+        transactionType: TransactionType.BUY,
+        transactionDate: "2024-01-01",
+        purchaseQuantity: 100,
+        purchasePricePerUnit: 1000,
+      };
+
+      mockPrisma.company.findUnique.mockResolvedValue(null);
+
+      await expect(service.create(createTransactionDto)).rejects.toThrow(
+        NotFoundException,
+      );
+    });
+  });
+
+  describe("submitForApproval", () => {
+    it("should submit transaction for approval successfully", async () => {
+      const transactionId = "1";
+      const userId = "user1";
+      const dto = { notes: "Please approve this transaction" };
+
+      const transaction = {
+        id: transactionId,
+        companySymbol: "NABIL",
+        status: "DRAFT",
+        totalPurchaseAmount: 100000,
+      };
+
+      mockPrisma.transaction.findUnique.mockResolvedValue(transaction);
+      mockPrisma.transaction.update.mockResolvedValue({
+        ...transaction,
+        status: "PENDING",
+      });
+
+      const result = await service.submitForApproval(
+        transactionId,
+        userId,
+        dto,
+      );
+
+      expect(result).toEqual({ ...transaction, status: "PENDING" });
+      expect(mockPrisma.transaction.update).toHaveBeenCalledWith({
+        where: { id: transactionId },
+        data: { status: "PENDING" },
+        include: { company: true },
+      });
+      expect(mockAuditService.log).toHaveBeenCalledWith({
+        entityType: "TRANSACTION",
+        entityId: transactionId,
+        action: "SUBMIT_FOR_APPROVAL",
+        oldValues: { status: "DRAFT" },
+        newValues: { status: "PENDING" },
+        userId,
+        comment: dto.notes,
+      });
+    });
+
+    it("should throw BadRequestException when transaction is not in DRAFT status", async () => {
+      const transactionId = "1";
+      const userId = "user1";
+      const dto = { notes: "Please approve" };
+
+      const transaction = {
+        id: transactionId,
+        status: "PENDING",
+      };
+
+      mockPrisma.transaction.findUnique.mockResolvedValue(transaction);
+
+      await expect(
+        service.submitForApproval(transactionId, userId, dto),
+      ).rejects.toThrow(BadRequestException);
+    });
+  });
+
+  describe("approveTransaction", () => {
+    it("should approve transaction successfully", async () => {
+      const transactionId = "1";
+      const approverId = "approver1";
+      const dto = { approvalNotes: "Approved" };
+
+      const transaction = {
+        id: transactionId,
+        companySymbol: "NABIL",
+        status: "PENDING",
+      };
+
+      const workflow = {
+        id: "workflow1",
+        entityType: "TRANSACTION",
+        entityId: transactionId,
+      };
+
+      const approvedWorkflow = {
+        ...workflow,
+        status: "APPROVED",
+        approvedBy: approverId,
+        approvedAt: new Date(),
+      };
+
+      mockPrisma.transaction.findUnique.mockResolvedValue(transaction);
+      mockApprovalService.getWorkflowsForEntity.mockResolvedValue([workflow]);
+      mockApprovalService.approveWorkflow.mockResolvedValue(approvedWorkflow);
+      mockPrisma.transaction.update.mockResolvedValue({
+        ...transaction,
+        status: "APPROVED",
+      });
+
+      const result = await service.approveTransaction(
+        transactionId,
+        approverId,
+        dto,
+      );
+
+      expect(result).toEqual({ ...transaction, status: "APPROVED" });
+      expect(mockApprovalService.getWorkflowsForEntity).toHaveBeenCalledWith(
+        "TRANSACTION",
+        transactionId,
+      );
+      expect(mockApprovalService.approveWorkflow).toHaveBeenCalledWith({
+        workflowId: "workflow1",
+        approvedBy: approverId,
+      });
+      expect(mockPrisma.transaction.update).toHaveBeenCalledWith({
+        where: { id: transactionId },
+        data: { status: "APPROVED" },
+        include: { company: true },
+      });
+      expect(mockAuditService.log).toHaveBeenCalledWith({
+        entityType: "TRANSACTION",
+        entityId: transactionId,
+        action: "APPROVE",
+        oldValues: { status: "PENDING" },
+        newValues: { status: "APPROVED" },
+        userId: approverId,
+        comment: dto.approvalNotes,
+      });
+    });
+
+    it("should throw NotFoundException when no workflow is found", async () => {
+      const transactionId = "1";
+      const approverId = "approver1";
+      const dto = { approvalNotes: "Approved" };
+
+      const transaction = {
+        id: transactionId,
+        status: "PENDING",
+      };
+
+      mockPrisma.transaction.findUnique.mockResolvedValue(transaction);
+      mockApprovalService.getWorkflowsForEntity.mockResolvedValue([]);
+
+      await expect(
+        service.approveTransaction(transactionId, approverId, dto),
+      ).rejects.toThrow(NotFoundException);
+    });
+  });
+
+  describe("rejectTransaction", () => {
+    it("should reject transaction successfully", async () => {
+      const transactionId = "1";
+      const approverId = "approver1";
+      const dto = { rejectionReason: "Insufficient funds" };
+
+      const transaction = {
+        id: transactionId,
+        status: "PENDING",
+      };
+
+      const workflow = {
+        id: "workflow1",
+        entityType: "TRANSACTION",
+        entityId: transactionId,
+      };
+
+      const rejectedWorkflow = {
+        ...workflow,
+        status: "REJECTED",
+        approvedBy: approverId,
+        rejectionReason: dto.rejectionReason,
+        rejectedAt: new Date(),
+      };
+
+      mockPrisma.transaction.findUnique.mockResolvedValue(transaction);
+      mockApprovalService.getWorkflowsForEntity.mockResolvedValue([workflow]);
+      mockApprovalService.rejectWorkflow.mockResolvedValue(rejectedWorkflow);
+      mockPrisma.transaction.update.mockResolvedValue({
+        ...transaction,
+        status: "REJECTED",
+      });
+
+      const result = await service.rejectTransaction(
+        transactionId,
+        approverId,
+        dto,
+      );
+
+      expect(result).toEqual({ ...transaction, status: "REJECTED" });
+      expect(mockApprovalService.rejectWorkflow).toHaveBeenCalledWith({
+        workflowId: "workflow1",
+        approvedBy: approverId,
+        rejectionReason: dto.rejectionReason,
+      });
+      expect(mockAuditService.log).toHaveBeenCalledWith({
+        entityType: "TRANSACTION",
+        entityId: transactionId,
+        action: "REJECT",
+        oldValues: { status: "PENDING" },
+        newValues: { status: "REJECTED" },
+        userId: approverId,
+        comment: dto.rejectionReason,
+      });
+    });
+  });
+
+  describe("withdrawFromApproval", () => {
+    it("should withdraw transaction from approval successfully", async () => {
+      const transactionId = "1";
+      const userId = "user1";
+
+      const transaction = {
+        id: transactionId,
+        status: "PENDING",
+      };
+
+      const workflow = {
+        id: "workflow1",
+        entityType: "TRANSACTION",
+        entityId: transactionId,
+      };
+
+      mockPrisma.transaction.findUnique.mockResolvedValue(transaction);
+      mockApprovalService.getWorkflowsForEntity.mockResolvedValue([workflow]);
+      mockPrisma.approvalWorkflow.delete.mockResolvedValue(workflow);
+      mockPrisma.transaction.update.mockResolvedValue({
+        ...transaction,
+        status: "DRAFT",
+      });
+
+      const result = await service.withdrawFromApproval(transactionId, userId);
+
+      expect(result).toEqual({ ...transaction, status: "DRAFT" });
+      expect(mockPrisma.approvalWorkflow.delete).toHaveBeenCalledWith({
+        where: { id: "workflow1" },
+      });
+      expect(mockPrisma.transaction.update).toHaveBeenCalledWith({
+        where: { id: transactionId },
+        data: { status: "DRAFT" },
+        include: { company: true },
+      });
+      expect(mockAuditService.log).toHaveBeenCalledWith({
+        entityType: "TRANSACTION",
+        entityId: transactionId,
+        action: "WITHDRAW",
+        oldValues: { status: "PENDING" },
+        newValues: { status: "DRAFT" },
+        userId,
+        comment: "Transaction withdrawn from approval",
+      });
+    });
+
+    it("should throw BadRequestException when transaction is not in PENDING status", async () => {
+      const transactionId = "1";
+      const userId = "user1";
+
+      const transaction = {
+        id: transactionId,
+        status: "APPROVED",
+      };
+
+      mockPrisma.transaction.findUnique.mockResolvedValue(transaction);
+
+      await expect(
+        service.withdrawFromApproval(transactionId, userId),
+      ).rejects.toThrow(BadRequestException);
+    });
+  });
+
+  describe("getPendingApprovals", () => {
+    it("should return pending transactions", async () => {
+      const pendingTransactions = [
+        {
+          id: "1",
+          companySymbol: "NABIL",
+          status: "PENDING",
+          totalPurchaseAmount: 100000,
+          company: { symbol: "NABIL", companyName: "Nabil Bank" },
+        },
+        {
+          id: "2",
+          companySymbol: "NRN",
+          status: "PENDING",
+          totalSalesAmount: 50000,
+          company: { symbol: "NRN", companyName: "Narayanhiti" },
+        },
+      ];
+
+      mockPrisma.transaction.findMany.mockResolvedValue(pendingTransactions);
+
+      const result = await service.getPendingApprovals();
+
+      expect(result).toEqual(pendingTransactions);
+      expect(mockPrisma.transaction.findMany).toHaveBeenCalledWith({
+        where: { status: "PENDING" },
+        include: { company: true },
+        orderBy: { createdAt: "desc" },
+      });
+    });
+  });
+
+  describe("getApprovalStats", () => {
+    it("should return approval statistics", async () => {
+      const stats = {
+        draft: 10,
+        pending: 5,
+        approved: 20,
+        rejected: 3,
+        total: 38,
+      };
+
+      mockPrisma.transaction.count.mockResolvedValueOnce(10); // DRAFT
+      mockPrisma.transaction.count.mockResolvedValueOnce(5); // PENDING
+      mockPrisma.transaction.count.mockResolvedValueOnce(20); // APPROVED
+      mockPrisma.transaction.count.mockResolvedValueOnce(3); // REJECTED
+
+      const result = await service.getApprovalStats();
+
+      expect(result).toEqual(stats);
+    });
+  });
+
+  describe("remove", () => {
+    it("should delete a DRAFT transaction successfully", async () => {
+      const transactionId = "1";
+      const userId = "user1";
+
+      const transaction = {
+        id: transactionId,
+        status: "DRAFT",
+        companySymbol: "NABIL",
+      };
+
+      mockPrisma.transaction.findUnique.mockResolvedValue(transaction);
+      mockPrisma.transaction.delete.mockResolvedValue(transaction);
+
+      const result = await service.remove(transactionId, userId);
+
+      expect(result).toEqual(transaction);
+      expect(mockPrisma.transaction.delete).toHaveBeenCalledWith({
+        where: { id: transactionId },
+      });
+      expect(mockAuditService.log).toHaveBeenCalledWith({
+        entityType: "TRANSACTION",
+        entityId: transactionId,
+        action: "DELETE",
+        oldValues: transaction,
+        userId,
+        comment: "Transaction deleted",
+      });
+    });
+
+    it("should throw BadRequestException when trying to delete approved transaction", async () => {
+      const transactionId = "1";
+      const userId = "user1";
+
+      const transaction = {
+        id: transactionId,
+        status: "APPROVED",
+      };
+
+      mockPrisma.transaction.findUnique.mockResolvedValue(transaction);
+
+      await expect(service.remove(transactionId, userId)).rejects.toThrow(
+        BadRequestException,
+      );
+    });
+  });
+});

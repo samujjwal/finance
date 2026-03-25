@@ -1,0 +1,423 @@
+import { Test, TestingModule } from "@nestjs/testing";
+import { AuthService } from "./auth.service";
+import { PrismaService } from "../prisma/prisma.service";
+import { JwtService } from "@nestjs/jwt";
+import { AuditService } from "../audit/audit.service";
+import { BadRequestException, UnauthorizedException } from "@nestjs/common";
+import * as bcrypt from "bcrypt";
+import { RegisterDto } from "./dto/auth.dto";
+
+describe("AuthService", () => {
+  let service: AuthService;
+  let prisma: PrismaService;
+  let jwtService: JwtService;
+  let auditService: AuditService;
+
+  const mockPrisma = {
+    user: {
+      findUnique: jest.fn(),
+      create: jest.fn(),
+      update: jest.fn(),
+      findMany: jest.fn(),
+    },
+    userRole: {
+      findMany: jest.fn(),
+      create: jest.fn(),
+      delete: jest.fn(),
+    },
+    role: {
+      findUnique: jest.fn(),
+    },
+    auditLog: {
+      create: jest.fn(),
+    },
+  };
+
+  const mockJwtService = {
+    sign: jest.fn(),
+    verify: jest.fn(),
+  };
+
+  const mockAuditService = {
+    log: jest.fn(),
+  };
+
+  beforeEach(async () => {
+    const module: TestingModule = await Test.createTestingModule({
+      providers: [
+        AuthService,
+        {
+          provide: PrismaService,
+          useValue: mockPrisma,
+        },
+        {
+          provide: JwtService,
+          useValue: mockJwtService,
+        },
+        {
+          provide: AuditService,
+          useValue: mockAuditService,
+        },
+      ],
+    }).compile();
+
+    service = module.get<AuthService>(AuthService);
+    prisma = module.get<PrismaService>(PrismaService);
+    jwtService = module.get<JwtService>(JwtService);
+    auditService = module.get<AuditService>(AuditService);
+  });
+
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+
+  describe("validateUser", () => {
+    it("should return user without password hash when credentials are valid", async () => {
+      const user = {
+        id: "1",
+        username: "testuser",
+        passwordHash: await bcrypt.hash("password123", 10),
+        isActive: true,
+        status: "ACTIVE",
+      };
+
+      mockPrisma.user.findUnique.mockResolvedValue(user);
+      jest
+        .spyOn(bcrypt, "compare")
+        .mockImplementation(() => Promise.resolve(true));
+
+      const result = await service.validateUser("testuser", "password123");
+
+      expect(result).toEqual({
+        id: "1",
+        username: "testuser",
+        isActive: true,
+        status: "ACTIVE",
+      });
+      expect(bcrypt.compare).toHaveBeenCalledWith(
+        "password123",
+        user.passwordHash,
+      );
+    });
+
+    it("should return null when user is not found", async () => {
+      mockPrisma.user.findUnique.mockResolvedValue(null);
+
+      const result = await service.validateUser("nonexistent", "password");
+
+      expect(result).toBeNull();
+    });
+
+    it("should return null when password is incorrect", async () => {
+      const user = {
+        id: "1",
+        username: "testuser",
+        passwordHash: await bcrypt.hash("password123", 10),
+        isActive: true,
+        status: "ACTIVE",
+      };
+
+      mockPrisma.user.findUnique.mockResolvedValue(user);
+      jest
+        .spyOn(bcrypt, "compare")
+        .mockImplementation(() => Promise.resolve(false));
+
+      const result = await service.validateUser("testuser", "wrongpassword");
+
+      expect(result).toBeNull();
+    });
+
+    it("should return null when user is inactive", async () => {
+      const user = {
+        id: "1",
+        username: "testuser",
+        passwordHash: await bcrypt.hash("password123", 10),
+        isActive: false,
+        status: "ACTIVE",
+      };
+
+      mockPrisma.user.findUnique.mockResolvedValue(user);
+      jest
+        .spyOn(bcrypt, "compare")
+        .mockImplementation(() => Promise.resolve(true));
+
+      const result = await service.validateUser("testuser", "password123");
+
+      expect(result).toBeNull();
+    });
+
+    it("should return null when user status is not ACTIVE", async () => {
+      const user = {
+        id: "1",
+        username: "testuser",
+        passwordHash: await bcrypt.hash("password123", 10),
+        isActive: true,
+        status: "SUSPENDED",
+      };
+
+      mockPrisma.user.findUnique.mockResolvedValue(user);
+      jest
+        .spyOn(bcrypt, "compare")
+        .mockImplementation(() => Promise.resolve(true));
+
+      const result = await service.validateUser("testuser", "password123");
+
+      expect(result).toBeNull();
+    });
+
+    it("should return null when user account is locked", async () => {
+      const user = {
+        id: "1",
+        username: "testuser",
+        passwordHash: await bcrypt.hash("password123", 10),
+        isActive: true,
+        status: "ACTIVE",
+        failedLoginAttempts: 5,
+        lockedUntil: new Date(Date.now() + 60000), // Locked for 1 minute
+      };
+
+      mockPrisma.user.findUnique.mockResolvedValue(user);
+      jest
+        .spyOn(bcrypt, "compare")
+        .mockImplementation(() => Promise.resolve(true));
+
+      const result = await service.validateUser("testuser", "password123");
+
+      expect(result).toBeNull();
+    });
+  });
+
+  describe("login", () => {
+    it("should return user and token when login is successful", async () => {
+      const user = {
+        id: "1",
+        username: "testuser",
+        userId: "USER001",
+        email: "test@example.com",
+        firstName: "Test",
+        surname: "User",
+        isActive: true,
+        status: "ACTIVE",
+        failedLoginAttempts: 0,
+        lockedUntil: null,
+      };
+
+      jest.spyOn(service, "validateUser").mockResolvedValue(user);
+      mockPrisma.user.update.mockResolvedValue(user);
+      mockJwtService.sign.mockReturnValue("jwt-token");
+
+      const result = await service.login("testuser", "password123");
+
+      expect(result).toEqual({
+        user,
+        token: "jwt-token",
+        expiresIn: "24h",
+      });
+      expect(mockPrisma.user.update).toHaveBeenCalledWith({
+        where: { id: "1" },
+        data: {
+          lastLogin: expect.any(Date),
+          failedLoginAttempts: 0,
+          lockedUntil: null,
+        },
+      });
+      expect(mockAuditService.log).toHaveBeenCalledWith({
+        entityType: "USER",
+        entityId: "1",
+        action: "LOGIN",
+        userId: "1",
+        comment: "User logged in successfully",
+      });
+    });
+
+    it("should throw UnauthorizedException when credentials are invalid", async () => {
+      jest.spyOn(service, "validateUser").mockResolvedValue(null);
+
+      await expect(service.login("testuser", "wrongpassword")).rejects.toThrow(
+        UnauthorizedException,
+      );
+    });
+
+    it("should throw UnauthorizedException when user is locked", async () => {
+      jest.spyOn(service, "validateUser").mockResolvedValue(null);
+
+      await expect(service.login("lockeduser", "password")).rejects.toThrow(
+        UnauthorizedException,
+      );
+    });
+  });
+
+  describe("register", () => {
+    it("should create a new user successfully", async () => {
+      const createUserDto: RegisterDto = {
+        username: "newuser",
+        email: "newuser@example.com",
+        password: "Password123",
+        firstName: "New",
+        surname: "User",
+        userId: "USER002",
+        userTypeId: "1",
+        branchId: "1",
+      };
+
+      const existingUser = null;
+      const createdUser = {
+        id: "2",
+        ...createUserDto,
+        passwordHash: "hashed-password",
+        isActive: true,
+        status: "ACTIVE",
+        failedLoginAttempts: 0,
+        lockedUntil: null,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      };
+
+      mockPrisma.user.findUnique.mockResolvedValue(existingUser);
+      jest
+        .spyOn(bcrypt, "hash")
+        .mockImplementation(() => Promise.resolve("hashed-password"));
+      mockPrisma.user.create.mockResolvedValue(createdUser);
+
+      const result = await service.register(createUserDto);
+
+      expect(result).toEqual(createdUser);
+      expect(bcrypt.hash).toHaveBeenCalledWith("Password123", 10);
+      expect(mockPrisma.user.create).toHaveBeenCalledWith({
+        data: {
+          ...createUserDto,
+          passwordHash: "hashed-password",
+          isActive: true,
+          status: "ACTIVE",
+          failedLoginAttempts: 0,
+        },
+      });
+      expect(mockAuditService.log).toHaveBeenCalledWith({
+        entityType: "USER",
+        entityId: "2",
+        action: "CREATE",
+        userId: "2",
+        comment: "User account created",
+      });
+    });
+
+    it("should throw BadRequestException when username already exists", async () => {
+      const createUserDto: RegisterDto = {
+        username: "existinguser",
+        email: "new@example.com",
+        password: "Password123",
+        firstName: "New",
+        surname: "User",
+        userId: "USER003",
+        userTypeId: "1",
+        branchId: "1",
+      };
+
+      const existingUser = { id: "1", username: "existinguser" };
+      mockPrisma.user.findUnique.mockResolvedValue(existingUser);
+
+      await expect(service.register(createUserDto)).rejects.toThrow(
+        BadRequestException,
+      );
+    });
+
+    it("should throw BadRequestException when email already exists", async () => {
+      const createUserDto: RegisterDto = {
+        username: "newuser",
+        email: "existing@example.com",
+        password: "Password123",
+        firstName: "New",
+        surname: "User",
+        userId: "USER005",
+        userTypeId: "1",
+        branchId: "1",
+      };
+
+      const existingUser = { id: "1", email: "existing@example.com" };
+      mockPrisma.user.findUnique.mockResolvedValue(existingUser);
+
+      await expect(service.register(createUserDto)).rejects.toThrow(
+        BadRequestException,
+      );
+    });
+  });
+
+  describe("changePassword", () => {
+    it("should change password successfully", async () => {
+      const userId = "1";
+      const changePasswordDto = {
+        currentPassword: "oldpassword",
+        newPassword: "NewPassword123",
+      };
+
+      const user = {
+        id: userId,
+        username: "testuser",
+        passwordHash: await bcrypt.hash("oldpassword", 10),
+        isActive: true,
+        status: "ACTIVE",
+      };
+
+      mockPrisma.user.findUnique.mockResolvedValue(user);
+      jest
+        .spyOn(bcrypt, "compare")
+        .mockImplementation(() => Promise.resolve(true));
+      jest
+        .spyOn(bcrypt, "hash")
+        .mockImplementation(() => Promise.resolve("new-hashed-password"));
+      mockPrisma.user.update.mockResolvedValue({
+        ...user,
+        passwordHash: "new-hashed-password",
+      });
+
+      const result = await service.changePassword(
+        userId,
+        changePasswordDto.currentPassword,
+        changePasswordDto.newPassword,
+      );
+
+      expect(result).toEqual({ message: "Password changed successfully" });
+      expect(bcrypt.hash).toHaveBeenCalledWith("NewPassword123", 10);
+      expect(mockPrisma.user.update).toHaveBeenCalledWith({
+        where: { id: userId },
+        data: { passwordHash: "new-hashed-password" },
+      });
+      expect(mockAuditService.log).toHaveBeenCalledWith({
+        entityType: "USER",
+        entityId: userId,
+        action: "PASSWORD_CHANGE",
+        userId,
+        comment: "User password changed",
+      });
+    });
+
+    it("should throw UnauthorizedException when current password is incorrect", async () => {
+      const userId = "1";
+      const changePasswordDto = {
+        currentPassword: "wrongpassword",
+        newPassword: "NewPassword123",
+      };
+
+      const user = {
+        id: userId,
+        username: "testuser",
+        passwordHash: await bcrypt.hash("oldpassword", 10),
+        isActive: true,
+        status: "ACTIVE",
+      };
+
+      mockPrisma.user.findUnique.mockResolvedValue(user);
+      jest
+        .spyOn(bcrypt, "compare")
+        .mockImplementation(() => Promise.resolve(false));
+
+      await expect(
+        service.changePassword(
+          userId,
+          changePasswordDto.currentPassword,
+          changePasswordDto.newPassword,
+        ),
+      ).rejects.toThrow(UnauthorizedException);
+    });
+  });
+});

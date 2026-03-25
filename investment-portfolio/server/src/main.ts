@@ -31,18 +31,25 @@ async function bootstrapDatabase(app: INestApplication) {
   const prisma = app.get(PrismaService);
 
   // Always ensure a root user exists with the known password
-  const existingRoot = await prisma.user.findFirst({ where: { role: "ROOT" } });
+  const existingRoot = await prisma.user.findFirst({
+    where: { userTypeId: "ADMIN", userId: "ROOT" },
+  });
   if (!existingRoot) {
     const passwordHash = await bcrypt.hash("password123#", 10);
     await prisma.user.upsert({
-      where: { username: "root" },
+      where: { userId: "ROOT" },
       create: {
+        userId: "ROOT",
         username: "root",
         email: "root@jcl.local",
         passwordHash,
-        role: "ROOT",
+        firstName: "System",
+        surname: "Root",
+        branchId: "BRANCH_MAIN",
+        userTypeId: "ADMIN",
+        status: "ACTIVE",
       },
-      update: { role: "ROOT", passwordHash },
+      update: { passwordHash },
     });
     console.log(
       "✅ Root user created  →  username: root  /  password: password123#",
@@ -58,7 +65,9 @@ async function bootstrapDatabase(app: INestApplication) {
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   const configService = app.get(ConfigService);
-  const allowedOrigins = buildAllowedOrigins(configService.get<string>("CORS_ORIGIN"));
+  const allowedOrigins = buildAllowedOrigins(
+    configService.get<string>("CORS_ORIGIN"),
+  );
 
   // Enable CORS
   app.enableCors({

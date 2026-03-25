@@ -41,6 +41,20 @@ export default defineConfig({
       use: { ...devices["iPhone 12"] },
     },
   ],
+  webServer: [
+    {
+      command: "npm run dev",
+      url: "http://localhost:1420",
+      reuseExistingServer: !process.env.CI,
+      timeout: 120 * 1000,
+    },
+    {
+      command: "cd server && npm run start:dev",
+      url: "http://localhost:3001",
+      reuseExistingServer: !process.env.CI,
+      timeout: 120 * 1000,
+    },
+  ],
   timeout: 60000,
   expect: {
     timeout: 5000,

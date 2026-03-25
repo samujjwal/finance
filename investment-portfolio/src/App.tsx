@@ -8,12 +8,13 @@ import { UnifiedDashboard } from "@/components/dashboard/UnifiedDashboard";
 import { CombinedReports } from "@/components/reports/CombinedReports";
 import { ServerStatusIndicator } from "@/components/common/ServerStatusIndicator";
 import { RootMaintenanceView } from "@/components/admin/RootMaintenanceView";
+import { AdminDashboard } from "@/components/admin/AdminDashboard";
 import { useAuthStore } from "@/stores/authStore";
 import { isDevelopment } from "@/utils/environment";
 import { apiService } from "@/services/api";
 import { initializeDesktopApp } from "@/services/desktop-environment";
 
-type Tab = 'dashboard' | 'portfolio' | 'transactions' | 'reports' | 'companies' | 'maintenance';
+type Tab = 'dashboard' | 'portfolio' | 'transactions' | 'reports' | 'companies' | 'admin' | 'maintenance';
 
 function App() {
   const { isAuthenticated, checkAuth, user } = useAuthStore();
@@ -55,7 +56,7 @@ function App() {
 
       // Now check auth (after setup status)
       await checkAuth();
-      
+
       setAppReady(true);
     };
 
@@ -97,6 +98,7 @@ function App() {
   }
 
   const isRootUser = user?.role === 'ROOT' || user?.username === 'root';
+  const isAdminUser = user?.role === 'ADMIN' || user?.username === 'admin' || isRootUser;
 
   const renderContent = () => {
     switch (activeTab) {
@@ -110,6 +112,8 @@ function App() {
         return <CombinedReports />;
       case 'companies':
         return <CompanyList />;
+      case 'admin':
+        return <AdminDashboard />;
       case 'maintenance':
         return isRootUser ? <RootMaintenanceView /> : <UnifiedDashboard />;
       default:
@@ -158,6 +162,7 @@ function App() {
                 { id: 'transactions', name: 'Transactions' },
                 { id: 'reports', name: 'Reports' },
                 { id: 'companies', name: 'Companies' },
+                ...(isAdminUser ? [{ id: 'admin', name: 'Admin' }] : []),
                 ...(isRootUser ? [{ id: 'maintenance', name: 'Root Actions' }] : []),
               ].map((tab) => (
                 <button
