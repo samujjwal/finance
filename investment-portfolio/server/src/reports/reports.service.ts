@@ -9,7 +9,9 @@ export class ReportsService {
     // Compute live from transactions so reports are always fresh after any transaction change.
     const transactions = await this.prisma.transaction.findMany({
       include: {
-        company: { select: { symbol: true, companyName: true, sector: true } },
+        instrument: {
+          select: { symbol: true, companyName: true, sector: true },
+        },
       },
       orderBy: { transactionDate: "asc" },
     });
@@ -32,8 +34,8 @@ export class ReportsService {
           monthName: monthLabel,
           monthKey,
           companySymbol: t.companySymbol,
-          sector: t.company?.sector,
-          company: t.company,
+          sector: t.instrument?.sector,
+          instrument: t.instrument,
           purchaseQuantity: 0,
           totalPurchaseAmount: 0,
           salesQuantity: 0,
@@ -153,14 +155,18 @@ export class ReportsService {
     const transactions = await this.prisma.transaction.findMany({
       where,
       include: {
-        company: { select: { symbol: true, companyName: true, sector: true } },
+        instrument: {
+          select: { symbol: true, companyName: true, sector: true },
+        },
       },
       orderBy: { transactionDate: "asc" },
     });
 
     const holdings = await this.prisma.portfolioHolding.findMany({
       include: {
-        company: { select: { symbol: true, companyName: true, sector: true } },
+        instrument: {
+          select: { symbol: true, companyName: true, sector: true },
+        },
       },
     });
 
@@ -198,7 +204,9 @@ export class ReportsService {
     const holdings = await this.prisma.portfolioHolding.findMany({
       where: { totalQuantity: { gt: 0 } },
       include: {
-        company: { select: { symbol: true, companyName: true, sector: true } },
+        instrument: {
+          select: { symbol: true, companyName: true, sector: true },
+        },
       },
     });
 
@@ -210,7 +218,7 @@ export class ReportsService {
     >();
 
     for (const h of holdings) {
-      const sector = h.company?.sector || "Unknown";
+      const sector = h.instrument?.sector || "Unknown";
       if (!sectorMap.has(sector)) {
         sectorMap.set(sector, {
           sector,
@@ -237,7 +245,7 @@ export class ReportsService {
     if (type === "holdings") {
       return this.prisma.portfolioHolding.findMany({
         include: {
-          company: {
+          instrument: {
             select: { symbol: true, companyName: true, sector: true },
           },
         },
@@ -247,7 +255,9 @@ export class ReportsService {
 
     return this.prisma.transaction.findMany({
       include: {
-        company: { select: { symbol: true, companyName: true, sector: true } },
+        instrument: {
+          select: { symbol: true, companyName: true, sector: true },
+        },
       },
       orderBy: { transactionDate: "desc" },
     });

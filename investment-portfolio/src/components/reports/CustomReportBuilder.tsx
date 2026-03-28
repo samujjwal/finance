@@ -143,7 +143,8 @@ export const CustomReportBuilder: React.FC = () => {
         ...config,
         dateRange: config.dateRange,
       });
-      setData(response.data.data || []);
+      const payload = (response.data as any) || {};
+      setData(payload.data || payload || []);
     } catch (error) {
       console.error('Failed to generate report:', error);
       // Use mock data for demo

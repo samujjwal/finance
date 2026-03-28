@@ -26,9 +26,10 @@ export function usePermissions() {
       const response = await apiService.getCurrentUserFunctions();
       console.log('🔍 usePermissions: API response:', response);
       if (response.success && response.data) {
-        console.log('🔍 usePermissions: Functions loaded:', response.data.length);
+        const functions = (response.data as UserFunctions['functions']) || [];
+        console.log('🔍 usePermissions: Functions loaded:', functions.length);
         setUserFunctions({
-          functions: response.data,
+          functions,
           isLoading: false,
           error: null,
         });

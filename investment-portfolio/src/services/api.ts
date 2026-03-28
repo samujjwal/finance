@@ -79,9 +79,22 @@ class ApiService {
     return this.makeRequest("auth/me");
   }
 
+  // Generic helper for custom endpoints used by advanced UI screens.
+  async post(endpoint: string, body?: unknown) {
+    return this.makeRequest(endpoint.replace(/^\//, ""), {
+      method: "POST",
+      body: JSON.stringify(body ?? {}),
+    });
+  }
+
   // Companies
   async getCompanies() {
     return this.makeRequest("companies");
+  }
+
+  // Backward-compatible aliases for phase-2 terminology
+  async getInstruments() {
+    return this.getCompanies();
   }
 
   async getCompany(symbol: string) {
@@ -93,6 +106,10 @@ class ApiService {
       method: "POST",
       body: JSON.stringify(companyData),
     });
+  }
+
+  async createInstrument(instrumentData: any) {
+    return this.createCompany(instrumentData);
   }
 
   async createCompaniesBulk(companies: any[]) {
@@ -107,6 +124,10 @@ class ApiService {
       method: "PUT",
       body: JSON.stringify(companyData),
     });
+  }
+
+  async updateInstrument(symbol: string, instrumentData: any) {
+    return this.updateCompany(symbol, instrumentData);
   }
 
   async deleteCompany(symbol: string) {
@@ -431,6 +452,395 @@ class ApiService {
 
   async getAuditLogsForEntity(entityType: string, entityId: string) {
     return this.makeRequest(`audit/entity/${entityType}/${entityId}`);
+  }
+
+  // ===== Organizations =====
+  async getOrganizations() {
+    return this.makeRequest("organizations");
+  }
+  async getOrganization(id: string) {
+    return this.makeRequest(`organizations/${id}`);
+  }
+  async createOrganization(data: any) {
+    return this.makeRequest("organizations", {
+      method: "POST",
+      body: JSON.stringify(data),
+    });
+  }
+  async updateOrganization(id: string, data: any) {
+    return this.makeRequest(`organizations/${id}`, {
+      method: "PUT",
+      body: JSON.stringify(data),
+    });
+  }
+  async getOrganizationModules(id: string) {
+    return this.makeRequest(`organizations/${id}/modules`);
+  }
+  async updateOrganizationModules(id: string, data: any) {
+    return this.makeRequest(`organizations/${id}/modules`, {
+      method: "PUT",
+      body: JSON.stringify(data),
+    });
+  }
+
+  // ===== Accounting - Fiscal Years =====
+  async getFiscalYears(organizationId: string) {
+    return this.makeRequest(
+      `accounting/fiscal-years?organizationId=${organizationId}`,
+    );
+  }
+  async getCurrentFiscalYear(organizationId: string) {
+    return this.makeRequest(
+      `accounting/fiscal-years/current?organizationId=${organizationId}`,
+    );
+  }
+  async createFiscalYear(data: any) {
+    return this.makeRequest("accounting/fiscal-years", {
+      method: "POST",
+      body: JSON.stringify(data),
+    });
+  }
+  async closeFiscalYear(id: string) {
+    return this.makeRequest(`accounting/fiscal-years/${id}/close`, {
+      method: "PUT",
+    });
+  }
+
+  // ===== Accounting - Chart of Accounts =====
+  async getAccountGroups(organizationId: string) {
+    return this.makeRequest(
+      `accounting/groups?organizationId=${organizationId}`,
+    );
+  }
+  async getAccountGroupTree(organizationId: string) {
+    return this.makeRequest(
+      `accounting/groups/tree?organizationId=${organizationId}`,
+    );
+  }
+  async createAccountGroup(data: any) {
+    return this.makeRequest("accounting/groups", {
+      method: "POST",
+      body: JSON.stringify(data),
+    });
+  }
+  async getLedgerAccounts(organizationId: string, groupId?: string) {
+    const q = new URLSearchParams({
+      organizationId,
+      ...(groupId && { groupId }),
+    });
+    return this.makeRequest(`accounting/ledger-accounts?${q}`);
+  }
+  async getLedgerAccount(id: string) {
+    return this.makeRequest(`accounting/ledger-accounts/${id}`);
+  }
+  async getLedgerBalance(id: string, asOfDate?: string) {
+    const q = asOfDate ? `?asOfDate=${asOfDate}` : "";
+    return this.makeRequest(`accounting/ledger-accounts/${id}/balance${q}`);
+  }
+  async createLedgerAccount(data: any) {
+    return this.makeRequest("accounting/ledger-accounts", {
+      method: "POST",
+      body: JSON.stringify(data),
+    });
+  }
+  async updateLedgerAccount(id: string, data: any) {
+    return this.makeRequest(`accounting/ledger-accounts/${id}`, {
+      method: "PUT",
+      body: JSON.stringify(data),
+    });
+  }
+  async deleteLedgerAccount(id: string) {
+    return this.makeRequest(`accounting/ledger-accounts/${id}`, {
+      method: "DELETE",
+    });
+  }
+  async autoCreateInvestmentAccounts(organizationId: string) {
+    return this.makeRequest(
+      "accounting/ledger-accounts/auto-create-investment",
+      { method: "POST", body: JSON.stringify({ organizationId }) },
+    );
+  }
+
+  // ===== Accounting - Journals =====
+  async getJournals(organizationId: string, filters?: any) {
+    const q = new URLSearchParams({ organizationId, ...filters });
+    return this.makeRequest(`accounting/journals?${q}`);
+  }
+  async getJournal(id: string) {
+    return this.makeRequest(`accounting/journals/${id}`);
+  }
+  async createJournal(data: any) {
+    return this.makeRequest("accounting/journals", {
+      method: "POST",
+      body: JSON.stringify(data),
+    });
+  }
+  async postJournal(id: string, postedById: number) {
+    return this.makeRequest(`accounting/journals/${id}/post`, {
+      method: "PUT",
+      body: JSON.stringify({ postedById }),
+    });
+  }
+  async reverseJournal(id: string, reversalDate: string, createdById: number) {
+    return this.makeRequest(`accounting/journals/${id}/reverse`, {
+      method: "POST",
+      body: JSON.stringify({ reversalDate, createdById }),
+    });
+  }
+
+  // ===== Accounting - Vouchers =====
+  async getVouchers(organizationId: string, status?: string) {
+    const q = new URLSearchParams({
+      organizationId,
+      ...(status && { status }),
+    });
+    return this.makeRequest(`accounting/vouchers?${q}`);
+  }
+  async createVoucher(data: any) {
+    return this.makeRequest("accounting/vouchers", {
+      method: "POST",
+      body: JSON.stringify(data),
+    });
+  }
+  async submitVoucher(id: string) {
+    return this.makeRequest(`accounting/vouchers/${id}/submit`, {
+      method: "PUT",
+    });
+  }
+  async approveVoucher(id: string, data: any) {
+    return this.makeRequest(`accounting/vouchers/${id}/approve`, {
+      method: "PUT",
+      body: JSON.stringify(data),
+    });
+  }
+
+  // ===== Accounting - Customers & Vendors =====
+  async getCustomers(organizationId: string) {
+    return this.makeRequest(
+      `accounting/customers?organizationId=${organizationId}`,
+    );
+  }
+  async getCustomer(id: string) {
+    return this.makeRequest(`accounting/customers/${id}`);
+  }
+  async createCustomer(data: any) {
+    return this.makeRequest("accounting/customers", {
+      method: "POST",
+      body: JSON.stringify(data),
+    });
+  }
+  async getCustomerBalance(id: string) {
+    return this.makeRequest(`accounting/customers/${id}/balance`);
+  }
+  async getVendors(organizationId: string) {
+    return this.makeRequest(
+      `accounting/vendors?organizationId=${organizationId}`,
+    );
+  }
+  async getVendor(id: string) {
+    return this.makeRequest(`accounting/vendors/${id}`);
+  }
+  async createVendor(data: any) {
+    return this.makeRequest("accounting/vendors", {
+      method: "POST",
+      body: JSON.stringify(data),
+    });
+  }
+
+  // ===== Accounting - Invoices & Bills =====
+  async getInvoices(organizationId: string, status?: string) {
+    const q = new URLSearchParams({
+      organizationId,
+      ...(status && { status }),
+    });
+    return this.makeRequest(`accounting/invoices?${q}`);
+  }
+  async createInvoice(data: any) {
+    return this.makeRequest("accounting/invoices", {
+      method: "POST",
+      body: JSON.stringify(data),
+    });
+  }
+  async postInvoice(id: string) {
+    return this.makeRequest(`accounting/invoices/${id}/post`, {
+      method: "PUT",
+    });
+  }
+  async applyInvoicePayment(id: string, data: any) {
+    return this.makeRequest(`accounting/invoices/${id}/payment`, {
+      method: "PUT",
+      body: JSON.stringify(data),
+    });
+  }
+  async getBills(organizationId: string, status?: string) {
+    const q = new URLSearchParams({
+      organizationId,
+      ...(status && { status }),
+    });
+    return this.makeRequest(`accounting/bills?${q}`);
+  }
+  async createBill(data: any) {
+    return this.makeRequest("accounting/bills", {
+      method: "POST",
+      body: JSON.stringify(data),
+    });
+  }
+  async postBill(id: string) {
+    return this.makeRequest(`accounting/bills/${id}/post`, { method: "PUT" });
+  }
+
+  // ===== Accounting - Banking =====
+  async getBankAccounts(organizationId: string) {
+    return this.makeRequest(
+      `accounting/banking/accounts?organizationId=${organizationId}`,
+    );
+  }
+  async createBankAccount(data: any) {
+    return this.makeRequest("accounting/banking/accounts", {
+      method: "POST",
+      body: JSON.stringify(data),
+    });
+  }
+  async startReconciliation(data: any) {
+    return this.makeRequest("accounting/banking/reconciliations", {
+      method: "POST",
+      body: JSON.stringify(data),
+    });
+  }
+  async getReconciliation(id: string) {
+    return this.makeRequest(`accounting/banking/reconciliations/${id}`);
+  }
+  async addBankTransaction(reconId: string, data: any) {
+    return this.makeRequest(
+      `accounting/banking/reconciliations/${reconId}/transactions`,
+      { method: "POST", body: JSON.stringify(data) },
+    );
+  }
+  async autoMatchReconciliation(id: string) {
+    return this.makeRequest(
+      `accounting/banking/reconciliations/${id}/auto-match`,
+      { method: "POST" },
+    );
+  }
+  async completeReconciliation(id: string) {
+    return this.makeRequest(
+      `accounting/banking/reconciliations/${id}/complete`,
+      { method: "PUT" },
+    );
+  }
+
+  // ===== Portfolio Accounts =====
+  async getPortfolioAccounts(organizationId: string) {
+    return this.makeRequest(
+      `portfolio-accounts?organizationId=${organizationId}`,
+    );
+  }
+  async createPortfolioAccount(data: any) {
+    return this.makeRequest("portfolio-accounts", {
+      method: "POST",
+      body: JSON.stringify(data),
+    });
+  }
+  async getPortfolioAccount(id: string) {
+    return this.makeRequest(`portfolio-accounts/${id}`);
+  }
+  async getPortfolioAccountHoldings(id: string) {
+    return this.makeRequest(`portfolio-accounts/${id}/holdings`);
+  }
+
+  // ===== Nepal - Calendar =====
+  async convertADToBS(date: string) {
+    return this.makeRequest(`nepal/calendar/convert/ad-to-bs?date=${date}`);
+  }
+  async convertBSToAD(year: number, month: number, day: number) {
+    return this.makeRequest(
+      `nepal/calendar/convert/bs-to-ad?year=${year}&month=${month}&day=${day}`,
+    );
+  }
+  async getNepalFiscalYear(date?: string) {
+    return this.makeRequest(
+      `nepal/calendar/fiscal-year${date ? `?date=${date}` : ""}`,
+    );
+  }
+  async getBSCalendarMonth(year: number, month: number) {
+    return this.makeRequest(`nepal/calendar/${year}/${month}`);
+  }
+
+  // ===== Nepal - VAT =====
+  async getVatConfig(organizationId: string) {
+    return this.makeRequest(
+      `nepal/vat/config?organizationId=${organizationId}`,
+    );
+  }
+  async configureVat(data: any) {
+    return this.makeRequest("nepal/vat/config", {
+      method: "POST",
+      body: JSON.stringify(data),
+    });
+  }
+  async generateVatReturn(data: any) {
+    return this.makeRequest("nepal/vat/returns", {
+      method: "POST",
+      body: JSON.stringify(data),
+    });
+  }
+  async getVatReturns(organizationId: string) {
+    return this.makeRequest(
+      `nepal/vat/returns?organizationId=${organizationId}`,
+    );
+  }
+  async submitVatReturn(id: string) {
+    return this.makeRequest(`nepal/vat/returns/${id}/submit`, {
+      method: "PUT",
+    });
+  }
+
+  // ===== Nepal - TDS =====
+  async getTdsSections() {
+    return this.makeRequest("nepal/tds/sections");
+  }
+  async getTdsConfig(organizationId: string) {
+    return this.makeRequest(
+      `nepal/tds/config?organizationId=${organizationId}`,
+    );
+  }
+  async calculateTds(data: any) {
+    return this.makeRequest("nepal/tds/calculate", {
+      method: "POST",
+      body: JSON.stringify(data),
+    });
+  }
+  async getTdsDeductions(organizationId: string, fiscalYearId?: string) {
+    const q = new URLSearchParams({
+      organizationId,
+      ...(fiscalYearId && { fiscalYearId }),
+    });
+    return this.makeRequest(`nepal/tds/deductions?${q}`);
+  }
+
+  // ===== Nepal - IRD Export =====
+  async downloadSalesRegister(
+    organizationId: string,
+    from: string,
+    to: string,
+  ) {
+    window.open(
+      `${this.getApiBaseUrl()}/nepal/ird/sales-register?organizationId=${organizationId}&from=${from}&to=${to}`,
+    );
+  }
+  async downloadPurchaseRegister(
+    organizationId: string,
+    from: string,
+    to: string,
+  ) {
+    window.open(
+      `${this.getApiBaseUrl()}/nepal/ird/purchase-register?organizationId=${organizationId}&from=${from}&to=${to}`,
+    );
+  }
+  async downloadTdsRegister(organizationId: string, fiscalYearId: string) {
+    window.open(
+      `${this.getApiBaseUrl()}/nepal/ird/tds-register?organizationId=${organizationId}&fiscalYearId=${fiscalYearId}`,
+    );
   }
 }
 

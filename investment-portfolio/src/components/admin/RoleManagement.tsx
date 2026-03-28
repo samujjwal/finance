@@ -54,7 +54,8 @@ export function RoleManagement() {
       setLoading(true);
       const response = await apiService.getRoles();
       if (response.success) {
-        setRoles(response.data?.roles || []);
+        const payload = (response.data as any) || {};
+        setRoles(payload.roles || []);
       } else {
         setError(response.error || 'Failed to load roles');
       }
@@ -69,7 +70,7 @@ export function RoleManagement() {
     try {
       const response = await apiService.getAllFunctions();
       if (response.success) {
-        setFunctions(response.data || []);
+        setFunctions((response.data as Function[]) || []);
       }
     } catch (err) {
       console.error('Failed to load functions:', err);

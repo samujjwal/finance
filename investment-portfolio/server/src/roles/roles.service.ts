@@ -833,4 +833,45 @@ export class RoleService {
 
     return { message: "Role removed from user" };
   }
+
+  /**
+   * Returns functions filtered by module name (e.g. INVESTMENT, ACCOUNTING, FOUNDATION).
+   */
+  async getFunctionsByModule(module: string) {
+    return this.prisma.function.findMany({
+      where: { module, isActive: true },
+      orderBy: { name: "asc" },
+    });
+  }
+
+  /**
+   * Assign all active functions of a given module to a role (bulk).
+   */
+  async assignModuleFunctionsToRole(
+    roleId: string,
+    module: string,
+    assignedBy: string,
+  ) {
+    const functions = await this.getFunctionsByModule(module);
+    const assignments = [];
+    for (const fn of functions) {
+      const existing = await this.prisma.roleFunction.findFirst({
+        where: { roleId, functionId: fn.id },
+      });
+      if (!existing) {
+        assignments.push(
+          this.prisma.roleFunction.create({
+            data: {
+              roleId,
+              functionId: fn.id,
+              assignedBy,
+              status: "PENDING_APPROVAL",
+            },
+          }),
+        );
+      }
+    }
+    if (assignments.length > 0) await Promise.all(assignments);
+    return { assigned: assignments.length };
+  }
 }

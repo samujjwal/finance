@@ -4,11 +4,13 @@ import {
   ConflictException,
   ForbiddenException,
   BadRequestException,
+  Optional,
 } from "@nestjs/common";
 import { PrismaService } from "../prisma/prisma.service";
 import { FeeRatesService } from "../fee-rates/fee-rates.service";
 import { ApprovalService } from "../approval/approval.service";
 import { AuditService } from "../audit/audit.service";
+import { InvestmentAccountingBridgeService } from "../integration/investment-accounting-bridge.service";
 import {
   CreateTransactionDto,
   UpdateTransactionDto,
@@ -32,6 +34,7 @@ export class TransactionsService {
     private feeRates: FeeRatesService,
     private approvalService: ApprovalService,
     private auditService: AuditService,
+    @Optional() private bridge?: InvestmentAccountingBridgeService,
   ) {}
 
   async findAll(filters?: TransactionFilterDto) {
@@ -63,7 +66,7 @@ export class TransactionsService {
       where,
       orderBy: { transactionDate: "desc" },
       include: {
-        company: {
+        instrument: {
           select: {
             symbol: true,
             companyName: true,
@@ -78,7 +81,7 @@ export class TransactionsService {
     const transaction = await this.prisma.transaction.findUnique({
       where: { id },
       include: {
-        company: true,
+        instrument: true,
       },
     });
 
@@ -91,7 +94,7 @@ export class TransactionsService {
 
   async create(createDto: CreateTransactionDto) {
     // Validate that the company exists
-    const company = await this.prisma.company.findUnique({
+    const company = await this.prisma.instrument.findUnique({
       where: { symbol: createDto.companySymbol },
     });
 
@@ -157,12 +160,53 @@ export class TransactionsService {
       }
     }
 
-    return this.prisma.transaction.create({
+    const saved = await this.prisma.transaction.create({
       data,
       include: {
-        company: true,
+        instrument: true,
       },
     });
+
+    // Fire-and-forget: auto-journal if accounting is configured
+    if (this.bridge) {
+      const creator = await this.prisma.user.findUnique({
+        where: { id: saved.createdBy },
+        select: { organizationId: true },
+      });
+      const organizationId = creator?.organizationId;
+      if (!organizationId) return saved;
+
+      const isBuy = createDto.transactionType === "BUY";
+      const amount = isBuy
+        ? (saved.totalPurchaseAmount ?? 0)
+        : (saved.totalSalesAmount ?? 0);
+      const qty = isBuy
+        ? (saved.purchaseQuantity ?? 0)
+        : (saved.salesQuantity ?? 0);
+      const price = isBuy
+        ? (saved.purchasePricePerUnit ?? 0)
+        : (saved.salesPricePerUnit ?? 0);
+      void this.bridge.createJournalForTransaction({
+        organizationId,
+        transactionId: saved.id,
+        instrumentSymbol: saved.companySymbol,
+        transactionType: createDto.transactionType as any,
+        quantity: qty,
+        pricePerUnit: price,
+        totalAmount: amount,
+        brokerageCommission: isBuy
+          ? (saved.purchaseCommission ?? 0)
+          : (saved.salesCommission ?? 0),
+        sebonFee: 0,
+        dpCharge: isBuy
+          ? (saved.purchaseDpCharges ?? 0)
+          : (saved.salesDpCharges ?? 0),
+        transactionDate: new Date(saved.transactionDate),
+        createdById: saved.createdBy,
+      });
+    }
+
+    return saved;
   }
 
   async update(id: string, updateDto: UpdateTransactionDto) {
@@ -173,7 +217,7 @@ export class TransactionsService {
       updateDto.companySymbol &&
       updateDto.companySymbol !== transaction.companySymbol
     ) {
-      const company = await this.prisma.company.findUnique({
+      const company = await this.prisma.instrument.findUnique({
         where: { symbol: updateDto.companySymbol },
       });
 
@@ -188,7 +232,7 @@ export class TransactionsService {
       where: { id },
       data: updateDto,
       include: {
-        company: true,
+        instrument: true,
       },
     });
   }
@@ -257,7 +301,7 @@ export class TransactionsService {
     const updated = await this.prisma.transaction.update({
       where: { id },
       data: { status: TransactionStatus.PENDING },
-      include: { company: true },
+      include: { instrument: true },
     });
 
     // Audit log
@@ -310,7 +354,7 @@ export class TransactionsService {
         approvedAt: new Date(),
         approvedBy: approverId,
       },
-      include: { company: true },
+      include: { instrument: true },
     });
 
     // Audit log
@@ -366,7 +410,7 @@ export class TransactionsService {
       data: {
         status: TransactionStatus.REJECTED,
       },
-      include: { company: true },
+      include: { instrument: true },
     });
 
     // Audit log
@@ -407,7 +451,7 @@ export class TransactionsService {
     const updated = await this.prisma.transaction.update({
       where: { id },
       data: { status: TransactionStatus.DRAFT },
-      include: { company: true },
+      include: { instrument: true },
     });
 
     // Audit log
@@ -428,7 +472,7 @@ export class TransactionsService {
   async getPendingApprovals() {
     return this.prisma.transaction.findMany({
       where: { status: TransactionStatus.PENDING },
-      include: { company: true },
+      include: { instrument: true },
       orderBy: { createdAt: "asc" },
     });
   }

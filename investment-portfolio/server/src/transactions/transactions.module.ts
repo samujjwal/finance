@@ -5,9 +5,16 @@ import { PrismaModule } from "../prisma/prisma.module";
 import { FeeRatesModule } from "../fee-rates/fee-rates.module";
 import { ApprovalModule } from "../approval/approval.module";
 import { AuditModule } from "../audit/audit.module";
+import { IntegrationModule } from "../integration/integration.module";
 
 @Module({
-  imports: [PrismaModule, FeeRatesModule, ApprovalModule, AuditModule],
+  imports: [
+    PrismaModule,
+    FeeRatesModule,
+    ApprovalModule,
+    AuditModule,
+    IntegrationModule,
+  ],
   controllers: [TransactionsController],
   providers: [TransactionsService],
   exports: [TransactionsService],

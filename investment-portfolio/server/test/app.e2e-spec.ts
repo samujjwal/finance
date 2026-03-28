@@ -38,7 +38,7 @@ describe("Investment Portfolio E2E", () => {
     await prisma.monthlySummary.deleteMany();
     await prisma.portfolioHolding.deleteMany();
     await prisma.userSession.deleteMany();
-    await prisma.company.deleteMany();
+    await prisma.instrument.deleteMany();
     await prisma.user.deleteMany();
   });
 
@@ -48,7 +48,7 @@ describe("Investment Portfolio E2E", () => {
     await prisma.monthlySummary.deleteMany();
     await prisma.portfolioHolding.deleteMany();
     await prisma.userSession.deleteMany();
-    await prisma.company.deleteMany();
+    await prisma.instrument.deleteMany();
     await prisma.user.deleteMany();
     await app.close();
   });

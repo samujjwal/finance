@@ -9,7 +9,7 @@ export class PortfolioService {
     // Calculate holdings from transactions
     const transactions = await this.prisma.transaction.findMany({
       include: {
-        company: {
+        instrument: {
           select: {
             symbol: true,
             companyName: true,
@@ -33,7 +33,7 @@ export class PortfolioService {
           totalQuantity: 0,
           totalCost: 0,
           weightedAverageCost: 0,
-          company: transaction.company,
+          instrument: transaction.instrument,
           lastUpdated: new Date(),
         });
       }
@@ -44,9 +44,7 @@ export class PortfolioService {
         const qty = transaction.purchaseQuantity || 0;
         // Prefer totalPurchaseCost (includes commissions) over raw purchase amount
         const cost =
-          transaction.totalPurchaseCost ||
-          transaction.totalPurchaseAmount ||
-          0;
+          transaction.totalPurchaseCost || transaction.totalPurchaseAmount || 0;
         holding.totalQuantity += qty;
         holding.totalCost += cost;
       } else if (transaction.transactionType === "SELL") {
@@ -113,7 +111,7 @@ export class PortfolioService {
     // Get the final holdings from database
     return this.prisma.portfolioHolding.findMany({
       include: {
-        company: {
+        instrument: {
           select: {
             symbol: true,
             companyName: true,
@@ -175,7 +173,7 @@ export class PortfolioService {
     // Sector distribution
     const sectorMap = new Map<string, number>();
     holdings.forEach((holding) => {
-      const sector = holding.company?.sector || "Unknown";
+      const sector = holding.instrument?.sector || "Unknown";
       sectorMap.set(
         sector,
         (sectorMap.get(sector) || 0) + (holding.totalCost || 0),
@@ -218,7 +216,7 @@ export class PortfolioService {
 
     // Generate monthly summaries from transactions
     const transactions = await this.prisma.transaction.findMany({
-      include: { company: true },
+      include: { instrument: true },
       orderBy: { transactionDate: "asc" },
     });
 
@@ -238,7 +236,7 @@ export class PortfolioService {
             year: "numeric",
           }),
           companySymbol: symbol,
-          sector: transaction.company?.sector,
+          sector: transaction.instrument?.sector,
           purchaseQuantity: 0,
           totalPurchaseAmount: 0,
           salesQuantity: 0,

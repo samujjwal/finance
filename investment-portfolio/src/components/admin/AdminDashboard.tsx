@@ -38,11 +38,15 @@ export function AdminDashboard() {
       const pendingResponse = await apiService.getPendingApprovals();
       const rolesResponse = await apiService.getRoles();
 
+      const usersData = (usersResponse.data as any) || {};
+      const pendingData = (pendingResponse.data as any[]) || [];
+      const rolesData = (rolesResponse.data as any) || {};
+
       setStats({
-        totalUsers: usersResponse.data?.pagination?.total || 0,
-        activeUsers: usersResponse.data?.users?.filter((u: any) => u.status === 'ACTIVE').length || 0,
-        pendingApprovals: pendingResponse.data?.length || 0,
-        totalRoles: (rolesResponse.data as any)?.roles?.length || 0,
+        totalUsers: usersData?.pagination?.total || 0,
+        activeUsers: usersData?.users?.filter((u: any) => u.status === 'ACTIVE').length || 0,
+        pendingApprovals: pendingData.length || 0,
+        totalRoles: rolesData?.roles?.length || 0,
         systemHealth: 'healthy'
       });
     } catch (error) {

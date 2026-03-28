@@ -9,12 +9,16 @@ import { CombinedReports } from "@/components/reports/CombinedReports";
 import { ServerStatusIndicator } from "@/components/common/ServerStatusIndicator";
 import { RootMaintenanceView } from "@/components/admin/RootMaintenanceView";
 import { AdminDashboard } from "@/components/admin/AdminDashboard";
+import { AccountingDashboard } from "@/components/accounting/AccountingDashboard";
+import { NepalDashboard } from "@/components/nepal/NepalDashboard";
+import { OrganizationSettings } from "@/components/organizations/OrganizationSettings";
 import { useAuthStore } from "@/stores/authStore";
 import { isDevelopment } from "@/utils/environment";
 import { apiService } from "@/services/api";
 import { initializeDesktopApp } from "@/services/desktop-environment";
+import { useCompanyModules } from "@/hooks/useCompanyModules";
 
-type Tab = 'dashboard' | 'portfolio' | 'transactions' | 'reports' | 'companies' | 'admin' | 'maintenance';
+type Tab = 'dashboard' | 'portfolio' | 'transactions' | 'reports' | 'companies' | 'accounting' | 'nepal' | 'organization' | 'admin' | 'maintenance';
 
 function App() {
   const { isAuthenticated, checkAuth, user } = useAuthStore();
@@ -63,6 +67,64 @@ function App() {
     initApp();
   }, [checkAuth]);
 
+  // IMPORTANT: Call all hooks BEFORE any conditional returns (Rules of Hooks)
+  const isRootUser = user?.role === 'ROOT' || user?.username === 'root';
+  const isAdminUser = user?.role === 'ADMIN' || user?.username === 'admin' || isRootUser;
+  const orgId: string = (user as any)?.organizationId ?? '';
+  const { hasModule, modulesLoaded } = useCompanyModules(orgId);
+
+  // Temporarily disable legacy capital-market and admin/root tabs.
+  const showLegacyCapitalMarketTabs = true;
+  const showLegacyAdminTabs = true;
+
+  const canUseInvestment = showLegacyCapitalMarketTabs && hasModule('investment');
+  const canUseAccounting = showLegacyCapitalMarketTabs && hasModule('accounting');
+  const canUseNepal = showLegacyCapitalMarketTabs && canUseAccounting;
+  const canUseAdmin = showLegacyAdminTabs && isAdminUser;
+  const canUseMaintenance = showLegacyAdminTabs && isRootUser;
+
+  // Call all useEffect hooks BEFORE any conditional returns
+  useEffect(() => {
+    if (
+      (activeTab === 'portfolio' ||
+        activeTab === 'transactions' ||
+        activeTab === 'reports' ||
+        activeTab === 'companies') &&
+      modulesLoaded &&
+      !canUseInvestment
+    ) {
+      setActiveTab('dashboard');
+      return;
+    }
+
+    if (activeTab === 'accounting' && modulesLoaded && !canUseAccounting) {
+      setActiveTab('dashboard');
+      return;
+    }
+
+    if (activeTab === 'nepal' && modulesLoaded && !canUseNepal) {
+      setActiveTab('dashboard');
+      return;
+    }
+
+    if (activeTab === 'admin' && !canUseAdmin) {
+      setActiveTab('dashboard');
+      return;
+    }
+
+    if (activeTab === 'maintenance' && !canUseMaintenance) {
+      setActiveTab('dashboard');
+    }
+  }, [
+    activeTab,
+    canUseAccounting,
+    canUseAdmin,
+    canUseInvestment,
+    canUseMaintenance,
+    canUseNepal,
+    modulesLoaded,
+  ]);
+
   // While we're waiting for the setup-status response, show nothing (or a spinner)
   if (firstRun === null || !appReady) {
     return (
@@ -97,27 +159,34 @@ function App() {
     );
   }
 
-  const isRootUser = user?.role === 'ROOT' || user?.username === 'root';
-  const isAdminUser = user?.role === 'ADMIN' || user?.username === 'admin' || isRootUser;
-
   const renderContent = () => {
     switch (activeTab) {
       case 'dashboard':
         return <UnifiedDashboard onNavigate={setActiveTab} />;
       case 'portfolio':
-        return <PortfolioView />;
+        return canUseInvestment ? <PortfolioView /> : <UnifiedDashboard onNavigate={setActiveTab} />;
       case 'transactions':
-        return <TransactionList />;
+        return canUseInvestment ? <TransactionList /> : <UnifiedDashboard onNavigate={setActiveTab} />;
       case 'reports':
-        return <CombinedReports />;
+        return canUseInvestment ? <CombinedReports /> : <UnifiedDashboard onNavigate={setActiveTab} />;
       case 'companies':
-        return <CompanyList />;
+        return canUseInvestment ? <CompanyList /> : <UnifiedDashboard onNavigate={setActiveTab} />;
+      case 'accounting':
+        return canUseAccounting ? (
+          <AccountingDashboard organizationId={orgId} userId={Number(user?.id ?? 0)} />
+        ) : (
+          <UnifiedDashboard onNavigate={setActiveTab} />
+        );
+      case 'nepal':
+        return canUseNepal ? <NepalDashboard organizationId={orgId} /> : <UnifiedDashboard onNavigate={setActiveTab} />;
+      case 'organization':
+        return <OrganizationSettings organizationId={orgId} />;
       case 'admin':
-        return <AdminDashboard />;
+        return canUseAdmin ? <AdminDashboard /> : <UnifiedDashboard onNavigate={setActiveTab} />;
       case 'maintenance':
-        return isRootUser ? <RootMaintenanceView /> : <UnifiedDashboard />;
+        return canUseMaintenance ? <RootMaintenanceView /> : <UnifiedDashboard onNavigate={setActiveTab} />;
       default:
-        return <UnifiedDashboard />;
+        return <UnifiedDashboard onNavigate={setActiveTab} />;
     }
   };
 
@@ -158,12 +227,17 @@ function App() {
             <nav className="-mb-px flex space-x-8">
               {[
                 { id: 'dashboard', name: 'Dashboard' },
-                { id: 'portfolio', name: 'Portfolio' },
-                { id: 'transactions', name: 'Transactions' },
-                { id: 'reports', name: 'Reports' },
-                { id: 'companies', name: 'Companies' },
-                ...(isAdminUser ? [{ id: 'admin', name: 'Admin' }] : []),
-                ...(isRootUser ? [{ id: 'maintenance', name: 'Root Actions' }] : []),
+                ...(canUseInvestment ? [
+                  { id: 'portfolio', name: 'Portfolio' },
+                  { id: 'transactions', name: 'Transactions' },
+                  { id: 'reports', name: 'Reports' },
+                  { id: 'companies', name: 'Companies' },
+                ] : []),
+                ...(canUseAccounting ? [{ id: 'accounting', name: 'Accounting' }] : []),
+                ...(canUseNepal ? [{ id: 'nepal', name: 'Nepal / Tax' }] : []),
+                ...(orgId ? [{ id: 'organization', name: 'Org Settings' }] : []),
+                ...(canUseAdmin ? [{ id: 'admin', name: 'Admin' }] : []),
+                ...(canUseMaintenance ? [{ id: 'maintenance', name: 'Root Actions' }] : []),
               ].map((tab) => (
                 <button
                   key={tab.id}

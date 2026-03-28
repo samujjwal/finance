@@ -767,7 +767,7 @@ async function main() {
   ];
 
   for (const company of companies) {
-    await prisma.company.upsert({
+    await prisma.instrument.upsert({
       where: { symbol: company.symbol },
       update: {},
       create: company,

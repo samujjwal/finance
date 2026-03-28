@@ -19,6 +19,11 @@ export class LoginDto {
   @MinLength(6)
   @MaxLength(10)
   password: string;
+
+  @ApiProperty({ description: "TOTP code for 2FA", required: false })
+  @IsOptional()
+  @IsString()
+  totpCode?: string;
 }
 
 export class RegisterDto {

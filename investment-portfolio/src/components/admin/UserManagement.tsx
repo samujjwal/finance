@@ -198,7 +198,8 @@ export function UserManagement() {
       setLoading(true);
       const response = await apiService.getUsers();
       if (response.success) {
-        setUsers(response.data?.users || []);
+        const payload = (response.data as any) || {};
+        setUsers(payload.users || []);
       } else {
         setError(response.error || 'Failed to load users');
       }

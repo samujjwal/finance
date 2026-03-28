@@ -47,10 +47,20 @@ export class AuthController {
   @Post("login")
   @ApiOperation({ summary: "Login user" })
   @ApiBody({ type: LoginDto })
-  async login(@Body() loginDto: LoginDto) {
+  async login(@Body() loginDto: LoginDto, @Request() req: any) {
+    const forwardedFor = req.headers["x-forwarded-for"] as string | undefined;
+    const ipAddress =
+      (forwardedFor ? forwardedFor.split(",")[0].trim() : undefined) || req.ip;
+
     return {
       success: true,
-      data: await this.authService.login(loginDto.username, loginDto.password),
+      data: await this.authService.login(
+        loginDto.username,
+        loginDto.password,
+        ipAddress,
+        req.headers["user-agent"],
+        loginDto.totpCode,
+      ),
     };
   }
 
@@ -79,7 +89,8 @@ export class AuthController {
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
   @ApiOperation({ summary: "Logout user" })
-  async logout() {
+  async logout(@Request() req: any) {
+    await this.authService.logout(req.user?.sub, req.user?.sid);
     return {
       success: true,
       message: "Logout successful",

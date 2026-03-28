@@ -11,13 +11,13 @@ export class CompaniesService {
   constructor(private prisma: PrismaService) {}
 
   async findAll() {
-    return this.prisma.company.findMany({
+    return this.prisma.instrument.findMany({
       orderBy: { symbol: "asc" },
     });
   }
 
   async findOne(symbol: string) {
-    const company = await this.prisma.company.findUnique({
+    const company = await this.prisma.instrument.findUnique({
       where: { symbol },
     });
 
@@ -30,7 +30,7 @@ export class CompaniesService {
 
   async create(createCompanyDto: CreateCompanyDto) {
     // Check if company already exists
-    const existingCompany = await this.prisma.company.findUnique({
+    const existingCompany = await this.prisma.instrument.findUnique({
       where: { symbol: createCompanyDto.symbol },
     });
 
@@ -38,14 +38,14 @@ export class CompaniesService {
       throw new ConflictException("Company with this symbol already exists");
     }
 
-    return this.prisma.company.create({
+    return this.prisma.instrument.create({
       data: createCompanyDto,
     });
   }
 
   /** Upsert: create if not exists, update if exists. Used by bulk import. */
   async upsert(createCompanyDto: CreateCompanyDto) {
-    return this.prisma.company.upsert({
+    return this.prisma.instrument.upsert({
       where: { symbol: createCompanyDto.symbol },
       update: {
         companyName: createCompanyDto.companyName,
@@ -63,17 +63,17 @@ export class CompaniesService {
     let created = 0;
     let updated = 0;
     for (const dto of dtos) {
-      const existing = await this.prisma.company.findUnique({
+      const existing = await this.prisma.instrument.findUnique({
         where: { symbol: dto.symbol },
       });
       if (existing) {
-        await this.prisma.company.update({
+        await this.prisma.instrument.update({
           where: { symbol: dto.symbol },
           data: dto,
         });
         updated++;
       } else {
-        await this.prisma.company.create({ data: dto });
+        await this.prisma.instrument.create({ data: dto });
         created++;
       }
     }
@@ -83,7 +83,7 @@ export class CompaniesService {
   async update(symbol: string, updateCompanyDto: UpdateCompanyDto) {
     const company = await this.findOne(symbol);
 
-    return this.prisma.company.update({
+    return this.prisma.instrument.update({
       where: { symbol },
       data: updateCompanyDto,
     });
@@ -108,7 +108,7 @@ export class CompaniesService {
       where: { companySymbol: symbol },
     });
 
-    return this.prisma.company.delete({
+    return this.prisma.instrument.delete({
       where: { symbol },
     });
   }
@@ -124,7 +124,7 @@ export class CompaniesService {
     }> = [];
 
     // Check exact symbol match
-    const existingBySymbol = await this.prisma.company.findUnique({
+    const existingBySymbol = await this.prisma.instrument.findUnique({
       where: { symbol },
     });
     if (existingBySymbol) {
@@ -136,7 +136,7 @@ export class CompaniesService {
     }
 
     // Check symbol2 and symbol3 variations
-    const symbolVariations = await this.prisma.company.findMany({
+    const symbolVariations = await this.prisma.instrument.findMany({
       where: {
         OR: [{ symbol2: symbol }, { symbol3: symbol }],
       },
@@ -152,7 +152,7 @@ export class CompaniesService {
     // Check company name similarity (if provided)
     if (companyName) {
       const normalizedName = companyName.toLowerCase().trim();
-      const nameMatches = await this.prisma.company.findMany({
+      const nameMatches = await this.prisma.instrument.findMany({
         where: {
           companyName: {
             contains: normalizedName,
@@ -211,17 +211,17 @@ export class CompaniesService {
         continue;
       }
 
-      const existing = await this.prisma.company.findUnique({
+      const existing = await this.prisma.instrument.findUnique({
         where: { symbol: dto.symbol },
       });
       if (existing) {
-        await this.prisma.company.update({
+        await this.prisma.instrument.update({
           where: { symbol: dto.symbol },
           data: dto,
         });
         results.updated++;
       } else {
-        await this.prisma.company.create({ data: dto });
+        await this.prisma.instrument.create({ data: dto });
         results.created++;
       }
     }

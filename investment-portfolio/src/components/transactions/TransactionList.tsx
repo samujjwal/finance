@@ -5,6 +5,7 @@ import { TransactionGrid } from './TransactionGrid';
 import { ImportExport } from './ImportExport';
 import { TransactionFilters } from './TransactionFilters';
 import { CompanyStatement } from '@/components/portfolio/CompanyStatement';
+import { VirtualizedDataGrid } from '@/components/common/VirtualizedDataGrid';
 import { apiService } from '@/services/api';
 import React from 'react';
 
@@ -28,53 +29,6 @@ interface Transaction {
     sector?: string;
   };
 }
-
-// Defined at module level so React.memo can do its job (no re-creation on parent render)
-const TransactionRow = React.memo(({
-  transaction,
-  onEdit,
-  onDelete,
-  formatCurrency,
-}: {
-  transaction: Transaction;
-  onEdit: (t: Transaction) => void;
-  onDelete: (id: string) => void;
-  formatCurrency: (amount?: number) => string;
-}) => (
-  <tr className="hover:bg-gray-50">
-    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-      {new Date(transaction.transactionDate).toLocaleDateString()}
-    </td>
-    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-      <div>
-        <div className="font-medium">{transaction.companySymbol}</div>
-        <div className="text-gray-500">{transaction.company?.companyName}</div>
-      </div>
-    </td>
-    <td className="px-6 py-4 whitespace-nowrap text-sm">
-      <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${transaction.transactionType === 'BUY' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
-        }`}>
-        {transaction.transactionType}
-      </span>
-    </td>
-    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-      {transaction.transactionType === 'BUY' ? transaction.purchaseQuantity : transaction.salesQuantity}
-    </td>
-    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-      {formatCurrency(transaction.transactionType === 'BUY' ? transaction.purchasePricePerUnit : transaction.salesPricePerUnit)}
-    </td>
-    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-      {formatCurrency(transaction.transactionType === 'BUY' ? transaction.totalPurchaseAmount : transaction.totalSalesAmount)}
-    </td>
-    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-      <div className="flex space-x-2">
-        <Button variant="outline" size="sm" onClick={() => onEdit(transaction)}>Edit</Button>
-        <Button variant="outline" size="sm" onClick={() => onDelete(transaction.id)} className="text-red-600 hover:text-red-800">Delete</Button>
-      </div>
-    </td>
-  </tr>
-));
-TransactionRow.displayName = 'TransactionRow';
 
 export function TransactionList() {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
@@ -166,15 +120,87 @@ export function TransactionList() {
     }).format(amount);
   }, []);
 
-  const transactionRows = useMemo(() => transactions.map((transaction) => (
-    <TransactionRow
-      key={transaction.id}
-      transaction={transaction}
-      onEdit={setEditingTransaction}
-      onDelete={handleDelete}
-      formatCurrency={formatCurrency}
-    />
-  )), [transactions, handleDelete, formatCurrency]);
+  const transactionColumns = useMemo(() => [
+    {
+      key: 'transactionDate' as const,
+      header: 'Date',
+      width: 1,
+      render: (transaction: Transaction) => (
+        <span className="text-sm text-gray-900">
+          {new Date(transaction.transactionDate).toLocaleDateString()}
+        </span>
+      ),
+    },
+    {
+      key: 'companySymbol' as const,
+      header: 'Company',
+      width: 1.6,
+      render: (transaction: Transaction) => (
+        <div>
+          <div className="font-medium text-sm text-gray-900">{transaction.companySymbol}</div>
+          <div className="text-xs text-gray-500">{transaction.company?.companyName || '-'}</div>
+        </div>
+      ),
+    },
+    {
+      key: 'transactionType' as const,
+      header: 'Type',
+      width: 1,
+      render: (transaction: Transaction) => (
+        <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${transaction.transactionType === 'BUY' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
+          {transaction.transactionType}
+        </span>
+      ),
+    },
+    {
+      key: 'purchaseQuantity' as const,
+      header: 'Quantity',
+      width: 1,
+      render: (transaction: Transaction) => (
+        <span className="text-sm text-gray-900">
+          {transaction.transactionType === 'BUY' ? transaction.purchaseQuantity : transaction.salesQuantity}
+        </span>
+      ),
+    },
+    {
+      key: 'purchasePricePerUnit' as const,
+      header: 'Price',
+      width: 1,
+      render: (transaction: Transaction) => (
+        <span className="text-sm text-gray-900">
+          {formatCurrency(transaction.transactionType === 'BUY' ? transaction.purchasePricePerUnit : transaction.salesPricePerUnit)}
+        </span>
+      ),
+    },
+    {
+      key: 'totalPurchaseAmount' as const,
+      header: 'Total',
+      width: 1,
+      render: (transaction: Transaction) => (
+        <span className="text-sm text-gray-900">
+          {formatCurrency(transaction.transactionType === 'BUY' ? transaction.totalPurchaseAmount : transaction.totalSalesAmount)}
+        </span>
+      ),
+    },
+    {
+      key: 'id' as const,
+      header: 'Actions',
+      width: 1.4,
+      render: (transaction: Transaction) => (
+        <div className="flex space-x-2">
+          <Button variant="outline" size="sm" onClick={() => setEditingTransaction(transaction)}>Edit</Button>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => handleDelete(transaction.id)}
+            className="text-red-600 hover:text-red-800"
+          >
+            Delete
+          </Button>
+        </div>
+      ),
+    },
+  ], [formatCurrency, handleDelete]);
 
   if (initialLoading) {
     return (
@@ -247,38 +273,12 @@ export function TransactionList() {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="overflow-x-auto">
-                <table className="min-w-full divide-y divide-gray-200">
-                  <thead className="bg-gray-50">
-                    <tr>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Date
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Company
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Type
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Quantity
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Price
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Total
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Actions
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody className="bg-white divide-y divide-gray-200">
-                    {transactionRows}
-                  </tbody>
-                </table>
-              </div>
+              <VirtualizedDataGrid
+                rows={transactions}
+                columns={transactionColumns}
+                rowHeight={54}
+                height={520}
+              />
             </CardContent>
           </Card>
         </div>

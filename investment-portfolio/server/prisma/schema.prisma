@@ -61,6 +61,8 @@ model User {
   userRolesAssigned     UserRole[] @relation("UserRoleAssignedBy")
   userRolesApproved     UserRole[] @relation("UserRoleApprovedBy")
   systemConfigsUpdated  SystemConfig[]
+  journalEntriesPosted  JournalEntry[] @relation("JournalPostedBy")
+  journalEntriesCreated JournalEntry[] @relation("JournalCreatedBy")
 
   @@map("users")
 }
@@ -77,7 +79,78 @@ model UserSession {
   @@map("user_sessions")
 }
 
-model Company {
+// ========== MULTI-TENANT FOUNDATION (Phase 1) ==========
+
+model Tenant {
+  id        String   @id @default(cuid())
+  name      String
+  status    String   @default("ACTIVE")
+  plan      String   @default("FREE")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("tenants")
+}
+
+/// Business organization entity (the company using the platform, with module flags)
+model Organization {
+  id            String   @id @default(cuid())
+  name          String
+  code          String   @unique
+  hasInvestment Boolean  @default(true)  @map("has_investment")
+  hasAccounting Boolean  @default(false) @map("has_accounting")
+  hasInventory  Boolean  @default(false) @map("has_inventory")
+  baseCurrency  String   @default("NPR") @map("base_currency")
+  panNumber     String?  @map("pan_number")
+  vatNumber     String?  @map("vat_number")
+  address       String?
+  phone         String?
+  email         String?
+  isActive      Boolean  @default(true)  @map("is_active")
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt      @map("updated_at")
+
+  // Relations
+  fiscalYears       FiscalYear[]
+  portfolioAccounts PortfolioAccount[]
+  accountGroups     AccountGroup[]
+  ledgerAccounts    LedgerAccount[]
+  journalEntries    JournalEntry[]
+  vouchers          Voucher[]
+  customers         Customer[]
+  vendors           Vendor[]
+  bankAccounts      BankAccount[]
+  invoices          Invoice[]
+  bills             Bill[]
+  vatConfig         VatConfig?
+  tdsConfigs        TdsConfig[]
+
+  @@map("organizations")
+}
+
+model FiscalYear {
+  id             String   @id @default(cuid())
+  organizationId String   @map("organization_id")
+  name           String
+  startDate      DateTime @map("start_date")
+  endDate        DateTime @map("end_date")
+  isClosed       Boolean  @default(false) @map("is_closed")
+  closedBy       String?  @map("closed_by")
+  closedAt       DateTime? @map("closed_at")
+  createdAt      DateTime @default(now()) @map("created_at")
+  updatedAt      DateTime @updatedAt @map("updated_at")
+
+  organization Organization @relation(fields: [organizationId], references: [id])
+  journalEntries JournalEntry[]
+  vouchers       Voucher[]
+
+  @@map("fiscal_years")
+}
+
+// ========== INVESTMENT DOMAIN – Instrument replaces the old Company ==========
+
+/// NEPSE-listed securities (replaces Company). DB table kept as "companies" for zero-downtime migration.
+model Instrument {
   id             String   @id @default(cuid())
   serialNumber   Int?     @map("serial_number")
   symbol         String   @unique
@@ -94,7 +167,25 @@ model Company {
   monthlySummaries  MonthlySummary[]
   portfolioHoldings PortfolioHolding[]
 
-  @@map("companies")
+  @@map("companies") // DB table name preserved for backward-compat
+}
+
+/// Investor's brokerage/DP account (one org can have multiple)
+model PortfolioAccount {
+  id             String  @id @default(cuid())
+  organizationId String  @map("organization_id")
+  accountNumber  String? @map("account_number")
+  boId           String? @map("bo_id")
+  dpCode         String? @map("dp_code")
+  investorType   String? @map("investor_type")
+  isDefault      Boolean @default(false) @map("is_default")
+  isActive       Boolean @default(true)  @map("is_active")
+  createdAt      DateTime @default(now()) @map("created_at")
+  updatedAt      DateTime @updatedAt      @map("updated_at")
+
+  organization Organization @relation(fields: [organizationId], references: [id])
+
+  @@map("portfolio_accounts")
 }
 
 model Transaction {
@@ -138,10 +229,11 @@ model Transaction {
   updatedAt               DateTime @updatedAt @map("updated_at")
 
   // Relations
-  company  Company @relation(fields: [companySymbol], references: [symbol])
-  approver User?   @relation("TransactionApprovedBy", fields: [approvedBy], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  creator  User    @relation("TransactionCreatedBy", fields: [createdBy], references: [id], onDelete: Cascade)
+  instrument Instrument @relation(fields: [companySymbol], references: [symbol])
+  approver   User?      @relation("TransactionApprovedBy", fields: [approvedBy], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  creator    User       @relation("TransactionCreatedBy", fields: [createdBy], references: [id], onDelete: Cascade)
 
+  @@index([companySymbol, transactionDate])
   @@map("transactions")
 }
 
@@ -175,7 +267,7 @@ model MonthlySummary {
   updatedAt                    DateTime @updatedAt @map("updated_at")
 
   // Relations
-  company Company @relation(fields: [companySymbol], references: [symbol])
+  instrument Instrument @relation(fields: [companySymbol], references: [symbol])
 
   @@map("monthly_summary")
 }
@@ -196,7 +288,7 @@ model PortfolioHolding {
   updatedAt           DateTime @updatedAt @map("updated_at")
 
   // Relations
-  company Company @relation(fields: [companySymbol], references: [symbol])
+  instrument Instrument @relation(fields: [companySymbol], references: [symbol])
 
   @@map("portfolio_holdings")
 }
@@ -408,4 +500,417 @@ model FeeRate {
   updatedAt    DateTime @updatedAt @map("updated_at")
 
   @@map("fee_rates")
+}
+
+// ========== ACCOUNTING DOMAIN – Phase 3 ==========
+
+model AccountGroup {
+  id             String   @id @default(cuid())
+  organizationId String   @map("organization_id")
+  code           String
+  name           String
+  parentId       String?  @map("parent_id")
+  /// ASSET | LIABILITY | EQUITY | INCOME | EXPENSE
+  groupType      String   @map("group_type")
+  description    String?
+  isSystem       Boolean  @default(false) @map("is_system")
+  createdAt      DateTime @default(now()) @map("created_at")
+  updatedAt      DateTime @updatedAt      @map("updated_at")
+
+  organization   Organization    @relation(fields: [organizationId], references: [id])
+  parent         AccountGroup?   @relation("AccountGroupHierarchy", fields: [parentId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  children       AccountGroup[]  @relation("AccountGroupHierarchy")
+  ledgerAccounts LedgerAccount[]
+
+  @@unique([organizationId, code])
+  @@map("account_groups")
+}
+
+model LedgerAccount {
+  id              String  @id @default(cuid())
+  organizationId  String  @map("organization_id")
+  accountGroupId  String  @map("account_group_id")
+  code            String
+  name            String
+  /// ASSET | LIABILITY | EQUITY | INCOME | EXPENSE
+  accountType     String  @map("account_type")
+  openingBalance  Float   @default(0) @map("opening_balance")
+  currentBalance  Float   @default(0) @map("current_balance")
+  isSystem        Boolean @default(false) @map("is_system")
+  isActive        Boolean @default(true)  @map("is_active")
+  description     String?
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt      @map("updated_at")
+
+  organization  Organization       @relation(fields: [organizationId], references: [id])
+  accountGroup  AccountGroup       @relation(fields: [accountGroupId], references: [id])
+  journalLines  JournalEntryLine[]
+  bankAccount   BankAccount?
+
+  @@unique([organizationId, code])
+  @@map("ledger_accounts")
+}
+
+model JournalEntry {
+  id             String    @id @default(cuid())
+  organizationId String    @map("organization_id")
+  fiscalYearId   String?   @map("fiscal_year_id")
+  entryDate      DateTime  @map("entry_date")
+  reference      String?
+  narration      String?
+  totalDebit     Float     @default(0) @map("total_debit")
+  totalCredit    Float     @default(0) @map("total_credit")
+  /// DRAFT | POSTED | REVERSED
+  status         String    @default("DRAFT")
+  postedBy       String?   @map("posted_by")
+  postedAt       DateTime? @map("posted_at")
+  /// Marks entries auto-posted from investment bridge
+  isAutoPosted   Boolean   @default(false) @map("is_auto_posted")
+  /// TRANSACTION | INVOICE | BILL | MANUAL
+  sourceType     String?   @map("source_type")
+  sourceId       String?   @map("source_id")
+  createdBy      String    @map("created_by")
+  createdAt      DateTime  @default(now()) @map("created_at")
+  updatedAt      DateTime  @updatedAt      @map("updated_at")
+
+  organization Organization      @relation(fields: [organizationId], references: [id])
+  fiscalYear   FiscalYear?       @relation(fields: [fiscalYearId], references: [id])
+  lines        JournalEntryLine[]
+  poster       User?             @relation("JournalPostedBy", fields: [postedBy], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  creator      User              @relation("JournalCreatedBy", fields: [createdBy], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@index([organizationId, entryDate, status])
+  @@map("journal_entries")
+}
+
+model JournalEntryLine {
+  id              String  @id @default(cuid())
+  journalEntryId  String  @map("journal_entry_id")
+  ledgerAccountId String  @map("ledger_account_id")
+  debit           Float   @default(0)
+  credit          Float   @default(0)
+  narration       String?
+  createdAt       DateTime @default(now()) @map("created_at")
+
+  journalEntry            JournalEntry    @relation(fields: [journalEntryId], references: [id], onDelete: Cascade)
+  ledgerAccount           LedgerAccount   @relation(fields: [ledgerAccountId], references: [id])
+  matchedBankTransactions BankTransaction[]
+
+  @@map("journal_entry_lines")
+}
+
+/// Voucher types: PAYMENT | RECEIPT | JOURNAL | CONTRA
+model Voucher {
+  id              String    @id @default(cuid())
+  organizationId  String    @map("organization_id")
+  voucherType     String    @map("voucher_type")
+  voucherNumber   String    @map("voucher_number")
+  fiscalYearId    String?   @map("fiscal_year_id")
+  voucherDate     DateTime  @map("voucher_date")
+  narration       String?
+  totalAmount     Float     @default(0) @map("total_amount")
+  /// DRAFT | PENDING_APPROVAL | APPROVED | POSTED
+  status          String    @default("DRAFT")
+  submittedBy     String?   @map("submitted_by")
+  approvedBy      String?   @map("approved_by")
+  approvedAt      DateTime? @map("approved_at")
+  rejectionReason String?   @map("rejection_reason")
+  journalEntryId  String?   @map("journal_entry_id")
+  createdBy       String    @map("created_by")
+  createdAt       DateTime  @default(now()) @map("created_at")
+  updatedAt       DateTime  @updatedAt      @map("updated_at")
+
+  organization Organization @relation(fields: [organizationId], references: [id])
+  fiscalYear   FiscalYear?  @relation(fields: [fiscalYearId], references: [id])
+
+  @@unique([organizationId, voucherType, voucherNumber])
+  @@map("vouchers")
+}
+
+// ========== COMMERCIAL DOMAIN – Phases 4 ==========
+
+model Customer {
+  id              String  @id @default(cuid())
+  organizationId  String  @map("organization_id")
+  code            String
+  name            String
+  address         String?
+  phone           String?
+  email           String?
+  panNumber       String? @map("pan_number")
+  creditLimit     Float?  @map("credit_limit")
+  /// Payment terms in days
+  paymentTerms    Int?    @map("payment_terms")
+  ledgerAccountId String? @map("ledger_account_id")
+  isActive        Boolean @default(true) @map("is_active")
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt      @map("updated_at")
+
+  organization Organization @relation(fields: [organizationId], references: [id])
+  invoices     Invoice[]
+
+  @@unique([organizationId, code])
+  @@map("customers")
+}
+
+model Vendor {
+  id              String  @id @default(cuid())
+  organizationId  String  @map("organization_id")
+  code            String
+  name            String
+  address         String?
+  phone           String?
+  email           String?
+  panNumber       String? @map("pan_number")
+  paymentTerms    Int?    @map("payment_terms")
+  ledgerAccountId String? @map("ledger_account_id")
+  isActive        Boolean @default(true) @map("is_active")
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt      @map("updated_at")
+
+  organization  Organization   @relation(fields: [organizationId], references: [id])
+  bills         Bill[]
+  tdsDeductions TdsDeduction[]
+
+  @@unique([organizationId, code])
+  @@map("vendors")
+}
+
+model Invoice {
+  id             String    @id @default(cuid())
+  organizationId String    @map("organization_id")
+  customerId     String    @map("customer_id")
+  invoiceNumber  String    @map("invoice_number")
+  invoiceDate    DateTime  @map("invoice_date")
+  dueDate        DateTime? @map("due_date")
+  subtotal       Float     @default(0)
+  taxAmount      Float     @default(0) @map("tax_amount")
+  vatAmount      Float     @default(0) @map("vat_amount")
+  total          Float     @default(0)
+  paidAmount     Float     @default(0) @map("paid_amount")
+  /// DRAFT | POSTED | PARTIALLY_PAID | PAID | CANCELLED
+  status         String    @default("DRAFT")
+  narration      String?
+  journalEntryId String?   @map("journal_entry_id")
+  postedBy       String?   @map("posted_by")
+  postedAt       DateTime? @map("posted_at")
+  createdBy      String    @map("created_by")
+  createdAt      DateTime  @default(now()) @map("created_at")
+  updatedAt      DateTime  @updatedAt      @map("updated_at")
+
+  organization Organization @relation(fields: [organizationId], references: [id])
+  customer     Customer     @relation(fields: [customerId], references: [id])
+  lines        InvoiceLine[]
+
+  @@unique([organizationId, invoiceNumber])
+  @@map("invoices")
+}
+
+model InvoiceLine {
+  id          String  @id @default(cuid())
+  invoiceId   String  @map("invoice_id")
+  description String
+  quantity    Float   @default(1)
+  unitPrice   Float   @map("unit_price")
+  amount      Float   @default(0)
+  taxAmount   Float   @default(0) @map("tax_amount")
+  vatAmount   Float   @default(0) @map("vat_amount")
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  invoice Invoice @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+
+  @@map("invoice_lines")
+}
+
+model Bill {
+  id             String    @id @default(cuid())
+  organizationId String    @map("organization_id")
+  vendorId       String    @map("vendor_id")
+  billNumber     String    @map("bill_number")
+  billDate       DateTime  @map("bill_date")
+  dueDate        DateTime? @map("due_date")
+  subtotal       Float     @default(0)
+  taxAmount      Float     @default(0) @map("tax_amount")
+  tdsAmount      Float     @default(0) @map("tds_amount")
+  total          Float     @default(0)
+  paidAmount     Float     @default(0) @map("paid_amount")
+  /// DRAFT | POSTED | PARTIALLY_PAID | PAID | CANCELLED
+  status         String    @default("DRAFT")
+  narration      String?
+  journalEntryId String?   @map("journal_entry_id")
+  createdBy      String    @map("created_by")
+  createdAt      DateTime  @default(now()) @map("created_at")
+  updatedAt      DateTime  @updatedAt      @map("updated_at")
+
+  organization Organization @relation(fields: [organizationId], references: [id])
+  vendor       Vendor       @relation(fields: [vendorId], references: [id])
+  lines        BillLine[]
+
+  @@unique([organizationId, billNumber])
+  @@map("bills")
+}
+
+model BillLine {
+  id          String  @id @default(cuid())
+  billId      String  @map("bill_id")
+  description String
+  quantity    Float   @default(1)
+  unitPrice   Float   @map("unit_price")
+  amount      Float   @default(0)
+  tdsSection  String? @map("tds_section")
+  tdsAmount   Float   @default(0) @map("tds_amount")
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  bill Bill @relation(fields: [billId], references: [id], onDelete: Cascade)
+
+  @@map("bill_lines")
+}
+
+model BankAccount {
+  id              String  @id @default(cuid())
+  organizationId  String  @map("organization_id")
+  accountName     String  @map("account_name")
+  accountNumber   String  @map("account_number")
+  bankName        String  @map("bank_name")
+  ledgerAccountId String  @unique @map("ledger_account_id")
+  currentBalance  Float   @default(0) @map("current_balance")
+  isActive        Boolean @default(true) @map("is_active")
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt      @map("updated_at")
+
+  organization    Organization     @relation(fields: [organizationId], references: [id])
+  ledgerAccount   LedgerAccount    @relation(fields: [ledgerAccountId], references: [id])
+  reconciliations Reconciliation[]
+
+  @@map("bank_accounts")
+}
+
+model Reconciliation {
+  id               String    @id @default(cuid())
+  bankAccountId    String    @map("bank_account_id")
+  statementDate    DateTime  @map("statement_date")
+  statementBalance Float     @map("statement_balance")
+  bookBalance      Float     @default(0) @map("book_balance")
+  /// OPEN | COMPLETED
+  status           String    @default("OPEN")
+  createdBy        String    @map("created_by")
+  completedAt      DateTime? @map("completed_at")
+  createdAt        DateTime  @default(now()) @map("created_at")
+  updatedAt        DateTime  @updatedAt     @map("updated_at")
+
+  bankAccount  BankAccount      @relation(fields: [bankAccountId], references: [id])
+  transactions BankTransaction[]
+
+  @@map("reconciliations")
+}
+
+model BankTransaction {
+  id                   String    @id @default(cuid())
+  reconciliationId     String    @map("reconciliation_id")
+  transactionDate      DateTime  @map("transaction_date")
+  description          String
+  amount               Float
+  matchedJournalLineId String?   @map("matched_journal_line_id")
+  isMatched            Boolean   @default(false) @map("is_matched")
+  createdAt            DateTime  @default(now()) @map("created_at")
+
+  reconciliation     Reconciliation    @relation(fields: [reconciliationId], references: [id], onDelete: Cascade)
+  matchedJournalLine JournalEntryLine? @relation(fields: [matchedJournalLineId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@map("bank_transactions")
+}
+
+// ========== NEPAL LOCALIZATION – Phase 5 ==========
+
+model BsCalendar {
+  id           String   @id @default(cuid())
+  adDate       DateTime @unique @map("ad_date")
+  bsYear       Int      @map("bs_year")
+  bsMonth      Int      @map("bs_month")
+  bsDay        Int      @map("bs_day")
+  bsDateString String   @unique @map("bs_date_string")
+  isHoliday    Boolean  @default(false) @map("is_holiday")
+  holidayName  String?  @map("holiday_name")
+
+  @@index([bsYear, bsMonth])
+  @@map("bs_calendar")
+}
+
+model VatConfig {
+  id             String    @id @default(cuid())
+  organizationId String    @unique @map("organization_id")
+  registrationNo String?   @map("registration_no")
+  defaultRate    Float     @default(0.13) @map("default_rate")
+  isRegistered   Boolean   @default(false) @map("is_registered")
+  effectiveFrom  DateTime? @map("effective_from")
+  createdAt      DateTime  @default(now()) @map("created_at")
+  updatedAt      DateTime  @updatedAt      @map("updated_at")
+
+  organization Organization @relation(fields: [organizationId], references: [id])
+  vatReturns   VatReturn[]
+
+  @@map("vat_configs")
+}
+
+model VatReturn {
+  id              String    @id @default(cuid())
+  vatConfigId     String    @map("vat_config_id")
+  periodStart     DateTime  @map("period_start")
+  periodEnd       DateTime  @map("period_end")
+  salesAmount     Float     @default(0) @map("sales_amount")
+  purchaseAmount  Float     @default(0) @map("purchase_amount")
+  vatCollected    Float     @default(0) @map("vat_collected")
+  vatPaid         Float     @default(0) @map("vat_paid")
+  netVat          Float     @default(0) @map("net_vat")
+  /// DRAFT | FILED
+  status          String    @default("DRAFT")
+  filedAt         DateTime? @map("filed_at")
+  createdAt       DateTime  @default(now()) @map("created_at")
+  updatedAt       DateTime  @updatedAt      @map("updated_at")
+
+  vatConfig VatConfig @relation(fields: [vatConfigId], references: [id])
+
+  @@map("vat_returns")
+}
+
+model TdsConfig {
+  id             String    @id @default(cuid())
+  organizationId String    @map("organization_id")
+  /// e.g. "52", "87", "88"
+  section        String
+  description    String?
+  rateThreshold  Float?    @map("rate_threshold")
+  /// Decimal fraction e.g. 0.015 for 1.5%
+  rate           Float
+  effectiveFrom  DateTime  @map("effective_from")
+  effectiveTo    DateTime? @map("effective_to")
+  isActive       Boolean   @default(true) @map("is_active")
+  createdAt      DateTime  @default(now()) @map("created_at")
+  updatedAt      DateTime  @updatedAt      @map("updated_at")
+
+  organization Organization  @relation(fields: [organizationId], references: [id])
+  deductions   TdsDeduction[]
+
+  @@map("tds_configs")
+}
+
+model TdsDeduction {
+  id             String   @id @default(cuid())
+  organizationId String   @map("organization_id")
+  vendorId       String   @map("vendor_id")
+  tdsConfigId    String   @map("tds_config_id")
+  section        String
+  paymentAmount  Float    @map("payment_amount")
+  tdsAmount      Float    @map("tds_amount")
+  certificateNo  String?  @map("certificate_no")
+  paymentDate    DateTime @map("payment_date")
+  /// e.g. "2080/81"
+  fiscalYear     String   @map("fiscal_year")
+  createdBy      String   @map("created_by")
+  createdAt      DateTime @default(now()) @map("created_at")
+
+  vendor    Vendor    @relation(fields: [vendorId], references: [id])
+  tdsConfig TdsConfig @relation(fields: [tdsConfigId], references: [id])
+
+  @@map("tds_deductions")
 }

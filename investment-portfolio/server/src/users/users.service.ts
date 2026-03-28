@@ -730,4 +730,31 @@ export class UserService {
 
     return { cleared: lockedUsers.length };
   }
+
+  /**
+   * Returns distinct module names from the functions assigned to the user via their active roles.
+   */
+  async getUserModules(userId: string): Promise<string[]> {
+    const userRoles = await this.prisma.userRole.findMany({
+      where: { userId, status: "APPROVED" },
+      include: {
+        role: {
+          include: {
+            roleFunctions: {
+              where: { status: "APPROVED" },
+              include: { function: true },
+            },
+          },
+        },
+      },
+    });
+
+    const modules = new Set<string>();
+    for (const ur of userRoles) {
+      for (const rf of ur.role.roleFunctions) {
+        if (rf.function.module) modules.add(rf.function.module);
+      }
+    }
+    return Array.from(modules);
+  }
 }

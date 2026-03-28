@@ -8,6 +8,7 @@ import { JwtService } from "@nestjs/jwt";
 import { PrismaService } from "../prisma/prisma.service";
 import * as bcrypt from "bcrypt";
 import { RegisterDto } from "./dto/auth.dto";
+import { createHmac, randomUUID } from "crypto";
 
 // Security configuration per SRS
 const SECURITY_CONFIG = {
@@ -15,14 +16,84 @@ const SECURITY_CONFIG = {
   lockoutDurationMinutes: 30,
   passwordMinLength: 6,
   passwordMaxLength: 10,
+  ipAttemptWindowMs: 60_000,
+  ipAttemptLimit: 5,
+  sessionIdleTimeoutMinutes: 30,
 };
 
 @Injectable()
 export class AuthService {
+  private readonly ipAttemptTracker = new Map<string, number[]>();
+
   constructor(
     private prisma: PrismaService,
     private jwtService: JwtService,
   ) {}
+
+  private enforceIpRateLimit(ipAddress?: string): void {
+    if (!ipAddress) return;
+    const now = Date.now();
+    const attempts = this.ipAttemptTracker.get(ipAddress) ?? [];
+    const recentAttempts = attempts.filter(
+      (ts) => now - ts <= SECURITY_CONFIG.ipAttemptWindowMs,
+    );
+    this.ipAttemptTracker.set(ipAddress, recentAttempts);
+
+    if (recentAttempts.length >= SECURITY_CONFIG.ipAttemptLimit) {
+      throw new ForbiddenException(
+        "Too many login attempts from this IP. Please retry in a minute.",
+      );
+    }
+  }
+
+  private recordIpFailedAttempt(ipAddress?: string): void {
+    if (!ipAddress) return;
+    const attempts = this.ipAttemptTracker.get(ipAddress) ?? [];
+    attempts.push(Date.now());
+    this.ipAttemptTracker.set(ipAddress, attempts);
+  }
+
+  private clearIpAttempts(ipAddress?: string): void {
+    if (!ipAddress) return;
+    this.ipAttemptTracker.delete(ipAddress);
+  }
+
+  private generateTotp(
+    secret: string,
+    timeStepSec: number,
+    stepOffset = 0,
+  ): string {
+    const step = Math.floor(Date.now() / 1000 / timeStepSec) + stepOffset;
+    const stepBuffer = Buffer.alloc(8);
+    stepBuffer.writeUInt32BE(Math.floor(step / 2 ** 32), 0);
+    stepBuffer.writeUInt32BE(step & 0xffffffff, 4);
+
+    const hmac = createHmac("sha1", secret).update(stepBuffer).digest();
+    const offset = hmac[hmac.length - 1] & 0x0f;
+    const code =
+      ((hmac[offset] & 0x7f) << 24) |
+      ((hmac[offset + 1] & 0xff) << 16) |
+      ((hmac[offset + 2] & 0xff) << 8) |
+      (hmac[offset + 3] & 0xff);
+
+    return String(code % 1_000_000).padStart(6, "0");
+  }
+
+  private validateTotpCodeOrThrow(totpCode?: string): void {
+    const secret = process.env.TWO_FACTOR_SHARED_SECRET;
+    if (!secret) return;
+
+    if (!totpCode) {
+      throw new ForbiddenException("Two-factor code is required");
+    }
+
+    // Accept current and previous window to tolerate clock skew.
+    const current = this.generateTotp(secret, 30, 0);
+    const previous = this.generateTotp(secret, 30, -1);
+    if (totpCode !== current && totpCode !== previous) {
+      throw new ForbiddenException("Invalid two-factor code");
+    }
+  }
 
   /**
    * Validate password format per SRS: 6-10 chars with uppercase, lowercase, number
@@ -207,16 +278,26 @@ export class AuthService {
     password: string,
     ipAddress?: string,
     userAgent?: string,
+    totpCode?: string,
   ) {
+    this.enforceIpRateLimit(ipAddress);
+
     // Validate credentials with full security checks
-    const validatedUser = await this.validateUser(
-      username,
-      password,
-      ipAddress,
-    );
+    let validatedUser: any;
+    try {
+      validatedUser = await this.validateUser(username, password, ipAddress);
+    } catch (error) {
+      this.recordIpFailedAttempt(ipAddress);
+      throw error;
+    }
+
     if (!validatedUser) {
+      this.recordIpFailedAttempt(ipAddress);
       throw new UnauthorizedException("Invalid credentials");
     }
+
+    this.validateTotpCodeOrThrow(totpCode);
+    this.clearIpAttempts(ipAddress);
 
     // Update last login
     await this.prisma.user.update({
@@ -227,17 +308,41 @@ export class AuthService {
       },
     });
 
+    const sessionId = randomUUID();
+    const sessionExpiry = new Date(
+      Date.now() + SECURITY_CONFIG.sessionIdleTimeoutMinutes * 60 * 1000,
+    );
+
+    await this.prisma.userSession.create({
+      data: {
+        userId: validatedUser.id,
+        token: sessionId,
+        expiresAt: sessionExpiry,
+      },
+    });
+
     const payload = {
       username: validatedUser.username,
       sub: validatedUser.id,
       userType: validatedUser.userTypeId,
+      sid: sessionId,
     };
 
     return {
       user: validatedUser,
-      token: this.jwtService.sign(payload),
-      expiresIn: "24h",
+      token: this.jwtService.sign(payload, {
+        expiresIn: `${SECURITY_CONFIG.sessionIdleTimeoutMinutes}m`,
+      }),
+      expiresIn: `${SECURITY_CONFIG.sessionIdleTimeoutMinutes}m`,
     };
+  }
+
+  async logout(userId?: string, sessionId?: string): Promise<void> {
+    if (!userId || !sessionId) return;
+
+    await this.prisma.userSession.deleteMany({
+      where: { userId, token: sessionId },
+    });
   }
 
   async register(userData: RegisterDto) {

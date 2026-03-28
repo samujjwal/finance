@@ -18,6 +18,28 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
   }
 
   async validate(payload: any) {
+    if (!payload.sid) {
+      throw new UnauthorizedException("Session is missing");
+    }
+
+    const activeSession = await this.prisma.userSession.findFirst({
+      where: {
+        userId: payload.sub,
+        token: payload.sid,
+        expiresAt: { gt: new Date() },
+      },
+    });
+
+    if (!activeSession) {
+      throw new UnauthorizedException("Session expired or invalid");
+    }
+
+    // Extend session on each validated request to enforce idle-timeout semantics.
+    await this.prisma.userSession.update({
+      where: { id: activeSession.id },
+      data: { expiresAt: new Date(Date.now() + 30 * 60 * 1000) },
+    });
+
     // Fetch user with active roles for RBAC
     const user = await this.prisma.user.findUnique({
       where: { id: payload.sub },
@@ -42,6 +64,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
       sub: payload.sub,
       username: payload.username,
       userId: user.userId,
+      sid: payload.sid,
       // Legacy role field kept for backward compatibility during transition
       // New code should use PermissionService to check user functions
       role: payload.role,

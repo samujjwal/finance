@@ -54,10 +54,10 @@ export function ApprovalDashboard() {
       ]);
 
       if (workflowsRes.success) {
-        setWorkflows(workflowsRes.data || []);
+        setWorkflows(((workflowsRes.data as Workflow[]) || []));
       }
       if (statsRes.success) {
-        setStats(statsRes.data);
+        setStats((statsRes.data as Stats) || null);
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to load data');

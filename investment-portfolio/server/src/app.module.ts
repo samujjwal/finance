@@ -11,8 +11,13 @@ import { AuditModule } from "./audit/audit.module";
 import { ApprovalModule } from "./approval/approval.module";
 import { UsersModule } from "./users/users.module";
 import { RolesModule } from "./roles/roles.module";
-
 import { PermissionModule } from "./permissions/permission.module";
+import { OrganizationsModule } from "./organizations/organizations.module";
+import { AccountingModule } from "./accounting/accounting.module";
+import { PortfolioAccountsModule } from "./portfolio-accounts/portfolio-accounts.module";
+import { NepalModule } from "./nepal/nepal.module";
+import { IntegrationModule } from "./integration/integration.module";
+import { MigrationModule } from "./migration/migration.module";
 
 @Module({
   imports: [
@@ -32,6 +37,12 @@ import { PermissionModule } from "./permissions/permission.module";
     UsersModule,
     RolesModule,
     PermissionModule,
+    OrganizationsModule,
+    AccountingModule,
+    PortfolioAccountsModule,
+    NepalModule,
+    IntegrationModule,
+    MigrationModule,
   ],
 })
 export class AppModule {}
